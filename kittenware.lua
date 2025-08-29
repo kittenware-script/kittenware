@@ -36,7 +36,7 @@ local Main     = GUI:Load()
 local Combat   = Main:Tab("Combat")
 local Visual   = Main:Tab("Visual")
 local Utility  = Main:Tab("World")
-local Settings = Main:Tab("Settins")
+local Settings = Main:Tab("Settings")
 
 ----------------------------------------------------------------
 -- No Recoil
