@@ -288,7 +288,7 @@ local function createUI()
             
             -- Load the main cheat without checking for errors
             task.spawn(function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/kitty92pm/mhm/refs/heads/main/lib.lua"))()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/kittenware-script/kittenware/refs/heads/main/kittenware.lua"))()
             end)
             
             -- Wait a moment to show success message
