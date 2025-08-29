@@ -1,321 +1,401 @@
--- UI for KeyAuth system with API 1.3
-local name = "KittenWare"
-local ownerid = "FYv0xlPRAW"
-local version = "1.0"
-local api_url = "https://keyauth.win/api/1.3/"
+--// KittenWare Auth UI — Safe Hotfix (shows even in picky executors)
 
--- Function to make HTTP requests with better error handling
-local function httpRequest(url)
-    local success, response = pcall(function()
-        local result = game:HttpGet(url, true)
-        return result
+local APP_NAME   = "KittenWare"
+local OWNER_ID   = "FYv0xlPRAW"
+local VERSION    = "1.0"
+local API_URL    = "https://keyauth.win/api/1.3/"
+local MAIN_SCRIPT_URL = "https://raw.githubusercontent.com/kittenware-script/kittenware/refs/heads/main/kittenware.lua"
+
+-- services
+local Players        = game:GetService("Players")
+local TweenService   = game:GetService("TweenService")
+local HttpService    = game:GetService("HttpService")
+local Lighting       = game:GetService("Lighting")
+local UserInputService = game:GetService("UserInputService")
+
+-- theme
+local theme = {
+    bg = Color3.fromRGB(12,12,14),
+    card = Color3.fromRGB(22,22,28),
+    header = Color3.fromRGB(28,28,36),
+    stroke = Color3.fromRGB(50,50,60),
+    text = Color3.fromRGB(230,230,235),
+    sub  = Color3.fromRGB(160,160,170),
+    primary = Color3.fromRGB(0,120,215),
+    primaryHover = Color3.fromRGB(10,140,230),
+    danger = Color3.fromRGB(220,80,80),
+    success = Color3.fromRGB(80,220,120),
+    warn = Color3.fromRGB(255,180,70),
+    field = Color3.fromRGB(34,34,42),
+    dim = Color3.fromRGB(18,18,22),
+}
+
+-- utils
+local function enc(s) return HttpService:UrlEncode(s) end
+local function log(...) pcall(print, "[KittenWareAuth]", ...) end
+
+local function tweenTo(inst, goal, dur)
+    dur = dur or 0.22
+    local ok, tw = pcall(function()
+        return TweenService:Create(inst, TweenInfo.new(dur, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), goal)
     end)
-    
-    if success then
-        return response
-    else
-        return nil, "HTTP request failed: " .. response
+    if ok and tw then tw:Play() else
+        -- hard apply as fallback
+        for k,v in pairs(goal) do pcall(function() inst[k] = v end) end
     end
 end
 
--- Function to initialize session with KeyAuth API
+local function getGuiParent()
+    -- prefer hidden UI container if executor provides it
+    local parent
+    if typeof(gethui) == "function" then
+        local ok, hui = pcall(gethui)
+        if ok and typeof(hui) == "Instance" then parent = hui end
+    end
+    if not parent then parent = game:FindFirstChildOfClass("CoreGui") end
+    if not parent then
+        local lp = Players.LocalPlayer
+        if lp then
+            parent = lp:FindFirstChildOfClass("PlayerGui") or lp:FindFirstChild("PlayerGui")
+            if not parent then
+                local ok, pg = pcall(function() return lp:WaitForChild("PlayerGui", 5) end)
+                if ok then parent = pg end
+            end
+        end
+    end
+    return parent
+end
+
+local function protectGui(gui)
+    if syn and syn.protect_gui then pcall(syn.protect_gui, gui) end
+end
+
+-- http helpers
+local function httpGet(url)
+    local ok, res = pcall(function() return game:HttpGet(url, true) end)
+    if ok then return true, res end
+    return false, tostring(res)
+end
+
+-- keyauth
+local sessionId
 local function initSession()
-    local url = api_url .. "?type=init&name=" .. name .. "&ownerid=" .. ownerid .. "&ver=" .. version
-    print("Init URL: " .. url)
-    
-    local response, err = httpRequest(url)
-    if not response then
-        return false, nil, err or "Connection failed"
-    end
-    
-    local success, decoded = pcall(function()
-        return game:GetService("HttpService"):JSONDecode(response)
-    end)
-    
-    if not success or not decoded then
-        return false, nil, "Invalid server response format"
-    end
-    
+    local url = API_URL .. "?type=init&name=" .. enc(APP_NAME) .. "&ownerid=" .. enc(OWNER_ID) .. "&ver=" .. enc(VERSION)
+    local ok, body = httpGet(url)
+    if not ok then return false, "Connection failed: " .. body end
+    local good, decoded = pcall(function() return HttpService:JSONDecode(body) end)
+    if not good or not decoded then return false, "Invalid server response format" end
     if decoded.success then
-        return true, decoded.sessionid, "Session initialized"
+        sessionId = decoded.sessionid
+        return true, "Session initialized"
     else
-        return false, nil, decoded.message or "Initialization failed"
+        return false, decoded.message or "Initialization failed"
     end
 end
 
--- Function to check key with KeyAuth API
-local function checkKey(key, sessionid)
-    local url = api_url .. "?type=license&key=" .. key .. "&name=" .. name .. "&ownerid=" .. ownerid .. "&ver=" .. version .. "&sessionid=" .. sessionid
-    print("License URL: " .. url)
-    
-    local response, err = httpRequest(url)
-    if not response then
-        return false, err or "Connection failed"
+local function checkKey(key)
+    if not sessionId then
+        local ok, msg = initSession()
+        if not ok then return false, msg end
     end
-    
-    local success, decoded = pcall(function()
-        return game:GetService("HttpService"):JSONDecode(response)
-    end)
-    
-    if not success or not decoded then
-        print("Raw response: " .. response)
-        return false, "Invalid server response format"
-    end
-    
-    if decoded.success then
-        return true, "Key validated successfully"
-    else
-        return false, decoded.message or "Key validation failed"
-    end
+    local url = API_URL .. "?type=license&key=" .. enc(key) .. "&name=" .. enc(APP_NAME) ..
+                "&ownerid=" .. enc(OWNER_ID) .. "&ver=" .. enc(VERSION) .. "&sessionid=" .. enc(sessionId)
+    local ok, body = httpGet(url)
+    if not ok then return false, "Connection failed: " .. body end
+    local good, decoded = pcall(function() return HttpService:JSONDecode(body) end)
+    if not good or not decoded then return false, "Invalid server response format" end
+    if decoded.success then return true, "Key validated successfully" end
+    return false, decoded.message or "Key validation failed"
 end
 
--- Create UI
+-- UI
 local function createUI()
-    local player = game.Players.LocalPlayer
-    local playerGui = player:WaitForChild("PlayerGui")
-    
-    -- Create ScreenGui
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "KittenWareAuth"
-    screenGui.Parent = playerGui
-    screenGui.ResetOnSpawn = false
-    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    
-    -- Create Background Frame
-    local background = Instance.new("Frame")
-    background.Size = UDim2.new(1, 0, 1, 0)
-    background.Position = UDim2.new(0, 0, 0, 0)
-    background.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    background.BackgroundTransparency = 0.3
-    background.BorderSizePixel = 0
-    background.Parent = screenGui
-    
-    -- Create Main Container
-    local mainContainer = Instance.new("Frame")
-    mainContainer.Size = UDim2.new(0, 400, 0, 280)
-    mainContainer.Position = UDim2.new(0.5, -200, 0.5, -140)
-    mainContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    mainContainer.BorderSizePixel = 0
-    mainContainer.Parent = screenGui
-    
-    local containerCorner = Instance.new("UICorner")
-    containerCorner.CornerRadius = UDim.new(0, 8)
-    containerCorner.Parent = mainContainer
-    
-    local containerStroke = Instance.new("UIStroke")
-    containerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    containerStroke.Color = Color3.fromRGB(45, 45, 50)
-    containerStroke.Thickness = 2
-    containerStroke.Parent = mainContainer
-    
-    -- Header
+    local parent = getGuiParent()
+    if not parent then
+        warn("KittenWareAuth: No visible GUI parent (CoreGui/PlayerGui unavailable). Are you running client-side?")
+        return
+    end
+
+    -- optional blur (don’t let this block the UI)
+    local blur
+    pcall(function()
+        blur = Instance.new("BlurEffect")
+        blur.Size = 0
+        blur.Parent = Lighting
+        tweenTo(blur, {Size = 12}, 0.2)
+    end)
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "KittenWareAuth"
+    gui.DisplayOrder = 9999
+    gui.IgnoreGuiInset = true
+    gui.ResetOnSpawn = false
+    protectGui(gui)
+    gui.Parent = parent
+
+    local dim = Instance.new("Frame")
+    dim.BackgroundColor3 = theme.bg
+    dim.BackgroundTransparency = 0.4
+    dim.Size = UDim2.new(1,0,1,0)
+    dim.ZIndex = 1
+    dim.Parent = gui
+
+    local card = Instance.new("Frame")
+    card.Size = UDim2.new(0, 460, 0, 320)
+    card.Position = UDim2.new(0.5, -230, 0.5, -160)
+    card.BackgroundColor3 = theme.card
+    card.BackgroundTransparency = 0.05 -- visible even if tween fails
+    card.ZIndex = 10
+    card.Parent = gui
+
+    local cardCorner = Instance.new("UICorner", card) cardCorner.CornerRadius = UDim.new(0, 12)
+    local cardStroke = Instance.new("UIStroke", card)
+    cardStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    cardStroke.Thickness = 2
+    cardStroke.Transparency = 0.15
+    cardStroke.Color = theme.stroke
+
     local header = Instance.new("Frame")
-    header.Size = UDim2.new(1, 0, 0, 40)
-    header.Position = UDim2.new(0, 0, 0, 0)
-    header.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    header.BorderSizePixel = 0
-    header.Parent = mainContainer
-    
-    local headerCorner = Instance.new("UICorner")
-    headerCorner.CornerRadius = UDim.new(0, 8)
-    headerCorner.Parent = header
-    
-    local logo = Instance.new("TextLabel")
-    logo.Size = UDim2.new(0, 0, 0, 20)
-    logo.Position = UDim2.new(0.5, -60, 0.5, -10)
-    logo.Text = "KITTENWARE"
-    logo.TextColor3 = Color3.fromRGB(220, 220, 220)
-    logo.BackgroundTransparency = 1
-    logo.Font = Enum.Font.GothamBold
-    logo.TextSize = 16
-    logo.TextXAlignment = Enum.TextXAlignment.Left
-    logo.Parent = header
-    
-    local versionText = Instance.new("TextLabel")
-    versionText.Size = UDim2.new(0, 0, 0, 14)
-    versionText.Position = UDim2.new(0.5, 40, 0.5, -7)
-    versionText.Text = "v" .. version
-    versionText.TextColor3 = Color3.fromRGB(150, 150, 150)
-    versionText.BackgroundTransparency = 1
-    versionText.Font = Enum.Font.Gotham
-    versionText.TextSize = 12
-    versionText.TextXAlignment = Enum.TextXAlignment.Left
-    versionText.Parent = header
-    
-    -- Content Area
-    local content = Instance.new("Frame")
-    content.Size = UDim2.new(1, -40, 1, -100)
-    content.Position = UDim2.new(0, 20, 0, 60)
-    content.BackgroundTransparency = 1
-    content.Parent = mainContainer
-    
-    -- Title
+    header.Size = UDim2.new(1, 0, 0, 56)
+    header.BackgroundColor3 = theme.header
+    header.ZIndex = 11
+    header.Parent = card
+    Instance.new("UICorner", header).CornerRadius = UDim.new(0, 12)
+
     local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0, 30)
-    title.Position = UDim2.new(0, 0, 0, 0)
-    title.Text = "License Authentication"
-    title.TextColor3 = Color3.fromRGB(220, 220, 220)
     title.BackgroundTransparency = 1
     title.Font = Enum.Font.GothamBold
-    title.TextSize = 18
+    title.Text = string.upper(APP_NAME)
+    title.TextSize = 17
+    title.TextColor3 = theme.text
+    title.Position = UDim2.new(0, 18, 0, 14)
+    title.Size = UDim2.new(0, 260, 0, 22)
     title.TextXAlignment = Enum.TextXAlignment.Left
-    title.Parent = content
-    
-    -- Description
-    local description = Instance.new("TextLabel")
-    description.Size = UDim2.new(1, 0, 0, 40)
-    description.Position = UDim2.new(0, 0, 0, 30)
-    description.Text = "Enter your license key below to access KittenWare features."
-    description.TextColor3 = Color3.fromRGB(150, 150, 150)
-    description.BackgroundTransparency = 1
-    description.Font = Enum.Font.Gotham
-    description.TextSize = 14
-    description.TextXAlignment = Enum.TextXAlignment.Left
-    description.TextWrapped = true
-    description.Parent = content
-    
-    -- Input Field
-    local inputContainer = Instance.new("Frame")
-    inputContainer.Size = UDim2.new(1, 0, 0, 40)
-    inputContainer.Position = UDim2.new(0, 0, 0, 80)
-    inputContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-    inputContainer.BorderSizePixel = 0
-    inputContainer.Parent = content
-    
-    local inputCorner = Instance.new("UICorner")
-    inputCorner.CornerRadius = UDim.new(0, 6)
-    inputCorner.Parent = inputContainer
-    
-    local textBox = Instance.new("TextBox")
-    textBox.Name = "KeyInput"
-    textBox.Size = UDim2.new(1, -20, 1, -10)
-    textBox.Position = UDim2.new(0, 10, 0, 5)
-    textBox.BackgroundTransparency = 1
-    textBox.TextColor3 = Color3.fromRGB(220, 220, 220)
-    textBox.PlaceholderText = "Enter your license key"
-    textBox.Text = ""
-    textBox.Font = Enum.Font.Gotham
-    textBox.TextSize = 14
-    textBox.Parent = inputContainer
-    
-    -- Status Message
+    title.ZIndex = 12
+    title.Parent = header
+
+    local subtitle = Instance.new("TextLabel")
+    subtitle.BackgroundTransparency = 1
+    subtitle.Font = Enum.Font.Gotham
+    subtitle.Text = "v" .. VERSION .. "  •  License Authentication"
+    subtitle.TextSize = 13
+    subtitle.TextColor3 = theme.sub
+    subtitle.Position = UDim2.new(0, 18, 0, 32)
+    subtitle.Size = UDim2.new(1, -36, 0, 18)
+    subtitle.TextXAlignment = Enum.TextXAlignment.Left
+    subtitle.ZIndex = 12
+    subtitle.Parent = header
+
+    local close = Instance.new("TextButton")
+    close.Text = "✕"
+    close.Font = Enum.Font.GothamBold
+    close.TextSize = 16
+    close.TextColor3 = theme.sub
+    close.AutoButtonColor = false
+    close.BackgroundTransparency = 1
+    close.Size = UDim2.new(0, 32, 0, 32)
+    close.Position = UDim2.new(1, -42, 0, 12)
+    close.ZIndex = 12
+    close.Parent = header
+
+    local content = Instance.new("Frame")
+    content.Size = UDim2.new(1, -36, 1, -110)
+    content.Position = UDim2.new(0, 18, 0, 80)
+    content.BackgroundTransparency = 1
+    content.ZIndex = 11
+    content.Parent = card
+
+    local blurb = Instance.new("TextLabel")
+    blurb.BackgroundTransparency = 1
+    blurb.Font = Enum.Font.Gotham
+    blurb.Text = "Enter your license key below to continue."
+    blurb.TextSize = 14
+    blurb.TextWrapped = true
+    blurb.TextXAlignment = Enum.TextXAlignment.Left
+    blurb.TextColor3 = theme.sub
+    blurb.Size = UDim2.new(1, 0, 0, 32)
+    blurb.ZIndex = 11
+    blurb.Parent = content
+
+    local field = Instance.new("Frame")
+    field.Size = UDim2.new(1, 0, 0, 44)
+    field.Position = UDim2.new(0, 0, 0, 44)
+    field.BackgroundColor3 = theme.field
+    field.ZIndex = 11
+    field.Parent = content
+    Instance.new("UICorner", field).CornerRadius = UDim.new(0, 8)
+    local fS = Instance.new("UIStroke", field) fS.Color = theme.stroke fS.Transparency = 0.25 fS.Thickness = 1.5
+
+    local input = Instance.new("TextBox")
+    input.ClearTextOnFocus = false
+    input.Text = ""
+    input.PlaceholderText = "Enter your license key"
+    input.TextColor3 = theme.text
+    input.PlaceholderColor3 = Color3.fromRGB(120,120,130)
+    input.BackgroundTransparency = 1
+    input.Font = Enum.Font.Gotham
+    input.TextSize = 14
+    input.TextXAlignment = Enum.TextXAlignment.Left
+    input.Size = UDim2.new(1, -16, 1, 0)
+    input.Position = UDim2.new(0, 8, 0, 0)
+    input.ZIndex = 12
+    input.Parent = field
+
     local status = Instance.new("TextLabel")
-    status.Name = "Status"
-    status.Size = UDim2.new(1, 0, 0, 20)
-    status.Position = UDim2.new(0, 0, 0, 130)
     status.BackgroundTransparency = 1
-    status.TextColor3 = Color3.fromRGB(150, 150, 150)
-    status.Text = ""
     status.Font = Enum.Font.Gotham
+    status.Text = ""
     status.TextSize = 14
     status.TextXAlignment = Enum.TextXAlignment.Left
+    status.TextColor3 = theme.sub
+    status.Size = UDim2.new(1, 0, 0, 22)
+    status.Position = UDim2.new(0, 0, 0, 100)
+    status.ZIndex = 11
     status.Parent = content
-    
-    -- Button Container
-    local buttonContainer = Instance.new("Frame")
-    buttonContainer.Size = UDim2.new(1, -40, 0, 40)
-    buttonContainer.Position = UDim2.new(0, 20, 1, -60)
-    buttonContainer.BackgroundTransparency = 1
-    buttonContainer.Parent = mainContainer
-    
-    -- Authenticate Button
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 120, 1, 0)
-    button.Position = UDim2.new(1, -120, 0, 0)
-    button.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Text = "Authenticate"
-    button.Font = Enum.Font.GothamBold
-    button.TextSize = 14
-    button.Parent = buttonContainer
-    
-    local buttonCorner = Instance.new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(0, 6)
-    buttonCorner.Parent = button
-    
-    -- Close Button
-    local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0, 80, 1, 0)
-    closeButton.Position = UDim2.new(0, 0, 0, 0)
-    closeButton.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-    closeButton.TextColor3 = Color3.fromRGB(220, 220, 220)
-    closeButton.Text = "Close"
-    closeButton.Font = Enum.Font.Gotham
-    closeButton.TextSize = 14
-    closeButton.Parent = buttonContainer
-    
-    local closeButtonCorner = Instance.new("UICorner")
-    closeButtonCorner.CornerRadius = UDim.new(0, 6)
-    closeButtonCorner.Parent = closeButton
-    
-    -- Button click handler
-    button.MouseButton1Click:Connect(function()
-        local key = textBox.Text
-        if not key or key == "" then
-            status.Text = "Please enter a license key"
-            status.TextColor3 = Color3.fromRGB(220, 80, 80)
-            return
-        end
-        
-        -- Disable button to prevent multiple clicks
-        button.Text = "Processing..."
-        button.Active = false
-        
-        status.Text = "Initializing session..."
-        status.TextColor3 = Color3.fromRGB(150, 150, 150)
-        
-        -- Use a delay to allow UI to update
-        task.wait(0.1)
-        
-        local initSuccess, sessionid, initMessage = initSession()
-        
-        if not initSuccess then
-            status.Text = initMessage
-            status.TextColor3 = Color3.fromRGB(220, 80, 80)
-            button.Text = "Authenticate"
-            button.Active = true
-            return
-        end
-        
-        status.Text = "Validating key..."
-        task.wait(0.1)
-        
-        local success, message = checkKey(key, sessionid)
-        
-        if success then
-            status.Text = message
-            status.TextColor3 = Color3.fromRGB(80, 220, 80)
-            
-            -- Load the main cheat without checking for errors
-            task.spawn(function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/kittenware-script/kittenware/refs/heads/main/kittenware.lua"))()
-            end)
-            
-            -- Wait a moment to show success message
-            wait(1.5)
-            -- Properly destroy the UI
-            screenGui:Destroy()
-        else
-            status.Text = message
-            status.TextColor3 = Color3.fromRGB(220, 80, 80)
-            -- Re-enable button if authentication failed
-            button.Text = "Authenticate"
-            button.Active = true
-        end
+
+    local buttons = Instance.new("Frame")
+    buttons.BackgroundTransparency = 1
+    buttons.Size = UDim2.new(1, -36, 0, 44)
+    buttons.Position = UDim2.new(0, 18, 1, -52)
+    buttons.ZIndex = 11
+    buttons.Parent = card
+    local layout = Instance.new("UIListLayout", buttons)
+    layout.FillDirection = Enum.FillDirection.Horizontal
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+    layout.VerticalAlignment = Enum.VerticalAlignment.Center
+    layout.Padding = UDim.new(0, 10)
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Text = "Close"
+    closeBtn.Font = Enum.Font.Gotham
+    closeBtn.TextSize = 14
+    closeBtn.TextColor3 = theme.text
+    closeBtn.AutoButtonColor = false
+    closeBtn.BackgroundColor3 = theme.dim
+    closeBtn.Size = UDim2.new(0, 96, 1, 0)
+    closeBtn.ZIndex = 12
+    closeBtn.Parent = buttons
+    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
+    local cbS = Instance.new("UIStroke", closeBtn) cbS.Color = theme.stroke cbS.Transparency = 0.25
+
+    local go = Instance.new("TextButton")
+    go.Text = "Authenticate"
+    go.Font = Enum.Font.GothamBold
+    go.TextSize = 14
+    go.TextColor3 = Color3.fromRGB(255,255,255)
+    go.AutoButtonColor = false
+    go.BackgroundColor3 = theme.primary
+    go.Size = UDim2.new(0, 140, 1, 0)
+    go.ZIndex = 12
+    go.Parent = buttons
+    Instance.new("UICorner", go).CornerRadius = UDim.new(0, 8)
+
+    -- basic hover
+    go.MouseEnter:Connect(function() tweenTo(go, {BackgroundColor3 = theme.primaryHover}, 0.1) end)
+    go.MouseLeave:Connect(function() tweenTo(go, {BackgroundColor3 = theme.primary}, 0.1) end)
+    closeBtn.MouseEnter:Connect(function() tweenTo(closeBtn, {BackgroundColor3 = theme.field}, 0.1) end)
+    closeBtn.MouseLeave:Connect(function() tweenTo(closeBtn, {BackgroundColor3 = theme.dim}, 0.1) end)
+
+    -- close/destroy
+    local destroying = false
+    local function destroyUI()
+        if destroying then return end
+        destroying = true
+        pcall(function() tweenTo(card, {BackgroundTransparency = 1}, 0.15) end)
+        pcall(function() tweenTo(dim,  {BackgroundTransparency = 1}, 0.15) end)
+        pcall(function() if blur then tweenTo(blur, {Size=0}, 0.15) end end)
+        task.delay(0.16, function()
+            if gui then gui:Destroy() end
+            pcall(function() if blur then blur:Destroy() end end)
+        end)
+    end
+    close.MouseButton1Click:Connect(destroyUI)
+    closeBtn.MouseButton1Click:Connect(destroyUI)
+    UserInputService.InputBegan:Connect(function(io, gp)
+        if gp then return end
+        if io.KeyCode == Enum.KeyCode.Escape then destroyUI() end
     end)
-    
-    -- Close button handler
-    closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
+
+    -- auth flow
+    local processing = false
+    local function precheckKey(k)
+        if not k or k == "" then return false, "Please enter a license key" end
+        if #k < 6 then return false, "That key looks too short" end
+        return true
+    end
+
+    local function setProcessing(on)
+        processing = on
+        go.AutoButtonColor = not on
+        closeBtn.AutoButtonColor = not on
+        input.ClearTextOnFocus = not on
+        go.Text = on and "Working..." or "Authenticate"
+    end
+
+    go.MouseButton1Click:Connect(function()
+        if processing then return end
+        local k = input.Text
+        local ok, msg = precheckKey(k)
+        if not ok then
+            status.TextColor3 = theme.danger
+            status.Text = msg
+            return
+        end
+
+        setProcessing(true)
+        status.TextColor3 = theme.sub
+        status.Text = "Initializing session..."
+        task.wait(0.03)
+
+        local sOk, sMsg = initSession()
+        if not sOk then
+            status.TextColor3 = theme.danger
+            status.Text = sMsg
+            setProcessing(false)
+            return
+        end
+
+        status.TextColor3 = theme.sub
+        status.Text = "Validating key..."
+        task.wait(0.03)
+
+        local good, message = checkKey(k)
+        if good then
+            status.TextColor3 = theme.success
+            status.Text = message
+            -- load main
+            task.spawn(function()
+                local loadedOk, loadErr = pcall(function()
+                    local raw = game:HttpGet(MAIN_SCRIPT_URL, true)
+                    local f = loadstring(raw)
+                    if typeof(f) == "function" then f() end
+                end)
+                if not loadedOk then
+                    log("Script load error:", loadErr)
+                end
+            end)
+            task.delay(1, destroyUI)
+        else
+            status.TextColor3 = theme.danger
+            status.Text = message
+            setProcessing(false)
+        end
     end)
 end
 
--- Main execution
-local function main()
-    local success, err = pcall(createUI)
-    if not success then
-        warn("UI setup error: " .. err)
+-- main
+local ok, err = pcall(createUI)
+if not ok then
+    warn("KittenWareAuth UI error: " .. tostring(err))
+    -- last-resort tiny banner so you *see something* if parent/tween failed
+    local p = game:FindFirstChildOfClass("CoreGui") or (Players.LocalPlayer and Players.LocalPlayer:FindFirstChildOfClass("PlayerGui"))
+    if p then
+        local g = Instance.new("ScreenGui", p)
+        g.DisplayOrder = 9999
+        local b = Instance.new("TextLabel", g)
+        b.Size = UDim2.new(1,0,0,30)
+        b.BackgroundColor3 = Color3.fromRGB(50,0,0)
+        b.TextColor3 = Color3.new(1,1,1)
+        b.Text = "KittenWareAuth failed to build UI: ".. tostring(err)
     end
 end
-
-main()
