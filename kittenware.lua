@@ -3,6 +3,8 @@
   No Recoil + Aimbot (Wall Check + Distance + HUD)
   Fullbright/FOV + Insta Reload (speed)
   ESP++ (Skeleton / Corner Boxes / Filled Boxes / Tracers / Names / Health / Distance / Item ESP / Off-Screen Arrows)
+
+  Menu layout has been reorganized for clarity.
 ]]
 
 if getgenv().KittenWareLoaded or getgenv().KittenWareLoading then return end
@@ -29,11 +31,11 @@ local function lerp(a,b,t) return a + (b-a)*t end
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Roblox-Functions-Library/main/Library.lua"))()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/AirHub-V2/main/src/UI%20Library.lua"))()
 
--- Tabs
+-- Tabs (organized)
 local Main     = GUI:Load()
 local Combat   = Main:Tab("Combat")
 local Visual   = Main:Tab("Visual")
-local Utility  = Main:Tab("Utility")
+local Utility  = Main:Tab("World")
 local Settings = Main:Tab("Settings")
 
 ----------------------------------------------------------------
@@ -49,7 +51,11 @@ local function unwatch() for _,c in ipairs(nrConns) do if c then c:Disconnect() 
 local function onCharacter(ch) if not nrEnabled then return end sweep(ch) watch(ch) local bp=LP:FindFirstChildOfClass("Backpack") if bp then sweep(bp) watch(bp) end end
 local function enableNR() nrEnabled=true unwatch() sweep(LP) watch(LP) onCharacter(LP.Character or LP.CharacterAdded:Wait()) if charAddedConn then charAddedConn:Disconnect() end charAddedConn=LP.CharacterAdded:Connect(onCharacter) end
 local function disableNR() nrEnabled=false unwatch() if charAddedConn then charAddedConn:Disconnect() charAddedConn=nil end revert(LP) if LP.Character then revert(LP.Character) end local bp=LP:FindFirstChildOfClass("Backpack") if bp then revert(bp) end end
-Combat:Section({Name="No Recoil"}):Toggle({Name="Enabled",Flag="KW_NR",Default=false,Callback=function(v) if v then enableNR() else disableNR() end end})
+
+do
+    local S = Combat:Section({Name="No Recoil", Side="Left"})
+    S:Toggle({Name="Enabled",Flag="KW_NR",Default=false,Callback=function(v) if v then enableNR() else disableNR() end end})
+end
 
 ----------------------------------------------------------------
 -- ESP++ (Drawing API)
@@ -57,7 +63,7 @@ Combat:Section({Name="No Recoil"}):Toggle({Name="Enabled",Flag="KW_NR",Default=f
 local hasDrawing=(typeof(Drawing)=="table" and typeof(Drawing.new)=="function")
 if not hasDrawing then notify("KittenWare","Drawing API not found; ESP disabled.",5) end
 
--- ESP Core Config
+-- ESP Config (core)
 local espEnabled, espConn=false,nil
 local showSkeleton, showBoxes, showCornerBox, showFilledBox = true, true, true, false
 local cornerLen = 8 -- px
@@ -74,16 +80,14 @@ local visibleColor=Color3.fromRGB(0,255,255)
 local occludedColor=Color3.fromRGB(255,100,100)
 local fillAlpha = 0.15
 local nameSize, infoSize = 14, 13
+local friendList = {} -- {["PlayerName"]=true}
 
--- Item ESP Config (separate section)
-local showItem = true
-local itemColor = Color3.fromRGB(255, 200, 120)
-local itemUseTeamColor = false
-local itemTextSize = 13
-local itemOffsetY = 14
-local itemOutline = true
-local itemPrefix = ""      -- e.g., "[ITEM] "
-local itemUppercase = false
+-- Item ESP
+local itemESPEnabled = true
+local itemESPColor = Color3.fromRGB(255, 200, 120)
+local itemESPSize = 13
+local itemESPOffsetY = 14
+local itemESPShowWhenNoTool = false
 
 -- Off-screen arrows
 local arrowsEnabled = true
@@ -96,7 +100,6 @@ local arrowBaseColor = Color3.fromRGB(255,255,255)
 -- Store draw objects
 local playerDraw, espSignals = {}, {}
 local playersSignal, playerAddedConn
-local friendList = {} -- {["PlayerName"]=true}
 
 -- Helpers
 local function sameTeam(plr)
@@ -125,7 +128,7 @@ end
 
 -- Drawing factory
 local function makeLine() local l=Drawing.new("Line"); l.Visible=false; l.Thickness=thicknessBase; l.Transparency=alphaBase; l.Color=Color3.new(1,1,1); return l end
-local function makeText(sz, outline) local t=Drawing.new("Text"); t.Visible=false; t.Center=true; t.Size=sz or nameSize; t.Outline=outline~=false; t.Transparency=1; t.Color=Color3.new(1,1,1); return t end
+local function makeText() local t=Drawing.new("Text"); t.Visible=false; t.Center=true; t.Size=nameSize; t.Outline=true; t.Transparency=1; t.Color=Color3.new(1,1,1); return t end
 local function makeSquare() local s=Drawing.new("Square"); s.Visible=false; s.Filled=false; s.Thickness=thicknessBase; s.Transparency=alphaBase; s.Color=Color3.new(1,1,1); return s end
 local function makeTri() local tr=Drawing.new("Triangle"); tr.Visible=false; tr.Thickness=1; tr.Filled=true; tr.Color=Color3.fromRGB(255,255,255); tr.Transparency=0.9; return tr end
 
@@ -145,9 +148,9 @@ local function ensureBundle(plr)
         -- Tracer
         tracer=makeLine(),
         -- Text & HP
-        nameText=makeText(nameSize,true),
-        distText=makeText(infoSize,true),
-        itemText=makeText(itemTextSize,itemOutline),
+        nameText=makeText(),
+        distText=makeText(),
+        itemText=makeText(),
         hpBack=makeSquare(),
         hpBar=makeSquare(),
         -- Off-screen arrow
@@ -155,7 +158,6 @@ local function ensureBundle(plr)
     }
     playerDraw[plr]=b; return b
 end
-
 local function hideBundle(b) if not b then return end for _,ln in pairs(b) do ln.Visible=false end end
 local function cleanup(plr) local t=playerDraw[plr] if t then for _,ln in pairs(t) do ln:Remove() end end playerDraw[plr]=nil local sigs=espSignals[plr] if sigs then for _,c in ipairs(sigs) do if c then c:Disconnect() end end end espSignals[plr]=nil end
 
@@ -180,7 +182,6 @@ local function getParts(c)
 end
 
 local function vp(v3) local v,o=Camera:WorldToViewportPoint(v3); return Vector2.new(v.X,v.Y),o end
-
 local function dynamicThickness(dist)
     if not fadeByDistance then return thicknessBase, alphaBase end
     local t = clamp(dist / maxDistance, 0, 1)
@@ -227,17 +228,17 @@ end
 
 local function drawCorners(b, tl,tr,bl,br, col, th, al)
     local L = cornerLen
-    b.cTL1.From = tl;                 b.cTL1.To = tl + Vector2.new(L,0)
-    b.cTL2.From = tl;                 b.cTL2.To = tl + Vector2.new(0,L)
-    b.cTR1.From = tr;                 b.cTR1.To = tr + Vector2.new(-L,0)
-    b.cTR2.From = tr;                 b.cTR2.To = tr + Vector2.new(0,L)
-    b.cBL1.From = bl;                 b.cBL1.To = bl + Vector2.new(L,0)
-    b.cBL2.From = bl;                 b.cBL2.To = bl + Vector2.new(0,-L)
-    b.cBR1.From = br;                 b.cBR1.To = br + Vector2.new(-L,0)
-    b.cBR2.From = br;                 b.cBR2.To = br + Vector2.new(0,-L)
-    for _,ln in ipairs({b.cTL1,b.cTL2,b.cTR1,b.cTR2,b.cBL1,b.cBL2,b.cBR1,b.cBR2}) do
-        ln.Color=col; ln.Visible=true; ln.Thickness=th; ln.Transparency=al
+    local set = function(ln, a, b)
+        ln.From = a; ln.To = b; ln.Color = col; ln.Visible = true; ln.Thickness = th; ln.Transparency = al
     end
+    set(b.cTL1, tl, tl + Vector2.new(L,0))
+    set(b.cTL2, tl, tl + Vector2.new(0,L))
+    set(b.cTR1, tr, tr + Vector2.new(-L,0))
+    set(b.cTR2, tr, tr + Vector2.new(0,L))
+    set(b.cBL1, bl, bl + Vector2.new(L,0))
+    set(b.cBL2, bl, bl + Vector2.new(0,-L))
+    set(b.cBR1, br, br + Vector2.new(-L,0))
+    set(b.cBR2, br, br + Vector2.new(0,-L))
 end
 
 local function tracerAnchor()
@@ -260,17 +261,23 @@ local function drawArrow(tri, worldPos, color, dist)
     local p, on = Camera:WorldToViewportPoint(worldPos)
     local p2 = Vector2.new(p.X, p.Y)
     if on then tri.Visible=false return end
+
     local dir = (p2 - center)
     local mag = dir.Magnitude
     if mag < 1e-3 then tri.Visible=false return end
     dir = dir / mag
+
     local radius = arrowRadiusFactor * math.min(vpSize.X, vpSize.Y)
     local tip = center + dir * radius
     local baseCenter = tip - dir * arrowSize
     local perp = Vector2.new(-dir.Y, dir.X)
+
     local left = baseCenter + perp * (arrowSize * 0.5)
     local right = baseCenter - perp * (arrowSize * 0.5)
-    tri.PointA = tip; tri.PointB = left; tri.PointC = right
+
+    tri.PointA = tip
+    tri.PointB = left
+    tri.PointC = right
     tri.Color = color
     tri.Transparency = arrowFadeWithDistance and clamp(1 - (dist / maxDistance), 0.25, 0.95) or 0.9
     tri.Visible = true
@@ -391,17 +398,15 @@ local function updateOne(plr)
         b.distText.Visible = true
     else b.distText.Visible=false end
 
-    -- Item ESP (separate config)
-    if showItem and onScr then
+    -- Item ESP
+    if itemESPEnabled and onScr then
         local toolName = getEquippedToolName(ch)
-        if toolName then
-            if itemUppercase then toolName = string.upper(toolName) end
-            b.itemText.Text = (itemPrefix or "") .. toolName
-            b.itemText.Color = (itemUseTeamColor and plr.TeamColor and plr.TeamColor.Color) or itemColor
-            b.itemText.Position = Vector2.new((minX+maxX)/2, nameY + itemOffsetY)
-            b.itemText.Size = itemTextSize
-            b.itemText.Outline = itemOutline
-            b.itemText.Visible = true
+        if toolName or itemESPShowWhenNoTool then
+            b.itemText.Text = toolName or ""
+            b.itemText.Color = itemESPColor
+            b.itemText.Position = Vector2.new((minX+maxX)/2, nameY + itemESPOffsetY)
+            b.itemText.Size = itemESPSize
+            b.itemText.Visible = (toolName ~= nil) or itemESPShowWhenNoTool
         else
             b.itemText.Visible = false
         end
@@ -451,10 +456,10 @@ local function disableESP()
     for plr in pairs(playerDraw) do cleanup(plr) end
 end
 
--- ESP UI (Core & Elements)
+-- ESP UI (organized)
 do
-    local L=Visual:Section({Name="ESP Core", Side="Left"})
-    L:Toggle({Name="Enabled",Flag="KW_ESP",Default=false,Callback=function(v) if v then enableESP() else disableESP() end end})
+    local L=Visual:Section({Name="Core", Side="Left"})
+    L:Toggle({Name="Enable ESP",Flag="KW_ESP",Default=false,Callback=function(v) if v then enableESP() else disableESP() end end})
     L:Toggle({Name="Team Check",Flag="KW_ESP_TEAM",Default=false,Callback=function(v) espTeamCheck=v end})
     L:Toggle({Name="Use Team Colors",Flag="KW_ESP_TCOL",Default=false,Callback=function(v) useTeamColors=v end})
     L:Toggle({Name="Only Visible (LOS)",Flag="KW_ESP_VIS",Default=false,Callback=function(v) onlyVisible=v end})
@@ -465,7 +470,7 @@ do
     L:Slider({Name="Far Thickness",Flag="KW_ESP_TF",Default=math.floor(thicknessFar),Min=1,Max=6,Callback=function(v) thicknessFar=v end})
     L:Slider({Name="Base Alpha x10",Flag="KW_ESP_AL",Default=math.floor(alphaBase*10),Min=3,Max=10,Callback=function(v) alphaBase=v/10 end})
 
-    local R=Visual:Section({Name="ESP Elements", Side="Right"})
+    local R=Visual:Section({Name="Elements", Side="Right"})
     R:Toggle({Name="Skeleton",Flag="KW_ESPSkel",Default=true,Callback=function(v) showSkeleton=v end})
     R:Toggle({Name="Box (outline)",Flag="KW_ESPBox",Default=true,Callback=function(v) showBoxes=v end})
     R:Toggle({Name="Corner Box",Flag="KW_ESPCorner",Default=true,Callback=function(v) showCornerBox=v end})
@@ -479,20 +484,17 @@ do
     R:Toggle({Name="Distance",Flag="KW_ESPDist",Default=true,Callback=function(v) showDistance=v end})
 end
 
--- Item ESP — dedicated section
+-- Item ESP UI
 do
     local I = Visual:Section({Name="Item ESP", Side="Left"})
-    I:Toggle({Name="Enabled", Flag="KW_ITEM_EN", Default=showItem, Callback=function(v) showItem=v end})
-    I:Toggle({Name="Use Team Color", Flag="KW_ITEM_TC", Default=itemUseTeamColor, Callback=function(v) itemUseTeamColor=v end})
-    I:Colorpicker({Name="Text Color", Flag="KW_ITEM_COL", Default=itemColor, Callback=function(c) itemColor=c end})
-    I:Slider({Name="Text Size", Flag="KW_ITEM_SZ", Default=itemTextSize, Min=10, Max=24, Callback=function(v) itemTextSize=math.floor(v) end})
-    I:Slider({Name="Vertical Offset", Flag="KW_ITEM_OFFY", Default=itemOffsetY, Min=0, Max=30, Callback=function(v) itemOffsetY=math.floor(v) end})
-    I:Toggle({Name="Outline", Flag="KW_ITEM_OUT", Default=itemOutline, Callback=function(v) itemOutline=v end})
-    I:Box({Name="Prefix", Flag="KW_ITEM_PFX", Placeholder="Prefix", Callback=function(v) itemPrefix = v or "" end})
-    I:Toggle({Name="Uppercase", Flag="KW_ITEM_UP", Default=itemUppercase, Callback=function(v) itemUppercase=v end})
+    I:Toggle({Name="Enabled", Flag="KW_ITEM_EN", Default=itemESPEnabled, Callback=function(v) itemESPEnabled=v end})
+    I:Colorpicker({Name="Text Color", Flag="KW_ITEM_COL", Default=itemESPColor, Callback=function(c) itemESPColor=c end})
+    I:Slider({Name="Text Size", Flag="KW_ITEM_SZ", Default=itemESPSize, Min=10, Max=22, Callback=function(v) itemESPSize=math.floor(v) end})
+    I:Slider({Name="Offset Y", Flag="KW_ITEM_OFY", Default=itemESPOffsetY, Min=8, Max=28, Callback=function(v) itemESPOffsetY=math.floor(v) end})
+    I:Toggle({Name="Show When No Tool", Flag="KW_ITEM_SNT", Default=false, Callback=function(v) itemESPShowWhenNoTool=v end})
 end
 
--- Off-screen Arrows — dedicated section
+-- Off-screen Arrows UI
 do
     local A = Visual:Section({Name="Off-Screen Arrows", Side="Right"})
     A:Toggle({Name="Enabled", Flag="KW_AR_EN", Default=arrowsEnabled, Callback=function(v) arrowsEnabled=v end})
@@ -537,7 +539,12 @@ if hasDrawing then
     targetHUD.Text=""
 end
 local function setFOVVisible(v) if fovCircle then fovCircle.Visible=v end end
-local function updateFOVCircle() if not fovCircle then return end local m=UIS:GetMouseLocation() fovCircle.Position=Vector2.new(m.X,m.Y) fovCircle.Radius=aimFOV end
+local function updateFOVCircle()
+    if not fovCircle then return end
+    local m=UIS:GetMouseLocation()
+    fovCircle.Position=Vector2.new(m.X,m.Y)
+    fovCircle.Radius=aimFOV
+end
 local function setTargetHUD(txt, pos)
     if not targetHUD then return end
     if showTargetHUD and txt then
@@ -610,25 +617,28 @@ local function stepAimbot()
 end
 local function enableAimbot() if aimConn then aimConn:Disconnect() end aimConn=RunService.RenderStepped:Connect(stepAimbot) setFOVVisible(true) end
 local function disableAimbot() if aimConn then aimConn:Disconnect() aimConn=nil end setFOVVisible(false) setTargetHUD(nil) end
+
 do
-    local sec=Combat:Section({Name="Aimbot",Side="Left"})
-    sec:Toggle({Name="Enabled",Flag="KW_AIM_EN",Default=false,Callback=function(v) if v then enableAimbot() else disableAimbot() end end})
-    sec:Toggle({Name="Hold RMB",Flag="KW_AIM_HOLD",Default=false,Callback=function(v) aimHoldToUse=v end})
-    sec:Toggle({Name="Team Check",Flag="KW_AIM_TEAM",Default=false,Callback=function(v) aimTeamCheck=v end})
-    sec:Toggle({Name="Wall Check (LOS)",Flag="KW_AIM_WALL",Default=true,Callback=function(v) aimWallCheck=v end})
-    sec:Slider({Name="Max Distance (studs)",Flag="KW_AIM_MAXD",Default=aimMaxDistance,Min=200,Max=6000,Callback=function(v) aimMaxDistance=v end})
-    sec:Toggle({Name="Target HUD (name + distance)",Flag="KW_AIM_HUD",Default=true,Callback=function(v) showTargetHUD=v if not v then setTargetHUD(nil) end end})
-    sec:Dropdown({Name="Target Part",Flag="KW_AIM_PART",Content={"Head","HumanoidRootPart"},Default="Head",Callback=function(v) aimTargetPartName=v end})
-    sec:Slider({Name="FOV",Flag="KW_AIM_FOV",Default=aimFOV,Min=40,Max=600,Callback=function(v) aimFOV=v end})
-    sec:Slider({Name="Smooth",Flag="KW_AIM_SM",Default=math.floor(aimSmoothing*100),Min=1,Max=100,Callback=function(v) aimSmoothing=clamp(v/100,0.01,1) end})
-    sec:Keybind({Name="Toggle Key",Flag="KW_AIM_KEY",Default=aimKey,Callback=function(k) if typeof(k)=="EnumItem" then aimKey=k end end})
+    local L=Combat:Section({Name="Aimbot • Core",Side="Left"})
+    L:Toggle({Name="Enabled",Flag="KW_AIM_EN",Default=false,Callback=function(v) if v then enableAimbot() else disableAimbot() end end})
+    L:Toggle({Name="Hold RMB",Flag="KW_AIM_HOLD",Default=false,Callback=function(v) aimHoldToUse=v end})
+    L:Keybind({Name="Toggle Key",Flag="KW_AIM_KEY",Default=Enum.KeyCode.Q,Callback=function(k) if typeof(k)=="EnumItem" then aimKey=k end end})
+
+    local R=Combat:Section({Name="Aimbot • Filters & Feel",Side="Right"})
+    R:Toggle({Name="Team Check",Flag="KW_AIM_TEAM",Default=false,Callback=function(v) aimTeamCheck=v end})
+    R:Toggle({Name="Wall Check (LOS)",Flag="KW_AIM_WALL",Default=true,Callback=function(v) aimWallCheck=v end})
+    R:Slider({Name="Max Distance (studs)",Flag="KW_AIM_MAXD",Default=aimMaxDistance,Min=200,Max=6000,Callback=function(v) aimMaxDistance=v end})
+    R:Dropdown({Name="Target Part",Flag="KW_AIM_PART",Content={"Head","HumanoidRootPart"},Default="Head",Callback=function(v) aimTargetPartName=v end})
+    R:Slider({Name="FOV",Flag="KW_AIM_FOV",Default=aimFOV,Min=40,Max=600,Callback=function(v) aimFOV=v end})
+    R:Slider({Name="Smooth",Flag="KW_AIM_SM",Default=math.floor(aimSmoothing*100),Min=1,Max=100,Callback=function(v) aimSmoothing=clamp(v/100,0.01,1) end})
+    R:Toggle({Name="HUD (name + distance)",Flag="KW_AIM_HUD",Default=true,Callback=function(v) showTargetHUD=v if not v then setTargetHUD(nil) end end})
 end
 
 ----------------------------------------------------------------
 -- Insta Reload (speed multiplier)
 ----------------------------------------------------------------
 local irEnabled = true
-local irSpeed = 4.0        -- AdjustSpeed value applied to reload animations
+local irSpeed = 4.0        -- AdjustSpeed on reload animations
 local irCooldownMs = 300   -- per track cooldown
 local irScanInterval = 0.06
 local irConn
@@ -686,15 +696,17 @@ local function disableInstaReload()
 end
 
 do
-    local IR = Combat:Section({Name="Insta Reload (Speed)", Side="Right"})
-    IR:Toggle({Name="Enabled", Flag="KW_IR_EN", Default=true, Callback=function(v) if v then enableInstaReload() else disableInstaReload() end end})
-    IR:Slider({Name="Reload Speed ×", Flag="KW_IR_SPD", Default=irSpeed, Min=1, Max=20, Callback=function(v) irSpeed = v end})
-    IR:Slider({Name="Per-Reload Cooldown (ms)", Flag="KW_IR_CD", Default=irCooldownMs, Min=100, Max=1000, Callback=function(v) irCooldownMs = math.floor(v) end})
-    IR:Slider({Name="Scan Interval (ms)", Flag="KW_IR_IV", Default=math.floor(irScanInterval*1000), Min=30, Max=150, Callback=function(v) irScanInterval = clamp(v/1000, 0.03, 0.15) end})
+    local L = Combat:Section({Name="Insta Reload (Speed)", Side="Left"})
+    L:Toggle({Name="Enabled", Flag="KW_IR_EN", Default=true, Callback=function(v) if v then enableInstaReload() else disableInstaReload() end end})
+    L:Slider({Name="Reload Speed ×", Flag="KW_IR_SPD", Default=irSpeed, Min=1, Max=20, Callback=function(v) irSpeed = v end})
+
+    local R = Combat:Section({Name="Insta Reload • Advanced", Side="Right"})
+    R:Slider({Name="Per-Reload Cooldown (ms)", Flag="KW_IR_CD", Default=irCooldownMs, Min=100, Max=1000, Callback=function(v) irCooldownMs = math.floor(v) end})
+    R:Slider({Name="Scan Interval (ms)", Flag="KW_IR_IV", Default=math.floor(irScanInterval*1000), Min=30, Max=150, Callback=function(v) irScanInterval = clamp(v/1000, 0.03, 0.15) end})
 end
 
 ----------------------------------------------------------------
--- Utility: Fullbright / FOV Lock
+-- World / Camera (Fullbright & FOV)
 ----------------------------------------------------------------
 local fbEnabled, fbConn=false,nil
 local fbBrightness, fbClock, fbNoShadows=3,14,true
@@ -707,28 +719,35 @@ local function disableFullbright() if not fbEnabled then return end fbEnabled=fa
 local fovValue=80; local fovConn
 local function enableFOVLock() if fovConn then fovConn:Disconnect() end fovConn=RunService.RenderStepped:Connect(function() Camera.FieldOfView=fovValue end) end
 local function disableFOVLock() if fovConn then fovConn:Disconnect() fovConn=nil end end
+
 do
-    local U=Utility:Section({Name="Fullbright & Visuals",Side="Left"})
-    U:Toggle({Name="Fullbright (lock)",Flag="KW_FB",Default=false,Callback=function(v) if v then enableFullbright() else disableFullbright() end end})
-    U:Slider({Name="Brightness",Flag="KW_FB_BR",Default=fbBrightness,Min=1,Max=6,Callback=function(v) fbBrightness=v end})
-    U:Slider({Name="Time (Clock)",Flag="KW_FB_TM",Default=fbClock,Min=0,Max=24,Callback=function(v) fbClock=v end})
-    U:Toggle({Name="No Shadows",Flag="KW_FB_NS",Default=fbNoShadows,Callback=function(v) fbNoShadows=v end})
-    U:Toggle({Name="No Fog",Flag="KW_FB_NF",Default=true,Callback=function(v) fogEnabled=v end})
-    local F=Utility:Section({Name="Camera",Side="Right"})
-    F:Toggle({Name="FOV Lock",Flag="KW_FOV_L",Default=false,Callback=function(v) if v then enableFOVLock() else disableFOVLock() end end})
-    F:Slider({Name="FOV",Flag="KW_FOV_V",Default=fovValue,Min=40,Max=120,Callback=function(v) fovValue=v end})
+    local L=Utility:Section({Name="Fullbright",Side="Left"})
+    L:Toggle({Name="Enabled (lock)",Flag="KW_FB",Default=false,Callback=function(v) if v then enableFullbright() else disableFullbright() end end})
+    L:Slider({Name="Brightness",Flag="KW_FB_BR",Default=fbBrightness,Min=1,Max=6,Callback=function(v) fbBrightness=v end})
+    L:Slider({Name="Time (Clock)",Flag="KW_FB_TM",Default=fbClock,Min=0,Max=24,Callback=function(v) fbClock=v end})
+    L:Toggle({Name="No Shadows",Flag="KW_FB_NS",Default=fbNoShadows,Callback=function(v) fbNoShadows=v end})
+    L:Toggle({Name="No Fog",Flag="KW_FB_NF",Default=true,Callback=function(v) fogEnabled=v end})
+
+    local R=Utility:Section({Name="Camera (FOV)",Side="Right"})
+    R:Toggle({Name="FOV Lock",Flag="KW_FOV_L",Default=false,Callback=function(v) if v then enableFOVLock() else disableFOVLock() end end})
+    R:Slider({Name="FOV",Flag="KW_FOV_V",Default=fovValue,Min=40,Max=120,Callback=function(v) fovValue=v end})
 end
 
 ----------------------------------------------------------------
 -- Settings / Hotkeys / Lifecycle
 ----------------------------------------------------------------
-local S = Settings:Section({Name="KittenWare"})
+local S = Settings:Section({Name="General", Side="Left"})
 S:Keybind({Name="Toggle UI", Flag="KW_UI", Default=Enum.KeyCode.RightShift, Callback=function(_, newKey) if not newKey then GUI:Close() end end})
 S:Button({Name="Unload", Callback=function()
-    disableAimbot(); disableESP(); disableNR(); disableFullbright(); disableInstaReload()
+    -- orderly shutdown
+    if espEnabled then disableESP() end
+    disableAimbot(); disableNR(); disableFullbright(); disableInstaReload()
     GUI:Unload(); getgenv().KittenWareLoaded=nil
 end})
 
+local H = Settings:Section({Name="Quick Hotkeys", Side="Right"})
+H:Label("N  - Toggle No Recoil")
+H:Label("B  - Toggle ESP")
 UIS.InputBegan:Connect(function(i,gpe)
     if gpe then return end
     if i.KeyCode==Enum.KeyCode.N then if nrEnabled then disableNR() else enableNR() end
@@ -736,7 +755,8 @@ UIS.InputBegan:Connect(function(i,gpe)
 end)
 
 game:BindToClose(function()
-    disableAimbot(); disableESP(); disableNR(); disableFullbright(); disableInstaReload()
+    if espEnabled then disableESP() end
+    disableAimbot(); disableNR(); disableFullbright(); disableInstaReload()
 end)
 
 -- start systems
