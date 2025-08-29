@@ -1,13 +1,12 @@
---// KittenWare Auth UI — HWID Lock + Close-on-download + Town check + High/Low exec selector
+--// KittenWare Auth UI — HWID Lock + Close-on-download + Town-only + High/Low exec + Success toast
 
 local APP_NAME   = "KittenWare"
 local OWNER_ID   = "FYv0xlPRAW"
 local VERSION    = "1.0"
 local API_URL    = "https://keyauth.win/api/1.3/"
 
--- Place detection
+-- Place detection (Town only)
 local TOWN_PLACE_ID = 4991214437
-local IS_TOWN = (game.PlaceId == TOWN_PLACE_ID)
 
 -- Script URLs
 local MAIN_SCRIPT_URL_HIGH = "https://raw.githubusercontent.com/kittenware-script/kittenware/main/kittenware.lua"
@@ -21,6 +20,7 @@ local HttpService          = game:GetService("HttpService")
 local Lighting             = game:GetService("Lighting")
 local UserInputService     = game:GetService("UserInputService")
 local RbxAnalyticsService  = game:GetService("RbxAnalyticsService")
+local StarterGui           = game:GetService("StarterGui")
 
 -- theme
 local theme = {
@@ -41,6 +41,45 @@ local theme = {
     selectOff = Color3.fromRGB(28,28,36),
 }
 
+-- notify helper (tries SetCore then falls back to a tiny banner)
+local function notify(title, text, duration)
+    duration = duration or 5
+    local ok = pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = title or "KittenWare",
+            Text = text or "",
+            Duration = duration
+        })
+    end)
+    if ok then return end
+    -- fallback: minimal banner
+    local parent = game:FindFirstChildOfClass("CoreGui") or (Players.LocalPlayer and Players.LocalPlayer:FindFirstChildOfClass("PlayerGui"))
+    if not parent then return end
+    local g = Instance.new("ScreenGui")
+    g.DisplayOrder = 9999
+    g.Name = "KW_Toast"
+    g.IgnoreGuiInset = true
+    g.Parent = parent
+    local f = Instance.new("Frame", g)
+    f.BackgroundColor3 = Color3.fromRGB(30,30,38)
+    f.Size = UDim2.new(0, 320, 0, 42)
+    f.Position = UDim2.new(1, -340, 1, -62)
+    f.BorderSizePixel = 0
+    Instance.new("UICorner", f).CornerRadius = UDim.new(0, 8)
+    local tl = Instance.new("TextLabel", f)
+    tl.BackgroundTransparency = 1
+    tl.Font = Enum.Font.GothamBold
+    tl.TextColor3 = Color3.fromRGB(255,255,255)
+    tl.TextSize = 14
+    tl.TextXAlignment = Enum.TextXAlignment.Left
+    tl.Text = (title or "KittenWare") .. " — " .. (text or "")
+    tl.Position = UDim2.new(0, 12, 0, 10)
+    tl.Size = UDim2.new(1, -24, 1, -20)
+    task.delay(duration, function()
+        pcall(function() g:Destroy() end)
+    end)
+end
+
 -- utils
 local function enc(s) return HttpService:UrlEncode(s) end
 
@@ -51,17 +90,14 @@ local function getHWID()
         if syn and syn.get_hwid then return syn.get_hwid() end
     end)
     if ok and type(id) == "string" and #id > 0 then return id end
-
     local ok2, cid = pcall(function() return RbxAnalyticsService:GetClientId() end)
     if ok2 and type(cid) == "string" and #cid > 0 then
         return cid:gsub("[^%w]", ""):lower()
     end
-
     local uid = (Players.LocalPlayer and Players.LocalPlayer.UserId) or 0
     local plat = tostring(UserInputService:GetPlatform()):gsub("[^%w]", "")
     return ("uid%s-%s"):format(uid, plat)
 end
-
 local HWID = getHWID()
 
 local function tweenTo(inst, goal, dur)
@@ -127,7 +163,7 @@ local function fetchText(url)
     return false, "HttpGet failed and no request() available", 0
 end
 
--- Run chunk silently (swallow compile/runtime errors)
+-- Run chunk silently (swallow compile/runtime errors like BindToClose server-only)
 local function runChunkSilently(luaSource)
     local loader = loadstring or load
     if type(loader) ~= "function" then return end
@@ -181,11 +217,17 @@ local function checkKey(key)
     return false, msg
 end
 
+-- ========= TOWN CHECK (EARLY EXIT) =========
+if game.PlaceId ~= TOWN_PLACE_ID then
+    notify("KittenWare", "Wrong game", 5)
+    return
+end
+
 -- UI
 local function createUI()
     local parent = getGuiParent()
     if not parent then
-        warn("KittenWareAuth: No visible GUI parent.")
+        notify("KittenWare", "UI error: no parent", 5)
         return
     end
 
@@ -221,8 +263,8 @@ local function createUI()
     dim.Parent = gui
 
     local card = Instance.new("Frame")
-    card.Size = UDim2.new(0, 480, 0, IS_TOWN and 380 or 340)
-    card.Position = UDim2.new(0.5, -240, 0.5, -(IS_TOWN and 190 or 170))
+    card.Size = UDim2.new(0, 480, 0, 380)
+    card.Position = UDim2.new(0.5, -240, 0.5, -190)
     card.BackgroundColor3 = theme.card
     card.BackgroundTransparency = 0.05
     card.ZIndex = 10
@@ -257,7 +299,7 @@ local function createUI()
     local subtitle = Instance.new("TextLabel")
     subtitle.BackgroundTransparency = 1
     subtitle.Font = Enum.Font.Gotham
-    subtitle.Text = "v" .. VERSION .. "  •  License Authentication" .. (IS_TOWN and " • Town detected" or "")
+    subtitle.Text = "v" .. VERSION .. "  •  License Authentication • Town detected"
     subtitle.TextSize = 13
     subtitle.TextColor3 = theme.sub
     subtitle.Position = UDim2.new(0, 18, 0, 32)
@@ -335,56 +377,51 @@ local function createUI()
     idPreview.ZIndex = 11
     idPreview.Parent = content
 
-    -- High/Low exec selector (show only in Town)
+    -- High/Low exec selector
     local selectedTier = "high" -- default
-    local tierFrame, highBtn, lowBtn
+    local tierFrame = Instance.new("Frame")
+    tierFrame.BackgroundTransparency = 1
+    tierFrame.Size = UDim2.new(1, 0, 0, 40)
+    tierFrame.Position = UDim2.new(0, 0, 0, 100)
+    tierFrame.ZIndex = 11
+    tierFrame.Parent = content
 
-    if IS_TOWN then
-        tierFrame = Instance.new("Frame")
-        tierFrame.BackgroundTransparency = 1
-        tierFrame.Size = UDim2.new(1, 0, 0, 40)
-        tierFrame.Position = UDim2.new(0, 0, 0, 100)
-        tierFrame.ZIndex = 11
-        tierFrame.Parent = content
+    local layout = Instance.new("UIListLayout", tierFrame)
+    layout.FillDirection = Enum.FillDirection.Horizontal
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+    layout.VerticalAlignment = Enum.VerticalAlignment.Center
+    layout.Padding = UDim.new(0, 10)
 
-        local layout = Instance.new("UIListLayout", tierFrame)
-        layout.FillDirection = Enum.FillDirection.Horizontal
-        layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-        layout.VerticalAlignment = Enum.VerticalAlignment.Center
-        layout.Padding = UDim.new(0, 10)
-
-        local function mkTierButton(label)
-            local btn = Instance.new("TextButton")
-            btn.AutoButtonColor = false
-            btn.Size = UDim2.new(0, 130, 0, 34)
-            btn.BackgroundColor3 = theme.selectOff
-            btn.Text = label
-            btn.Font = Enum.Font.GothamBold
-            btn.TextSize = 14
-            btn.TextColor3 = theme.text
-            btn.ZIndex = 12
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-            local st = Instance.new("UIStroke", btn)
-            st.Color = theme.stroke
-            st.Transparency = 0.25
-            st.Thickness = 1.5
-            return btn
-        end
-
-        highBtn = mkTierButton("High exec")
-        highBtn.Parent = tierFrame
-        lowBtn  = mkTierButton("Low exec")
-        lowBtn.Parent = tierFrame
-
-        local function refreshTier()
-            tweenTo(highBtn, {BackgroundColor3 = (selectedTier=="high" and theme.selectOn or theme.selectOff)}, 0.08)
-            tweenTo(lowBtn,  {BackgroundColor3 = (selectedTier=="low"  and theme.selectOn or theme.selectOff)}, 0.08)
-        end
-        refreshTier()
-
-        highBtn.MouseButton1Click:Connect(function() selectedTier = "high"; refreshTier() end)
-        lowBtn.MouseButton1Click:Connect(function()  selectedTier = "low";  refreshTier() end)
+    local function mkTierButton(label)
+        local btn = Instance.new("TextButton")
+        btn.AutoButtonColor = false
+        btn.Size = UDim2.new(0, 130, 0, 34)
+        btn.BackgroundColor3 = theme.selectOff
+        btn.Text = label
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 14
+        btn.TextColor3 = theme.text
+        btn.ZIndex = 12
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+        local st = Instance.new("UIStroke", btn)
+        st.Color = theme.stroke
+        st.Transparency = 0.25
+        st.Thickness = 1.5
+        return btn
     end
+
+    local highBtn = mkTierButton("High exec")
+    highBtn.Parent = tierFrame
+    local lowBtn  = mkTierButton("Low exec")
+    lowBtn.Parent = tierFrame
+
+    local function refreshTier()
+        tweenTo(highBtn, {BackgroundColor3 = (selectedTier=="high" and theme.selectOn or theme.selectOff)}, 0.08)
+        tweenTo(lowBtn,  {BackgroundColor3 = (selectedTier=="low"  and theme.selectOn or theme.selectOff)}, 0.08)
+    end
+    refreshTier()
+    highBtn.MouseButton1Click:Connect(function() selectedTier = "high"; refreshTier() end)
+    lowBtn.MouseButton1Click:Connect(function()  selectedTier = "low";  refreshTier() end)
 
     local status = Instance.new("TextLabel")
     status.BackgroundTransparency = 1
@@ -394,7 +431,7 @@ local function createUI()
     status.TextXAlignment = Enum.TextXAlignment.Left
     status.TextColor3 = theme.sub
     status.Size = UDim2.new(1, 0, 0, 22)
-    status.Position = UDim2.new(0, 0, 0, IS_TOWN and 146 or 100)
+    status.Position = UDim2.new(0, 0, 0, 146)
     status.ZIndex = 11
     status.Parent = content
 
@@ -487,12 +524,11 @@ local function createUI()
             return
         end
 
-        -- Decide which script to fetch
-        local which = (IS_TOWN and selectedTier) or "high"
-        local url = (which == "low") and MAIN_SCRIPT_URL_LOW or MAIN_SCRIPT_URL_HIGH
+        -- Decide which script to fetch (high or low)
+        local url = (selectedTier == "low") and MAIN_SCRIPT_URL_LOW or MAIN_SCRIPT_URL_HIGH
 
         status.TextColor3 = theme.sub
-        status.Text = ("Downloading (%s exec)..."):format(which)
+        status.Text = ("Downloading (%s exec)..."):format(selectedTier)
         local okD, body = fetchText(url)
         if not okD then
             status.TextColor3 = theme.danger
@@ -501,10 +537,15 @@ local function createUI()
             return
         end
 
-        -- Close UI immediately after successful download (regardless of run result)
+        -- Close UI immediately after successful download
         status.TextColor3 = theme.success
         status.Text = "Success."
         task.delay(0.05, destroyUI)
+
+        -- Show post-success tip
+        task.delay(0.25, function()
+            notify("KittenWare", "Right-Click to open", 6)
+        end)
 
         -- Run silently in the background; swallow any errors (e.g., server-only APIs).
         task.spawn(function()
@@ -516,15 +557,5 @@ end
 -- main
 local ok, err = pcall(createUI)
 if not ok then
-    warn("KittenWareAuth UI error: " .. tostring(err))
-    local p = game:FindFirstChildOfClass("CoreGui") or (Players.LocalPlayer and Players.LocalPlayer:FindFirstChildOfClass("PlayerGui"))
-    if p then
-        local g = Instance.new("ScreenGui", p)
-        g.DisplayOrder = 9999
-        local b = Instance.new("TextLabel", g)
-        b.Size = UDim2.new(1,0,0,30)
-        b.BackgroundColor3 = Color3.fromRGB(50,0,0)
-        b.TextColor3 = Color3.new(1,1,1)
-        b.Text = "KittenWareAuth failed to build UI: ".. tostring(err)
-    end
+    notify("KittenWare", "UI error: ".. tostring(err), 6)
 end
