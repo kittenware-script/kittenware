@@ -1,17 +1,8 @@
 --[[
   KittenWare • 2025
-  No Recoil + ESP (Skeleton/Boxes/Tracers/Names/Health/Distance/Fill/Item ESP)
-  + Aimbot (Wall Check + Distance + HUD)
-  + Fullbright/FOV
-  + Gun Chams
-  + Silent Aim (assist; with its own FOV circle & toggles; no __namecall hooks)
-  + Reload Speed (animation speed multiplier for reload tracks)
-
-  Change Log (this build):
-  • Silent Aim now has its own FOV circle (toggle + color) so you can SEE it’s active.
-  • Fixed Silent Aim hookup to fire on LMB reliably and show current config in the menu.
-  • Replaced “Insta Reload (gentle skip)” with a clean Reload Speed multiplier that
-    only calls :AdjustSpeed(multiplier) on reload animations (no time-position jumps).
+  No Recoil + Aimbot (Wall Check + Distance + HUD)
+  Fullbright/FOV + Insta Reload (speed)
+  ESP++ (Skeleton / Corner Boxes / Filled Boxes / Tracers / Names / Health / Distance / Item ESP / Off-Screen Arrows)
 ]]
 
 if getgenv().KittenWareLoaded or getgenv().KittenWareLoading then return end
@@ -32,10 +23,11 @@ local Camera = Workspace.CurrentCamera
 
 local function notify(t,x,d) pcall(function() StarterGui:SetCore("SendNotification",{Title=t,Text=x,Duration=d or 3}) end) end
 local function clamp(v,a,b) return (v<a) and a or ((v>b) and b or v) end
+local function lerp(a,b,t) return a + (b-a)*t end
 
 -- UI lib (Exunys)
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Roblox-Functions-Library/main/Library.lua"))()
-local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/kitty92pm/AirHub-V2/refs/heads/main/src/UI%20Library.lua"))()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/AirHub-V2/main/src/UI%20Library.lua"))()
 
 -- Tabs
 local Main     = GUI:Load()
@@ -60,42 +52,60 @@ local function disableNR() nrEnabled=false unwatch() if charAddedConn then charA
 Combat:Section({Name="No Recoil"}):Toggle({Name="Enabled",Flag="KW_NR",Default=false,Callback=function(v) if v then enableNR() else disableNR() end end})
 
 ----------------------------------------------------------------
--- ESP (Drawing API)  — with Item ESP
+-- ESP++ (Drawing API)
 ----------------------------------------------------------------
 local hasDrawing=(typeof(Drawing)=="table" and typeof(Drawing.new)=="function")
 if not hasDrawing then notify("KittenWare","Drawing API not found; ESP disabled.",5) end
 
--- Config
+-- ESP Core Config
 local espEnabled, espConn=false,nil
-local showSkeleton, showBoxes, showTracers=true,true,true
-local showNames, showHealth, showDistance = true, true, true
-local showFilledBox = false
+local showSkeleton, showBoxes, showCornerBox, showFilledBox = true, true, true, false
+local cornerLen = 8 -- px
+local showTracers, showNames, showHealth, showDistance = true, true, true, true
 local onlyVisible = false
-local onlyOnScreen = true
-local maxDistance = 2000
+local maxDistance = 2500
+local fadeByDistance = true
+local thicknessBase, alphaBase = 2.5, 0.9
+local thicknessNear, thicknessFar = 3.0, 1.0
+local tracerOrigin="Bottom" -- Bottom/Center/Mouse
 local espTeamCheck=false
 local useTeamColors=false
 local visibleColor=Color3.fromRGB(0,255,255)
-local colors={ Red=Color3.fromRGB(255,0,0), Green=Color3.fromRGB(0,255,0), Yellow=Color3.fromRGB(255,255,0), Magenta=Color3.fromRGB(255,0,255) }
-local occludedColor=colors.Red
-local thickness, alpha=2.5,0.85
+local occludedColor=Color3.fromRGB(255,100,100)
 local fillAlpha = 0.15
-local tracerOrigin="Bottom" -- Bottom/Center/Mouse
+local nameSize, infoSize = 14, 13
 
--- Item ESP config
+-- Item ESP Config (separate section)
 local showItem = true
 local itemColor = Color3.fromRGB(255, 200, 120)
+local itemUseTeamColor = false
+local itemTextSize = 13
 local itemOffsetY = 14
+local itemOutline = true
+local itemPrefix = ""      -- e.g., "[ITEM] "
+local itemUppercase = false
 
+-- Off-screen arrows
+local arrowsEnabled = true
+local arrowSize = 18
+local arrowRadiusFactor = 0.45
+local arrowsUseTeamColors = true
+local arrowFadeWithDistance = true
+local arrowBaseColor = Color3.fromRGB(255,255,255)
+
+-- Store draw objects
 local playerDraw, espSignals = {}, {}
 local playersSignal, playerAddedConn
+local friendList = {} -- {["PlayerName"]=true}
 
+-- Helpers
 local function sameTeam(plr)
     if not espTeamCheck then return false end
     if LP.Team and plr.Team then return plr.Team==LP.Team end
     if LP.TeamColor and plr.TeamColor then return plr.TeamColor==LP.TeamColor end
     return false
 end
+
 local function isVisibleLOS(part, targetChar)
     if not part then return false end
     local origin=Camera.CFrame.Position
@@ -103,13 +113,21 @@ local function isVisibleLOS(part, targetChar)
     local rp=RaycastParams.new()
     rp.FilterType=Enum.RaycastFilterType.Blacklist
     rp.FilterDescendantsInstances={LP.Character, targetChar}
-    local hit = Workspace:Raycast(origin, dir, rp)
-    return hit == nil
+    return Workspace:Raycast(origin, dir, rp) == nil
 end
 
-local function makeLine() local l=Drawing.new("Line"); l.Visible=false; l.Thickness=thickness; l.Transparency=alpha; return l end
-local function makeText() local t=Drawing.new("Text"); t.Visible=false; t.Center=true; t.Size=14; t.Outline=true; t.Transparency=1; t.Color=Color3.new(1,1,1); return t end
-local function makeSquare() local s=Drawing.new("Square"); s.Visible=false; s.Filled=false; s.Thickness=thickness; s.Transparency=alpha; s.Color=Color3.new(1,1,1); return s end
+local function healthColor(h, mh)
+    local t = clamp(h / math.max(1, mh), 0, 1)
+    local r = t < 0.5 and 1 or lerp(1, 0, (t-0.5)/0.5)
+    local g = t < 0.5 and lerp(0,1,t/0.5) or 1
+    return Color3.new(r, g, 0)
+end
+
+-- Drawing factory
+local function makeLine() local l=Drawing.new("Line"); l.Visible=false; l.Thickness=thicknessBase; l.Transparency=alphaBase; l.Color=Color3.new(1,1,1); return l end
+local function makeText(sz, outline) local t=Drawing.new("Text"); t.Visible=false; t.Center=true; t.Size=sz or nameSize; t.Outline=outline~=false; t.Transparency=1; t.Color=Color3.new(1,1,1); return t end
+local function makeSquare() local s=Drawing.new("Square"); s.Visible=false; s.Filled=false; s.Thickness=thicknessBase; s.Transparency=alphaBase; s.Color=Color3.new(1,1,1); return s end
+local function makeTri() local tr=Drawing.new("Triangle"); tr.Visible=false; tr.Thickness=1; tr.Filled=true; tr.Color=Color3.fromRGB(255,255,255); tr.Transparency=0.9; return tr end
 
 local function ensureBundle(plr)
     if playerDraw[plr] then return playerDraw[plr] end
@@ -119,22 +137,25 @@ local function ensureBundle(plr)
         luArm=makeLine(), llArm=makeLine(), lHand=makeLine(),
         ruArm=makeLine(), rlArm=makeLine(), rHand=makeLine(),
         luLeg=makeLine(), llLeg=makeLine(), ruLeg=makeLine(), rlLeg=makeLine(),
-        -- Box (outline)
+        -- 2D box & corners
         boxT=makeLine(), boxB=makeLine(), boxL=makeLine(), boxR=makeLine(),
-        -- Filled overlay
+        cTL1=makeLine(), cTL2=makeLine(), cTR1=makeLine(), cTR2=makeLine(),
+        cBL1=makeLine(), cBL2=makeLine(), cBR1=makeLine(), cBR2=makeLine(),
         boxFill=makeSquare(),
         -- Tracer
         tracer=makeLine(),
-        -- Labels + Health
-        nameText=makeText(),
-        distText=makeText(),
+        -- Text & HP
+        nameText=makeText(nameSize,true),
+        distText=makeText(infoSize,true),
+        itemText=makeText(itemTextSize,itemOutline),
         hpBack=makeSquare(),
         hpBar=makeSquare(),
-        -- Item ESP
-        itemText=makeText(),
+        -- Off-screen arrow
+        arrow=makeTri(),
     }
     playerDraw[plr]=b; return b
 end
+
 local function hideBundle(b) if not b then return end for _,ln in pairs(b) do ln.Visible=false end end
 local function cleanup(plr) local t=playerDraw[plr] if t then for _,ln in pairs(t) do ln:Remove() end end playerDraw[plr]=nil local sigs=espSignals[plr] if sigs then for _,c in ipairs(sigs) do if c then c:Disconnect() end end end espSignals[plr]=nil end
 
@@ -157,13 +178,23 @@ local function getParts(c)
         rlLeg=c:FindFirstChild("RightLowerLeg")
     }
 end
+
 local function vp(v3) local v,o=Camera:WorldToViewportPoint(v3); return Vector2.new(v.X,v.Y),o end
-local function drawLine(line,a,b,col)
-    if a and b then
-        local a2,ao=vp(a.Position); local b2,bo=vp(b.Position)
+
+local function dynamicThickness(dist)
+    if not fadeByDistance then return thicknessBase, alphaBase end
+    local t = clamp(dist / maxDistance, 0, 1)
+    local th = lerp(thicknessNear, thicknessFar, t)
+    local al = lerp(alphaBase, 0.35, t)
+    return th, al
+end
+
+local function drawLine(line, p1, p2, col, th, al)
+    if p1 and p2 then
+        local a2,ao=vp(p1.Position); local b2,bo=vp(p2.Position)
         if ao and bo then
             line.From=a2; line.To=b2; line.Color=col; line.Visible=true
-            line.Thickness=thickness; line.Transparency=alpha
+            line.Thickness=th; line.Transparency=al
         else line.Visible=false end
     else line.Visible=false end
 end
@@ -185,13 +216,28 @@ local function computeBBox(model)
     return minX,minY,maxX,maxY,any
 end
 
-local function drawLineBox(lines, tl, tr, bl, br, col)
+local function drawLineBox(lines, tl, tr, bl, br, col, th, al)
     lines.boxT.From=tl; lines.boxT.To=tr; lines.boxT.Color=col; lines.boxT.Visible=true
     lines.boxB.From=bl; lines.boxB.To=br; lines.boxB.Color=col; lines.boxB.Visible=true
     lines.boxL.From=tl; lines.boxL.To=bl; lines.boxL.Color=col; lines.boxL.Visible=true
     lines.boxR.From=tr; lines.boxR.To=br; lines.boxR.Color=col; lines.boxR.Visible=true
-    lines.boxT.Thickness=thickness; lines.boxB.Thickness=thickness; lines.boxL.Thickness=thickness; lines.boxR.Thickness=thickness
-    lines.boxT.Transparency=alpha; lines.boxB.Transparency=alpha; lines.boxL.Transparency=alpha; lines.boxR.Transparency=alpha
+    lines.boxT.Thickness=th; lines.boxB.Thickness=th; lines.boxL.Thickness=th; lines.boxR.Thickness=th
+    lines.boxT.Transparency=al; lines.boxB.Transparency=al; lines.boxL.Transparency=al; lines.boxR.Transparency=al
+end
+
+local function drawCorners(b, tl,tr,bl,br, col, th, al)
+    local L = cornerLen
+    b.cTL1.From = tl;                 b.cTL1.To = tl + Vector2.new(L,0)
+    b.cTL2.From = tl;                 b.cTL2.To = tl + Vector2.new(0,L)
+    b.cTR1.From = tr;                 b.cTR1.To = tr + Vector2.new(-L,0)
+    b.cTR2.From = tr;                 b.cTR2.To = tr + Vector2.new(0,L)
+    b.cBL1.From = bl;                 b.cBL1.To = bl + Vector2.new(L,0)
+    b.cBL2.From = bl;                 b.cBL2.To = bl + Vector2.new(0,-L)
+    b.cBR1.From = br;                 b.cBR1.To = br + Vector2.new(-L,0)
+    b.cBR2.From = br;                 b.cBR2.To = br + Vector2.new(0,-L)
+    for _,ln in ipairs({b.cTL1,b.cTL2,b.cTR1,b.cTR2,b.cBL1,b.cBL2,b.cBR1,b.cBR2}) do
+        ln.Color=col; ln.Visible=true; ln.Thickness=th; ln.Transparency=al
+    end
 end
 
 local function tracerAnchor()
@@ -203,16 +249,36 @@ end
 local function getEquippedToolName(ch)
     if not ch then return nil end
     for _,obj in ipairs(ch:GetChildren()) do
-        if obj:IsA("Tool") then
-            return obj.Name
-        end
+        if obj:IsA("Tool") then return obj.Name end
     end
     return nil
 end
 
+local function drawArrow(tri, worldPos, color, dist)
+    local vpSize = Camera.ViewportSize
+    local center = Vector2.new(vpSize.X/2, vpSize.Y/2)
+    local p, on = Camera:WorldToViewportPoint(worldPos)
+    local p2 = Vector2.new(p.X, p.Y)
+    if on then tri.Visible=false return end
+    local dir = (p2 - center)
+    local mag = dir.Magnitude
+    if mag < 1e-3 then tri.Visible=false return end
+    dir = dir / mag
+    local radius = arrowRadiusFactor * math.min(vpSize.X, vpSize.Y)
+    local tip = center + dir * radius
+    local baseCenter = tip - dir * arrowSize
+    local perp = Vector2.new(-dir.Y, dir.X)
+    local left = baseCenter + perp * (arrowSize * 0.5)
+    local right = baseCenter - perp * (arrowSize * 0.5)
+    tri.PointA = tip; tri.PointB = left; tri.PointC = right
+    tri.Color = color
+    tri.Transparency = arrowFadeWithDistance and clamp(1 - (dist / maxDistance), 0.25, 0.95) or 0.9
+    tri.Visible = true
+end
+
 local function updateOne(plr)
     if not hasDrawing then return end
-    if plr==LP or (espTeamCheck and sameTeam(plr)) then local b=playerDraw[plr]; if b then hideBundle(b) end return end
+    if plr==LP or friendList[plr.Name] or (espTeamCheck and sameTeam(plr)) then local b=playerDraw[plr]; if b then hideBundle(b) end return end
 
     local ch=plr.Character; if not ch then local b=playerDraw[plr]; if b then hideBundle(b) end return end
     local P=getParts(ch)
@@ -226,22 +292,27 @@ local function updateOne(plr)
 
     local vis = isVisibleLOS(P.hrp, ch) or (P.torso and isVisibleLOS(P.torso, ch))
     if onlyVisible and not vis then local b=playerDraw[plr]; if b then hideBundle(b) end return end
+
     local col = vis and visibleColor or occludedColor
     if useTeamColors and plr.TeamColor then col = plr.TeamColor.Color end
+    local th, al = dynamicThickness(dist)
 
     local b=ensureBundle(plr)
 
-    -- skeleton
+    -- Skeleton
     if showSkeleton then
-        if P.torso then drawLine(b.torso,P.torso,P.hrp,col) drawLine(b.head,P.head,P.torso,col) drawLine(b.lower,P.lower or P.torso,P.torso,col)
+        if P.torso then
+            drawLine(b.torso,P.torso,P.hrp,col,th,al)
+            drawLine(b.head,P.head,P.torso,col,th,al)
+            drawLine(b.lower,P.lower or P.torso,P.torso,col,th,al)
         else b.torso.Visible=false b.head.Visible=false b.lower.Visible=false end
-        drawLine(b.luArm,P.luArm,P.torso or P.hrp,col); if P.llArm then drawLine(b.llArm,P.llArm,P.luArm,col) else b.llArm.Visible=false end
-        if P.lHand then drawLine(b.lHand,P.lHand,P.llArm or P.luArm,col) else b.lHand.Visible=false end
-        drawLine(b.ruArm,P.ruArm,P.torso or P.hrp,col); if P.rlArm then drawLine(b.rlArm,P.rlArm,P.ruArm,col) else b.rlArm.Visible=false end
-        if P.rHand then drawLine(b.rHand,P.rHand,P.rlArm or P.ruArm,col) else b.rHand.Visible=false end
+        drawLine(b.luArm,P.luArm,P.torso or P.hrp,col,th,al); if P.llArm then drawLine(b.llArm,P.llArm,P.luArm,col,th,al) else b.llArm.Visible=false end
+        if P.lHand then drawLine(b.lHand,P.lHand,P.llArm or P.luArm,col,th,al) else b.lHand.Visible=false end
+        drawLine(b.ruArm,P.ruArm,P.torso or P.hrp,col,th,al); if P.rlArm then drawLine(b.rlArm,P.rlArm,P.ruArm,col,th,al) else b.rlArm.Visible=false end
+        if P.rHand then drawLine(b.rHand,P.rHand,P.rlArm or P.ruArm,col,th,al) else b.rHand.Visible=false end
         local pelvis=P.lower or P.torso or P.hrp
-        drawLine(b.luLeg,P.luLeg,pelvis,col); if P.llLeg then drawLine(b.llLeg,P.llLeg,P.luLeg,col) else b.llLeg.Visible=false end
-        drawLine(b.ruLeg,P.ruLeg,pelvis,col); if P.rlLeg then drawLine(b.rlLeg,P.rlLeg,P.ruLeg,col) else b.rlLeg.Visible=false end
+        drawLine(b.luLeg,P.luLeg,pelvis,col,th,al); if P.llLeg then drawLine(b.llLeg,P.llLeg,P.luLeg,col,th,al) else b.llLeg.Visible=false end
+        drawLine(b.ruLeg,P.ruLeg,pelvis,col,th,al); if P.rlLeg then drawLine(b.rlLeg,P.rlLeg,P.ruLeg,col,th,al) else b.rlLeg.Visible=false end
     else
         b.torso.Visible=false b.head.Visible=false b.lower.Visible=false
         b.luArm.Visible=false b.llArm.Visible=false b.lHand.Visible=false
@@ -249,13 +320,16 @@ local function updateOne(plr)
         b.luLeg.Visible=false b.llLeg.Visible=false b.ruLeg.Visible=false b.rlLeg.Visible=false
     end
 
-    -- 2D box & fill
+    -- Boxes
     local minX,minY,maxX,maxY,onScr = computeBBox(ch)
-    if onlyOnScreen and not onScr then hideBundle(b); return end
     local tl,tr,bl,br=Vector2.new(minX,minY),Vector2.new(maxX,minY),Vector2.new(minX,maxY),Vector2.new(maxX,maxY)
 
-    if showBoxes then
-        drawLineBox(b, tl,tr,bl,br, col)
+    if showBoxes and onScr then
+        drawLineBox(b, tl,tr,bl,br, col, th, al)
+        if showCornerBox then drawCorners(b, tl,tr,bl,br, col, th+0.5, al) else
+            b.cTL1.Visible=false b.cTL2.Visible=false b.cTR1.Visible=false b.cTR2.Visible=false
+            b.cBL1.Visible=false b.cBL2.Visible=false b.cBR1.Visible=false b.cBR2.Visible=false
+        end
         if showFilledBox then
             b.boxFill.Filled = true
             b.boxFill.Color = col
@@ -268,15 +342,19 @@ local function updateOne(plr)
         end
     else
         b.boxT.Visible=false b.boxB.Visible=false b.boxL.Visible=false b.boxR.Visible=false
+        b.cTL1.Visible=false b.cTL2.Visible=false b.cTR1.Visible=false b.cTR2.Visible=false
+        b.cBL1.Visible=false b.cBL2.Visible=false b.cBR1.Visible=false b.cBR2.Visible=false
         b.boxFill.Visible=false
     end
 
-    -- health bar
-    if showHealth and hum then
-        local hp = math.max(0, math.min(100, (hum.Health / math.max(1, hum.MaxHealth)) * 100))
+    -- Health bar
+    if showHealth and hum and onScr then
+        local hp = hum.Health
+        local mh = math.max(1, hum.MaxHealth)
+        local pct = clamp(hp/mh, 0, 1)
         local bw = 4
         local height = (maxY - minY)
-        local filled = height * (hp/100)
+        local filled = height * pct
         b.hpBack.Filled = true
         b.hpBack.Color = Color3.fromRGB(30,30,30)
         b.hpBack.Transparency = 0.6
@@ -285,7 +363,7 @@ local function updateOne(plr)
         b.hpBack.Visible = true
 
         b.hpBar.Filled = true
-        b.hpBar.Color = Color3.fromRGB(120,255,120)
+        b.hpBar.Color = healthColor(hp, mh)
         b.hpBar.Transparency = 0.2
         b.hpBar.Position = Vector2.new(minX - (bw+3), maxY - filled)
         b.hpBar.Size = Vector2.new(bw, filled)
@@ -295,32 +373,34 @@ local function updateOne(plr)
         b.hpBar.Visible=false
     end
 
-    -- name & distance
+    -- Name / Distance
     local nameY = math.max(0, minY - 14)
-    if showNames then
-        b.nameText.Text = plr.Name .. (showHealth and hum and ("  ["..math.floor((hum.Health)).."]") or "")
+    if showNames and onScr then
+        b.nameText.Text = plr.Name
         b.nameText.Color = col
         b.nameText.Position = Vector2.new((minX+maxX)/2, nameY)
-        b.nameText.Size = 14
+        b.nameText.Size = nameSize
         b.nameText.Visible = true
     else b.nameText.Visible=false end
 
-    if showDistance then
+    if showDistance and onScr then
         b.distText.Text = string.format("%.0f", dist).."s"
         b.distText.Color = Color3.fromRGB(220,220,220)
         b.distText.Position = Vector2.new((minX+maxX)/2, maxY + 12)
-        b.distText.Size = 13
+        b.distText.Size = infoSize
         b.distText.Visible = true
     else b.distText.Visible=false end
 
-    -- Item ESP (equipped tool)
-    if showItem then
+    -- Item ESP (separate config)
+    if showItem and onScr then
         local toolName = getEquippedToolName(ch)
         if toolName then
-            b.itemText.Text = toolName
-            b.itemText.Color = itemColor
+            if itemUppercase then toolName = string.upper(toolName) end
+            b.itemText.Text = (itemPrefix or "") .. toolName
+            b.itemText.Color = (itemUseTeamColor and plr.TeamColor and plr.TeamColor.Color) or itemColor
             b.itemText.Position = Vector2.new((minX+maxX)/2, nameY + itemOffsetY)
-            b.itemText.Size = 13
+            b.itemText.Size = itemTextSize
+            b.itemText.Outline = itemOutline
             b.itemText.Visible = true
         else
             b.itemText.Visible = false
@@ -329,18 +409,24 @@ local function updateOne(plr)
         b.itemText.Visible = false
     end
 
-    -- tracer
-    if showTracers then
-        local pos,on=Camera:WorldToViewportPoint(P.hrp.Position)
-        if on then
-            b.tracer.From=tracerAnchor()
-            b.tracer.To=Vector2.new(pos.X,pos.Y)
-            b.tracer.Color=col
-            b.tracer.Thickness=thickness
-            b.tracer.Transparency=alpha
-            b.tracer.Visible=true
-        else b.tracer.Visible=false end
+    -- Tracer
+    if showTracers and onScr then
+        local pos,_=Camera:WorldToViewportPoint(P.hrp.Position)
+        b.tracer.From=tracerAnchor()
+        b.tracer.To=Vector2.new(pos.X,pos.Y)
+        b.tracer.Color=col
+        b.tracer.Thickness=th
+        b.tracer.Transparency=al
+        b.tracer.Visible=true
     else b.tracer.Visible=false end
+
+    -- Off-screen arrows
+    if arrowsEnabled and not onScr then
+        local arrowCol = arrowsUseTeamColors and (plr.TeamColor and plr.TeamColor.Color or col) or arrowBaseColor
+        drawArrow(b.arrow, P.hrp.Position, arrowCol, dist)
+    else
+        b.arrow.Visible = false
+    end
 end
 
 local function updateAll() for _,p in ipairs(Players:GetPlayers()) do updateOne(p) end end
@@ -365,37 +451,56 @@ local function disableESP()
     for plr in pairs(playerDraw) do cleanup(plr) end
 end
 
--- ESP UI
+-- ESP UI (Core & Elements)
 do
-    local sec=Visual:Section({Name="ESP Core", Side="Left"})
-    sec:Toggle({Name="Enabled",Flag="KW_ESP",Default=false,Callback=function(v) if v then enableESP() else disableESP() end end})
-    sec:Toggle({Name="Team Check (skip teammates)",Flag="KW_ESP_TEAM",Default=false,Callback=function(v) espTeamCheck=v end})
-    sec:Toggle({Name="Use Team Colors",Flag="KW_ESP_TCOL",Default=false,Callback=function(v) useTeamColors=v end})
-    sec:Toggle({Name="Only Visible",Flag="KW_ESP_VIS",Default=false,Callback=function(v) onlyVisible=v end})
-    sec:Toggle({Name="Only On-Screen",Flag="KW_ESP_OS",Default=true,Callback=function(v) onlyOnScreen=v end})
-    sec:Slider({Name="Max Distance",Flag="KW_ESP_DIST",Default=maxDistance,Min=200,Max=5000,Callback=function(v) maxDistance=v end})
-    sec:Dropdown({Name="Occluded Color",Flag="KW_ESPOCC",Content={"Red","Green","Yellow","Magenta"},Default="Red",Callback=function(lbl) occludedColor = colors[lbl] or colors.Red end})
-    sec:Slider({Name="Thickness",Flag="KW_ESPTk",Default=math.floor(thickness),Min=1,Max=6,Callback=function(v) thickness=v end})
-    sec:Slider({Name="Line Transparency",Flag="KW_ESPAl",Default=math.floor(alpha*10),Min=1,Max=10,Callback=function(v) alpha=v/10 end})
+    local L=Visual:Section({Name="ESP Core", Side="Left"})
+    L:Toggle({Name="Enabled",Flag="KW_ESP",Default=false,Callback=function(v) if v then enableESP() else disableESP() end end})
+    L:Toggle({Name="Team Check",Flag="KW_ESP_TEAM",Default=false,Callback=function(v) espTeamCheck=v end})
+    L:Toggle({Name="Use Team Colors",Flag="KW_ESP_TCOL",Default=false,Callback=function(v) useTeamColors=v end})
+    L:Toggle({Name="Only Visible (LOS)",Flag="KW_ESP_VIS",Default=false,Callback=function(v) onlyVisible=v end})
+    L:Slider({Name="Max Distance",Flag="KW_ESP_DIST",Default=maxDistance,Min=200,Max=6000,Callback=function(v) maxDistance=v end})
+    L:Toggle({Name="Fade By Distance",Flag="KW_ESP_FBD",Default=true,Callback=function(v) fadeByDistance=v end})
+    L:Slider({Name="Base Thickness",Flag="KW_ESP_TB",Default=math.floor(thicknessBase),Min=1,Max=6,Callback=function(v) thicknessBase=v end})
+    L:Slider({Name="Near Thickness",Flag="KW_ESP_TN",Default=math.floor(thicknessNear),Min=1,Max=8,Callback=function(v) thicknessNear=v end})
+    L:Slider({Name="Far Thickness",Flag="KW_ESP_TF",Default=math.floor(thicknessFar),Min=1,Max=6,Callback=function(v) thicknessFar=v end})
+    L:Slider({Name="Base Alpha x10",Flag="KW_ESP_AL",Default=math.floor(alphaBase*10),Min=3,Max=10,Callback=function(v) alphaBase=v/10 end})
 
-    local s2=Visual:Section({Name="ESP Elements", Side="Right"})
-    s2:Toggle({Name="Skeleton",Flag="KW_ESPSkel",Default=true,Callback=function(v) showSkeleton=v end})
-    s2:Toggle({Name="Boxes (outline)",Flag="KW_ESPBox",Default=true,Callback=function(v) showBoxes=v end})
-    s2:Toggle({Name="Filled Box",Flag="KW_ESPFBox",Default=false,Callback=function(v) showFilledBox=v end})
-    s2:Slider({Name="Fill Alpha",Flag="KW_ESPFill",Default=math.floor(fillAlpha*100),Min=1,Max=90,Callback=function(v) fillAlpha = clamp(v/100,0.02,0.9) end})
-    s2:Toggle({Name="Tracers",Flag="KW_ESPTracer",Default=true,Callback=function(v) showTracers=v end})
-    s2:Dropdown({Name="Tracer Origin",Flag="KW_TR_ORG",Content={"Bottom","Center","Mouse"},Default="Bottom",Callback=function(v) tracerOrigin=v end})
-    s2:Toggle({Name="Name Tags",Flag="KW_ESPName",Default=true,Callback=function(v) showNames=v end})
-    s2:Toggle({Name="Health Bar + HP",Flag="KW_ESPHP",Default=true,Callback=function(v) showHealth=v end})
-    s2:Toggle({Name="Distance Text",Flag="KW_ESPDist",Default=true,Callback=function(v) showDistance=v end})
+    local R=Visual:Section({Name="ESP Elements", Side="Right"})
+    R:Toggle({Name="Skeleton",Flag="KW_ESPSkel",Default=true,Callback=function(v) showSkeleton=v end})
+    R:Toggle({Name="Box (outline)",Flag="KW_ESPBox",Default=true,Callback=function(v) showBoxes=v end})
+    R:Toggle({Name="Corner Box",Flag="KW_ESPCorner",Default=true,Callback=function(v) showCornerBox=v end})
+    R:Slider({Name="Corner Length",Flag="KW_ESP_CL",Default=cornerLen,Min=4,Max=24,Callback=function(v) cornerLen=v end})
+    R:Toggle({Name="Filled Box",Flag="KW_ESPFBox",Default=false,Callback=function(v) showFilledBox=v end})
+    R:Slider({Name="Fill Alpha %",Flag="KW_ESPFill",Default=math.floor(fillAlpha*100),Min=5,Max=80,Callback=function(v) fillAlpha = clamp(v/100, 0.05, 0.8) end})
+    R:Toggle({Name="Tracers",Flag="KW_ESPTracer",Default=true,Callback=function(v) showTracers=v end})
+    R:Dropdown({Name="Tracer Origin",Flag="KW_TR_ORG",Content={"Bottom","Center","Mouse"},Default="Bottom",Callback=function(v) tracerOrigin=v end})
+    R:Toggle({Name="Name Tags",Flag="KW_ESPName",Default=true,Callback=function(v) showNames=v end})
+    R:Toggle({Name="Health Bar",Flag="KW_ESPHP",Default=true,Callback=function(v) showHealth=v end})
+    R:Toggle({Name="Distance",Flag="KW_ESPDist",Default=true,Callback=function(v) showDistance=v end})
 end
 
--- Item ESP UI
+-- Item ESP — dedicated section
 do
     local I = Visual:Section({Name="Item ESP", Side="Left"})
-    I:Toggle({Name="Show Equipped Item", Flag="KW_ITEM_EN", Default=true, Callback=function(v) showItem=v end})
-    I:Colorpicker({Name="Item Text Color", Flag="KW_ITEM_COL", Default=itemColor, Callback=function(c) itemColor=c end})
-    I:Slider({Name="Item Offset Y", Flag="KW_ITEM_OY", Default=itemOffsetY, Min=-40, Max=40, Callback=function(v) itemOffsetY=v end})
+    I:Toggle({Name="Enabled", Flag="KW_ITEM_EN", Default=showItem, Callback=function(v) showItem=v end})
+    I:Toggle({Name="Use Team Color", Flag="KW_ITEM_TC", Default=itemUseTeamColor, Callback=function(v) itemUseTeamColor=v end})
+    I:Colorpicker({Name="Text Color", Flag="KW_ITEM_COL", Default=itemColor, Callback=function(c) itemColor=c end})
+    I:Slider({Name="Text Size", Flag="KW_ITEM_SZ", Default=itemTextSize, Min=10, Max=24, Callback=function(v) itemTextSize=math.floor(v) end})
+    I:Slider({Name="Vertical Offset", Flag="KW_ITEM_OFFY", Default=itemOffsetY, Min=0, Max=30, Callback=function(v) itemOffsetY=math.floor(v) end})
+    I:Toggle({Name="Outline", Flag="KW_ITEM_OUT", Default=itemOutline, Callback=function(v) itemOutline=v end})
+    I:Box({Name="Prefix", Flag="KW_ITEM_PFX", Placeholder="Prefix", Callback=function(v) itemPrefix = v or "" end})
+    I:Toggle({Name="Uppercase", Flag="KW_ITEM_UP", Default=itemUppercase, Callback=function(v) itemUppercase=v end})
+end
+
+-- Off-screen Arrows — dedicated section
+do
+    local A = Visual:Section({Name="Off-Screen Arrows", Side="Right"})
+    A:Toggle({Name="Enabled", Flag="KW_AR_EN", Default=arrowsEnabled, Callback=function(v) arrowsEnabled=v end})
+    A:Toggle({Name="Use Team Colors", Flag="KW_AR_TC", Default=arrowsUseTeamColors, Callback=function(v) arrowsUseTeamColors=v end})
+    A:Toggle({Name="Fade With Distance", Flag="KW_AR_FD", Default=arrowFadeWithDistance, Callback=function(v) arrowFadeWithDistance=v end})
+    A:Colorpicker({Name="Base Color", Flag="KW_AR_COL", Default=arrowBaseColor, Callback=function(c) arrowBaseColor=c end})
+    A:Slider({Name="Arrow Size (px)", Flag="KW_AR_SZ", Default=arrowSize, Min=10, Max=40, Callback=function(v) arrowSize=math.floor(v) end})
+    A:Slider({Name="Radius Factor %", Flag="KW_AR_RF", Default=math.floor(arrowRadiusFactor*100), Min=30, Max=49, Callback=function(v) arrowRadiusFactor=clamp(v/100,0.30,0.49) end})
 end
 
 ----------------------------------------------------------------
@@ -410,7 +515,7 @@ local aimSmoothing=0.18
 local aimFOV=150
 local aimTeamCheck=false
 local aimWallCheck=true
-local aimMaxDistance = 1000
+local aimMaxDistance = 1200
 local showTargetHUD = true
 
 local aimConn
@@ -432,12 +537,7 @@ if hasDrawing then
     targetHUD.Text=""
 end
 local function setFOVVisible(v) if fovCircle then fovCircle.Visible=v end end
-local function updateFOVCircle()
-    if not fovCircle then return end
-    local m=UIS:GetMouseLocation()
-    fovCircle.Position=Vector2.new(m.X,m.Y)
-    fovCircle.Radius=aimFOV
-end
+local function updateFOVCircle() if not fovCircle then return end local m=UIS:GetMouseLocation() fovCircle.Position=Vector2.new(m.X,m.Y) fovCircle.Radius=aimFOV end
 local function setTargetHUD(txt, pos)
     if not targetHUD then return end
     if showTargetHUD and txt then
@@ -457,8 +557,7 @@ local function clearLOSTo(part, targetChar)
     local rp = RaycastParams.new()
     rp.FilterType = Enum.RaycastFilterType.Blacklist
     rp.FilterDescendantsInstances = {LP.Character, targetChar}
-    local hit = Workspace:Raycast(origin, dir, rp)
-    return hit == nil
+    return Workspace:Raycast(origin, dir, rp) == nil
 end
 local function getClosestTarget(fovCap, distCap)
     local m=UIS:GetMouseLocation(); local closest,bestDist=nil,math.huge
@@ -494,16 +593,8 @@ local holding=false
 UIS.InputBegan:Connect(function(i,gpe) if gpe then return end if i.UserInputType==aimHoldKey then holding=true end if i.KeyCode==aimKey then aimEnabled=not aimEnabled setFOVVisible(aimEnabled) end end)
 UIS.InputEnded:Connect(function(i,gpe) if i.UserInputType==aimHoldKey then holding=false end end)
 local function stepAimbot()
-    if not aimEnabled then
-        updateFOVCircle()
-        setTargetHUD(nil)
-        return
-    end
-    if aimHoldToUse and not holding then
-        updateFOVCircle()
-        setTargetHUD(nil)
-        return
-    end
+    if not aimEnabled then updateFOVCircle() setTargetHUD(nil) return end
+    if aimHoldToUse and not holding then updateFOVCircle() setTargetHUD(nil) return end
     local t=getClosestTarget(aimFOV, aimMaxDistance)
     if t then
         aimAt(t)
@@ -525,7 +616,7 @@ do
     sec:Toggle({Name="Hold RMB",Flag="KW_AIM_HOLD",Default=false,Callback=function(v) aimHoldToUse=v end})
     sec:Toggle({Name="Team Check",Flag="KW_AIM_TEAM",Default=false,Callback=function(v) aimTeamCheck=v end})
     sec:Toggle({Name="Wall Check (LOS)",Flag="KW_AIM_WALL",Default=true,Callback=function(v) aimWallCheck=v end})
-    sec:Slider({Name="Max Distance (studs)",Flag="KW_AIM_MAXD",Default=aimMaxDistance,Min=200,Max=5000,Callback=function(v) aimMaxDistance=v end})
+    sec:Slider({Name="Max Distance (studs)",Flag="KW_AIM_MAXD",Default=aimMaxDistance,Min=200,Max=6000,Callback=function(v) aimMaxDistance=v end})
     sec:Toggle({Name="Target HUD (name + distance)",Flag="KW_AIM_HUD",Default=true,Callback=function(v) showTargetHUD=v if not v then setTargetHUD(nil) end end})
     sec:Dropdown({Name="Target Part",Flag="KW_AIM_PART",Content={"Head","HumanoidRootPart"},Default="Head",Callback=function(v) aimTargetPartName=v end})
     sec:Slider({Name="FOV",Flag="KW_AIM_FOV",Default=aimFOV,Min=40,Max=600,Callback=function(v) aimFOV=v end})
@@ -534,122 +625,15 @@ do
 end
 
 ----------------------------------------------------------------
--- Silent Aim (with its own FOV circle)
+-- Insta Reload (speed multiplier)
 ----------------------------------------------------------------
-local saEnabled = true
-local saFOV     = 120
-local saWall    = true
-local saMaxDist = 1000
-local saTargetPart = "Head"
-local saAssistFrames = 2
-local saAssistStrength = 1.0
-local saShowCircle = true
-local saCircleColor = Color3.fromRGB(255, 180, 120)
-
-local saCircle
-if hasDrawing then
-    saCircle = Drawing.new("Circle")
-    saCircle.Visible = false
-    saCircle.Filled = false
-    saCircle.Thickness = 1.5
-    saCircle.Transparency = 0.95
-    saCircle.Color = saCircleColor
-end
-
-local function updateSACircle()
-    if not saCircle then return end
-    if not (saEnabled and saShowCircle) then saCircle.Visible=false return end
-    local m=UIS:GetMouseLocation()
-    saCircle.Position=Vector2.new(m.X,m.Y)
-    saCircle.Radius=saFOV
-    saCircle.Color=saCircleColor
-    saCircle.Visible=true
-end
-
-local saSection = Combat:Section({Name="Silent Aim", Side="Right"})
-saSection:Toggle({Name="Enabled", Flag="KW_SA_EN", Default=saEnabled, Callback=function(v) saEnabled=v updateSACircle() end})
-saSection:Toggle({Name="Show SA FOV", Flag="KW_SA_SHOW", Default=saShowCircle, Callback=function(v) saShowCircle=v updateSACircle() end})
-saSection:Colorpicker({Name="SA FOV Color", Flag="KW_SA_COL", Default=saCircleColor, Callback=function(c) saCircleColor=c updateSACircle() end})
-saSection:Toggle({Name="Wall Check", Flag="KW_SA_WALL", Default=saWall, Callback=function(v) saWall=v end})
-saSection:Slider({Name="FOV", Flag="KW_SA_FOV", Default=saFOV, Min=30, Max=600, Callback=function(v) saFOV=v updateSACircle() end})
-saSection:Slider({Name="Max Distance", Flag="KW_SA_MAXD", Default=saMaxDist, Min=200, Max=5000, Callback=function(v) saMaxDist=v end})
-saSection:Dropdown({Name="Target Part", Flag="KW_SA_PART", Content={"Head","HumanoidRootPart"}, Default=saTargetPart, Callback=function(v) saTargetPart=v end})
-saSection:Slider({Name="Assist Frames", Flag="KW_SA_FRAMES", Default=saAssistFrames, Min=1, Max=3, Callback=function(v) saAssistFrames=math.floor(v) end})
-saSection:Slider({Name="Assist Strength%", Flag="KW_SA_STR", Default=math.floor(saAssistStrength*100), Min=25, Max=100, Callback=function(v) saAssistStrength=clamp(v/100,0.25,1) end})
-
-local function clearLOSToSilent(part, ch)
-    if not saWall then return true end
-    local origin = Camera.CFrame.Position
-    local dir = (part.Position - origin)
-    local rp = RaycastParams.new()
-    rp.FilterType = Enum.RaycastFilterType.Blacklist
-    rp.FilterDescendantsInstances = {LP.Character, ch}
-    local hit = Workspace:Raycast(origin, dir, rp)
-    return hit == nil
-end
-
-local function getClosestForSilent(fovCap, distCap)
-    local m=UIS:GetMouseLocation(); local closest,bestDist=nil,math.huge
-    local camPos = Camera.CFrame.Position
-    for _,plr in ipairs(Players:GetPlayers()) do
-        if plr~=LP and not sameTeam(plr) then
-            local ch=plr.Character
-            local hum=ch and ch:FindFirstChildOfClass("Humanoid")
-            if ch and hum and hum.Health>0 then
-                local part=ch:FindFirstChild(saTargetPart) or ch:FindFirstChild("HumanoidRootPart")
-                if part then
-                    local worldDist=(part.Position-camPos).Magnitude
-                    if worldDist <= distCap then
-                        local pos,on=Camera:WorldToViewportPoint(part.Position)
-                        if on and clearLOSToSilent(part, ch) then
-                            local d=(Vector2.new(pos.X,pos.Y)-Vector2.new(m.X,m.Y)).Magnitude
-                            if d<=fovCap and d<bestDist then
-                                closest,bestDist=part,d
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return closest
-end
-
-local snapping=false
-UIS.InputBegan:Connect(function(input, gpe)
-    if gpe or not saEnabled then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        if snapping then return end
-        local target = getClosestForSilent(saFOV, saMaxDist)
-        if target then
-            snapping = true
-            local oldCF = Camera.CFrame
-            local desired = CFrame.new(oldCF.Position, target.Position)
-            for _=1, saAssistFrames do
-                local blend = (saAssistStrength >= 1) and desired or oldCF:Lerp(desired, saAssistStrength)
-                Camera.CFrame = blend
-                RunService.RenderStepped:Wait()
-            end
-            Camera.CFrame = oldCF
-            snapping = false
-        end
-    end
-end)
-
-RunService.RenderStepped:Connect(function()
-    updateSACircle()
-end)
-
-----------------------------------------------------------------
--- Reload Speed (animation AdjustSpeed multiplier on reload tracks)
-----------------------------------------------------------------
-local rsEnabled = true
-local rsMultiplier = 3.0      -- 1.0 = normal, 3.0 = 3x faster reload
-local rsCooldownMs = 250      -- don’t spam AdjustSpeed too often
-local rsScanInterval = 0.06
-local rsConn
-local rsAccum = 0
-local lastRS = {} -- [track] = last adjusted os.clock()
+local irEnabled = true
+local irSpeed = 4.0        -- AdjustSpeed value applied to reload animations
+local irCooldownMs = 300   -- per track cooldown
+local irScanInterval = 0.06
+local irConn
+local irAccum = 0
+local lastTouched = {} -- [track] = os.clock()
 
 local function isReloadTrack(track)
     local n = (track.Name or ""):lower()
@@ -662,12 +646,12 @@ local function isReloadTrack(track)
     return false
 end
 
-local function reloadSpeedStep(dt)
-    rsAccum += dt
-    if rsAccum < rsScanInterval then return end
-    rsAccum = 0
-    if not rsEnabled then return end
+local function instaReloadStep(dt)
+    irAccum += dt
+    if irAccum < irScanInterval then return end
+    irAccum = 0
 
+    if not irEnabled then return end
     local ch = LP.Character
     if not ch then return end
     local hum = ch:FindFirstChildOfClass("Humanoid")
@@ -678,33 +662,35 @@ local function reloadSpeedStep(dt)
     for _,track in ipairs(animator:GetPlayingAnimationTracks()) do
         if isReloadTrack(track) then
             local now = os.clock()
-            if not lastRS[track] or (now - lastRS[track]) * 1000 >= rsCooldownMs then
-                lastRS[track] = now
+            if lastTouched[track] and (now - lastTouched[track]) * 1000 < irCooldownMs then
+                -- cooling down
+            else
+                lastTouched[track] = now
                 pcall(function()
-                    track:AdjustSpeed(clamp(rsMultiplier, 1.0, 12.0))
+                    track:AdjustSpeed(clamp(irSpeed, 1, 20))
                 end)
             end
         end
     end
 end
 
-local function enableReloadSpeed()
-    if rsConn then rsConn:Disconnect() end
-    rsEnabled = true
-    rsAccum = 0
-    rsConn = RunService.Heartbeat:Connect(reloadSpeedStep)
+local function enableInstaReload()
+    if irConn then irConn:Disconnect() end
+    irEnabled = true
+    irAccum = 0
+    irConn = RunService.Heartbeat:Connect(instaReloadStep)
 end
-local function disableReloadSpeed()
-    rsEnabled = false
-    if rsConn then rsConn:Disconnect() rsConn=nil end
+local function disableInstaReload()
+    irEnabled = false
+    if irConn then irConn:Disconnect() irConn=nil end
 end
 
 do
-    local RS = Combat:Section({Name="Reload Speed", Side="Right"})
-    RS:Toggle({Name="Enabled", Flag="KW_RS_EN", Default=true, Callback=function(v) if v then enableReloadSpeed() else disableReloadSpeed() end end})
-    RS:Slider({Name="Multiplier (x)", Flag="KW_RS_MULT", Default=math.floor(rsMultiplier*10), Min=10, Max=120, Callback=function(v) rsMultiplier = clamp(v/10,1.0,12.0) end})
-    RS:Slider({Name="Per-Adjust Cooldown (ms)", Flag="KW_RS_CD", Default=rsCooldownMs, Min=100, Max=800, Callback=function(v) rsCooldownMs = math.floor(v) end})
-    RS:Slider({Name="Scan Interval (ms)", Flag="KW_RS_IV", Default=math.floor(rsScanInterval*1000), Min=30, Max=150, Callback=function(v) rsScanInterval = clamp(v/1000, 0.03, 0.15) end})
+    local IR = Combat:Section({Name="Insta Reload (Speed)", Side="Right"})
+    IR:Toggle({Name="Enabled", Flag="KW_IR_EN", Default=true, Callback=function(v) if v then enableInstaReload() else disableInstaReload() end end})
+    IR:Slider({Name="Reload Speed ×", Flag="KW_IR_SPD", Default=irSpeed, Min=1, Max=20, Callback=function(v) irSpeed = v end})
+    IR:Slider({Name="Per-Reload Cooldown (ms)", Flag="KW_IR_CD", Default=irCooldownMs, Min=100, Max=1000, Callback=function(v) irCooldownMs = math.floor(v) end})
+    IR:Slider({Name="Scan Interval (ms)", Flag="KW_IR_IV", Default=math.floor(irScanInterval*1000), Min=30, Max=150, Callback=function(v) irScanInterval = clamp(v/1000, 0.03, 0.15) end})
 end
 
 ----------------------------------------------------------------
@@ -734,117 +720,13 @@ do
 end
 
 ----------------------------------------------------------------
--- Gun Chams (Tools + Arms/Viewmodel)
-----------------------------------------------------------------
-local gunChamsEnabled=false
-local gunChamsMaterial="Neon"
-local gunChamsColor=Color3.fromRGB(255,105,180)
-local gunChamsTransparency=0.25
-local gunChamsIncludeArms=true
-
-local gunChamsState = {}   -- [BasePart] = {Material, Color, Transparency}
-local gunChamConns = {}
-local matEnum = { Neon = Enum.Material.Neon, ForceField = Enum.Material.ForceField, Plastic = Enum.Material.Plastic }
-
-local function savePartState(p)
-    if gunChamsState[p] then return end
-    gunChamsState[p] = { Material = p.Material, Color = p.Color, Transparency = p.Transparency }
-end
-local function restorePartState(p)
-    local st = gunChamsState[p]
-    if not st then return end
-    pcall(function() p.Material = st.Material p.Color = st.Color p.Transparency = st.Transparency end)
-    gunChamsState[p] = nil
-end
-local function applyChamToPart(p)
-    if not p:IsA("BasePart") then return end
-    savePartState(p)
-    pcall(function()
-        p.Material = matEnum[gunChamsMaterial] or Enum.Material.Neon
-        p.Color = gunChamsColor
-        p.Transparency = clamp(gunChamsTransparency,0,1)
-        p.Reflectance = 0
-    end)
-end
-local function applyChamToContainer(container)
-    if not container then return end
-    for _,d in ipairs(container:GetDescendants()) do
-        if d:IsA("BasePart") then applyChamToPart(d) end
-    end
-end
-local function restoreContainer(container)
-    if not container then return end
-    for _,d in ipairs(container:GetDescendants()) do
-        if d:IsA("BasePart") then restorePartState(d) end
-    end
-end
-local function hookTool(tool)
-    table.insert(gunChamConns, tool.AncestryChanged:Connect(function(_, parent)
-        if not gunChamsEnabled then return end
-        if tool:IsDescendantOf(LP.Character) then applyChamToContainer(tool) else restoreContainer(tool) end
-    end))
-    if tool:IsDescendantOf(LP.Character) then applyChamToContainer(tool) end
-end
-local gunChamLoop
-local function sweepGunChams()
-    if not gunChamsEnabled then return end
-    local ch = LP.Character
-    if ch then
-        for _,child in ipairs(ch:GetChildren()) do
-            if child:IsA("Tool") or child:IsA("Model") then applyChamToContainer(child) end
-        end
-    end
-    if gunChamsIncludeArms then
-        for _,camChild in ipairs(Camera:GetChildren()) do
-            if camChild:IsA("Model") or camChild:IsA("Folder") then applyChamToContainer(camChild)
-            elseif camChild:IsA("BasePart") then applyChamToPart(camChild) end
-        end
-    end
-end
-local function unhookGunChams() for _,c in ipairs(gunChamConns) do if c then c:Disconnect() end end gunChamConns = {} end
-local function enableGunChams()
-    if gunChamsEnabled then return end
-    gunChamsEnabled = true
-    local ch = LP.Character
-    if ch then for _,child in ipairs(ch:GetChildren()) do if child:IsA("Tool") or child:IsA("Model") then hookTool(child) end end end
-    table.insert(gunChamConns, LP.CharacterAdded:Connect(function(newCh)
-        task.wait(0.1)
-        for _,child in ipairs(newCh:GetChildren()) do if child:IsA("Tool") or child:IsA("Model") then hookTool(child) end end
-    end))
-    table.insert(gunChamConns, LP.Character.ChildAdded:Connect(function(obj) if obj:IsA("Tool") or obj:IsA("Model") then hookTool(obj) end end))
-    if gunChamLoop then gunChamLoop:Disconnect() end
-    gunChamLoop = RunService.RenderStepped:Connect(sweepGunChams)
-end
-local function disableGunChams()
-    gunChamsEnabled = false
-    if gunChamLoop then gunChamLoop:Disconnect() gunChamLoop=nil end
-    unhookGunChams()
-    for part,_ in pairs(gunChamsState) do restorePartState(part) end
-end
-
-do
-    local G = Visual:Section({Name="Gun Chams", Side="Right"})
-    G:Toggle({Name="Enabled", Flag="KW_GC_EN", Default=false, Callback=function(v) if v then enableGunChams() else disableGunChams() end end})
-    G:Dropdown({Name="Material", Flag="KW_GC_MAT", Content={"Neon","ForceField","Plastic"}, Default="Neon", Callback=function(v) gunChamsMaterial=v end})
-    G:Colorpicker({Name="Color", Flag="KW_GC_COL", Default=gunChamsColor, Callback=function(c) gunChamsColor=c end})
-    G:Slider({Name="Transparency", Flag="KW_GC_TR", Default=math.floor(gunChamsTransparency*100), Min=0, Max=100, Callback=function(v) gunChamsTransparency = clamp(v/100,0,1) end})
-    G:Toggle({Name="Include Camera Arms/Viewmodel", Flag="KW_GC_ARMS", Default=true, Callback=function(v) gunChamsIncludeArms=v end})
-end
-
-----------------------------------------------------------------
 -- Settings / Hotkeys / Lifecycle
 ----------------------------------------------------------------
 local S = Settings:Section({Name="KittenWare"})
 S:Keybind({Name="Toggle UI", Flag="KW_UI", Default=Enum.KeyCode.RightShift, Callback=function(_, newKey) if not newKey then GUI:Close() end end})
 S:Button({Name="Unload", Callback=function()
-    disableGunChams()
-    disableAimbot()
-    disableESP()
-    disableNR()
-    disableFullbright()
-    disableReloadSpeed()
-    GUI:Unload()
-    getgenv().KittenWareLoaded=nil
+    disableAimbot(); disableESP(); disableNR(); disableFullbright(); disableInstaReload()
+    GUI:Unload(); getgenv().KittenWareLoaded=nil
 end})
 
 UIS.InputBegan:Connect(function(i,gpe)
@@ -854,11 +736,11 @@ UIS.InputBegan:Connect(function(i,gpe)
 end)
 
 game:BindToClose(function()
-    disableGunChams(); disableAimbot(); disableESP(); disableNR(); disableFullbright(); disableReloadSpeed()
+    disableAimbot(); disableESP(); disableNR(); disableFullbright(); disableInstaReload()
 end)
 
 -- start systems
-enableReloadSpeed()
+enableInstaReload()
 
 getgenv().KittenWareLoaded = true
 getgenv().KittenWareLoading = nil
