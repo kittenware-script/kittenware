@@ -1,10 +1,10 @@
 --[[
   KittenWare • 2025
-  No Recoil + Aimbot (Wall Check + Distance + HUD)
+  No Recoil + Aimbot (Wall Check + Distance + HUD + Passive Check)
   Fullbright/FOV + Insta Reload (speed)
-  ESP++ (Skeleton / Corner Boxes / Filled Boxes / Tracers / Names / Health / Distance / Item ESP / Off-Screen Arrows)
+  ESP++ (Skeleton / Corner Boxes / Filled Boxes / Tracers / Names / Health / Distance / Item ESP / Off-Screen Arrows / Passive Tag)
 
-  Menu layout has been reorganized for clarity.
+  Menu layout is organized by sections.
 ]]
 
 if getgenv().KittenWareLoaded or getgenv().KittenWareLoading then return end
@@ -36,7 +36,7 @@ local Main     = GUI:Load()
 local Combat   = Main:Tab("Combat")
 local Visual   = Main:Tab("Visual")
 local Utility  = Main:Tab("World")
-local Settings = Main:Tab("Settings")
+local Settings = Main:Tab("Settins")
 
 ----------------------------------------------------------------
 -- No Recoil
@@ -97,6 +97,12 @@ local arrowsUseTeamColors = true
 local arrowFadeWithDistance = true
 local arrowBaseColor = Color3.fromRGB(255,255,255)
 
+-- Passive check (ForceField)
+local passiveESPEnabled = true
+local passiveAimbotIgnore = true
+local passiveTagColor = Color3.fromRGB(150, 210, 255)
+local passiveTagText = " (P)"
+
 -- Store draw objects
 local playerDraw, espSignals = {}, {}
 local playersSignal, playerAddedConn
@@ -106,6 +112,23 @@ local function sameTeam(plr)
     if not espTeamCheck then return false end
     if LP.Team and plr.Team then return plr.Team==LP.Team end
     if LP.TeamColor and plr.TeamColor then return plr.TeamColor==LP.TeamColor end
+    return false
+end
+
+local function characterIsPassive(ch)
+    if not ch then return false end
+    if ch:FindFirstChildOfClass("ForceField") then return true end
+    for _,bp in ipairs(ch:GetDescendants()) do
+        if bp:IsA("BasePart") and bp.Material == Enum.Material.ForceField then
+            return true
+        end
+    end
+    -- some games flag a passive attr on humanoid/character
+    local hum = ch:FindFirstChildOfClass("Humanoid")
+    if hum and (hum:GetAttribute("Passive") == true or hum:GetAttribute("Invulnerable")==true) then
+        return true
+    end
+    if ch:GetAttribute("Passive")==true then return true end
     return false
 end
 
@@ -300,8 +323,11 @@ local function updateOne(plr)
     local vis = isVisibleLOS(P.hrp, ch) or (P.torso and isVisibleLOS(P.torso, ch))
     if onlyVisible and not vis then local b=playerDraw[plr]; if b then hideBundle(b) end return end
 
-    local col = vis and visibleColor or occludedColor
-    if useTeamColors and plr.TeamColor then col = plr.TeamColor.Color end
+    local passive = passiveESPEnabled and characterIsPassive(ch) or false
+
+    local baseCol = vis and visibleColor or occludedColor
+    if useTeamColors and plr.TeamColor then baseCol = plr.TeamColor.Color end
+    local col = baseCol
     local th, al = dynamicThickness(dist)
 
     local b=ensureBundle(plr)
@@ -380,11 +406,17 @@ local function updateOne(plr)
         b.hpBar.Visible=false
     end
 
-    -- Name / Distance
+    -- Name / Distance / Passive tag / Item
     local nameY = math.max(0, minY - 14)
     if showNames and onScr then
-        b.nameText.Text = plr.Name
-        b.nameText.Color = col
+        local baseName = plr.Name
+        if passive and passiveESPEnabled then
+            baseName = baseName .. passiveTagText
+            b.nameText.Color = passiveTagColor
+        else
+            b.nameText.Color = col
+        end
+        b.nameText.Text = baseName
         b.nameText.Position = Vector2.new((minX+maxX)/2, nameY)
         b.nameText.Size = nameSize
         b.nameText.Visible = true
@@ -398,7 +430,6 @@ local function updateOne(plr)
         b.distText.Visible = true
     else b.distText.Visible=false end
 
-    -- Item ESP
     if itemESPEnabled and onScr then
         local toolName = getEquippedToolName(ch)
         if toolName or itemESPShowWhenNoTool then
@@ -427,7 +458,12 @@ local function updateOne(plr)
 
     -- Off-screen arrows
     if arrowsEnabled and not onScr then
-        local arrowCol = arrowsUseTeamColors and (plr.TeamColor and plr.TeamColor.Color or col) or arrowBaseColor
+        local arrowCol
+        if passive and passiveESPEnabled then
+            arrowCol = passiveTagColor
+        else
+            arrowCol = arrowsUseTeamColors and (plr.TeamColor and plr.TeamColor.Color or col) or arrowBaseColor
+        end
         drawArrow(b.arrow, P.hrp.Position, arrowCol, dist)
     else
         b.arrow.Visible = false
@@ -505,8 +541,15 @@ do
     A:Slider({Name="Radius Factor %", Flag="KW_AR_RF", Default=math.floor(arrowRadiusFactor*100), Min=30, Max=49, Callback=function(v) arrowRadiusFactor=clamp(v/100,0.30,0.49) end})
 end
 
+-- Passive Check UI
+do
+    local P = Visual:Section({Name="Passive Check (ForceField)", Side="Left"})
+    P:Toggle({Name="Show (P) on Passive", Flag="KW_PASSIVE_ESP", Default=passiveESPEnabled, Callback=function(v) passiveESPEnabled=v end})
+    P:Colorpicker({Name="Passive Tag Color", Flag="KW_PASSIVE_COL", Default=passiveTagColor, Callback=function(c) passiveTagColor=c end})
+end
+
 ----------------------------------------------------------------
--- Aimbot (Wall Check + Distance + HUD)
+-- Aimbot (Wall Check + Distance + HUD + Passive Check)
 ----------------------------------------------------------------
 local aimEnabled=false
 local aimHoldToUse=false
@@ -571,16 +614,20 @@ local function getClosestTarget(fovCap, distCap)
     local camPos = Camera.CFrame.Position
     for _,plr in ipairs(Players:GetPlayers()) do
         if plr~=LP and plr.Character and not sameTeamAim(plr) then
-            local hum=plr.Character:FindFirstChildOfClass("Humanoid") if hum and hum.Health>0 then
-                local part=plr.Character:FindFirstChild(aimTargetPartName) or plr.Character:FindFirstChild("HumanoidRootPart")
-                if part then
-                    local worldDist = (part.Position - camPos).Magnitude
-                    if worldDist <= distCap then
-                        local pos,on=screenPoint(part)
-                        if on and clearLOSTo(part, plr.Character) then
-                            local d=(pos-Vector2.new(m.X,m.Y)).Magnitude
-                            if d<=fovCap and d<bestDist then
-                                closest,bestDist=part,d
+            local ch = plr.Character
+            -- Passive ignore
+            if not (passiveAimbotIgnore and characterIsPassive(ch)) then
+                local hum=ch:FindFirstChildOfClass("Humanoid") if hum and hum.Health>0 then
+                    local part=ch:FindFirstChild(aimTargetPartName) or ch:FindFirstChild("HumanoidRootPart")
+                    if part then
+                        local worldDist = (part.Position - camPos).Magnitude
+                        if worldDist <= distCap then
+                            local pos,on=screenPoint(part)
+                            if on and clearLOSTo(part, ch) then
+                                local d=(pos-Vector2.new(m.X,m.Y)).Magnitude
+                                if d<=fovCap and d<bestDist then
+                                    closest,bestDist=part,d
+                                end
                             end
                         end
                     end
@@ -609,6 +656,8 @@ local function stepAimbot()
         local plr = ch and Players:GetPlayerFromCharacter(ch)
         local who = plr and plr.Name or "Target"
         local dist = (t.Position - Camera.CFrame.Position).Magnitude
+        local isP = ch and characterIsPassive(ch)
+        if isP then who = who .. " (P)" end
         setTargetHUD(string.format("%s  •  %.0fs", who, dist), Vector2.new(Camera.ViewportSize.X/2, 40))
     else
         setTargetHUD(nil)
@@ -627,6 +676,7 @@ do
     local R=Combat:Section({Name="Aimbot • Filters & Feel",Side="Right"})
     R:Toggle({Name="Team Check",Flag="KW_AIM_TEAM",Default=false,Callback=function(v) aimTeamCheck=v end})
     R:Toggle({Name="Wall Check (LOS)",Flag="KW_AIM_WALL",Default=true,Callback=function(v) aimWallCheck=v end})
+    R:Toggle({Name="Ignore Passive (ForceField)",Flag="KW_AIM_PASSIVE",Default=true,Callback=function(v) passiveAimbotIgnore=v end})
     R:Slider({Name="Max Distance (studs)",Flag="KW_AIM_MAXD",Default=aimMaxDistance,Min=200,Max=6000,Callback=function(v) aimMaxDistance=v end})
     R:Dropdown({Name="Target Part",Flag="KW_AIM_PART",Content={"Head","HumanoidRootPart"},Default="Head",Callback=function(v) aimTargetPartName=v end})
     R:Slider({Name="FOV",Flag="KW_AIM_FOV",Default=aimFOV,Min=40,Max=600,Callback=function(v) aimFOV=v end})
