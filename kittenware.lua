@@ -1,1 +1,1528 @@
-([[This file was protected with MoonSec V3]]):gsub('.+', (function(a) __BRfnkRaDdxA = a; end)); return(function(a,...)local r;local o;local f;local t;local h;local l;local e=24915;local n=0;local d={};while n<299 do n=n+1;while n<0x160 and e%0x2d94<0x16ca do n=n+1 e=(e-677)%31488 local z=n+e if(e%0x1d4e)>0xea7 then e=(e+0x12)%0x6c7f while n<0x3ac and e%0x43f0<0x21f8 do n=n+1 e=(e*753)%17758 local l=n+e if(e%0x4ae0)<=0x2570 then e=(e*0x9e)%0x19a5 local e=31585 if not d[e]then d[e]=0x1 end elseif e%2~=0 then e=(e-0x192)%0xadf1 local e=90362 if not d[e]then d[e]=0x1 t=(not t)and _ENV or t;end else e=(e+0x10d)%0x9da9 n=n+1 local e=58532 if not d[e]then d[e]=0x1 h=tonumber;end end end elseif e%2~=0 then e=(e+0x338)%0x3237 while n<0x2c0 and e%0x1206<0x903 do n=n+1 e=(e-548)%15007 local z=n+e if(e%0x1f4c)<=0xfa6 then e=(e-0x261)%0xab58 local e=32844 if not d[e]then d[e]=0x1 end elseif e%2~=0 then e=(e*0x18f)%0x402e local e=41322 if not d[e]then d[e]=0x1 l=function(l)local e=0x01 local function d(n)e=e+n return l:sub(e-n,e-0x01)end while true do local n=d(0x01)if(n=="\5")then break end local e=o.byte(d(0x01))local e=d(e)if n=="\2"then e=r.DkTXkHST(e)elseif n=="\3"then e=e~="\0"elseif n=="\6"then t[e]=function(n,e)return a(8,nil,a,e,n)end elseif n=="\4"then e=t[e]elseif n=="\0"then e=t[e][d(o.byte(d(0x01)))];end local n=d(0x08)r[n]=e end end end else e=(e+0x265)%0x94e9 n=n+1 local e=4943 if not d[e]then d[e]=0x1 f="\4\8\116\111\110\117\109\98\101\114\68\107\84\88\107\72\83\84\0\6\115\116\114\105\110\103\4\99\104\97\114\102\117\108\95\110\120\83\81\0\6\115\116\114\105\110\103\3\115\117\98\115\97\119\97\116\105\67\75\0\6\115\116\114\105\110\103\4\98\121\116\101\83\117\120\111\108\102\111\85\0\5\116\97\98\108\101\6\99\111\110\99\97\116\122\87\84\112\122\85\66\83\0\5\116\97\98\108\101\6\105\110\115\101\114\116\115\112\89\79\104\89\103\114\5";end end end else e=(e*0x2af)%0x4991 n=n+1 while n<0x3a0 and e%0x2b96<0x15cb do n=n+1 e=(e*157)%20543 local l=n+e if(e%0x365a)>=0x1b2d then e=(e-0x1af)%0xa0f1 local e=36051 if not d[e]then d[e]=0x1 t=getfenv and getfenv();end elseif e%2~=0 then e=(e*0x369)%0x3331 local e=35270 if not d[e]then d[e]=0x1 r={};end else e=(e-0x13c)%0xa89e n=n+1 local e=70031 if not d[e]then d[e]=0x1 o=string;end end end end end e=(e-195)%40561 end l(f);local e={};for n=0x0,0xff do local d=r.ful_nxSQ(n);e[n]=d;e[d]=n;end local function z(n)return e[n];end local o=(function(f,a)local o,d=0x01,0x10 local n={{},{},{}}local t=-0x01 local e=0x01 local l=f while true do n[0x03][r.sawatiCK(a,e,(function()e=o+e return e-0x01 end)())]=(function()t=t+0x01 return t end)()if t==(0x0f)then t=""d=0x000 break end end local t=#a while e<t+0x01 do n[0x02][d]=r.sawatiCK(a,e,(function()e=o+e return e-0x01 end)())d=d+0x01 if d%0x02==0x00 then d=0x00 r.spYOhYgr(n[0x01],(z((((n[0x03][n[0x02][0x00]]or 0x00)*0x10)+(n[0x03][n[0x02][0x01]]or 0x00)+l)%0x100)));l=f+l;end end return r.zWTpzUBS(n[0x01])end);l(o(26,"*> GON%15l;8eCR:R8"));l(o(41,"p^_qfGwd;ZK=otEUtd=fU;tTKGdqfU^UZqoK=_;^G=q_E_tUZKwwfZqI^^dEGwZ;w_qd^ZUk=q;GwUGb^KTf=odE^fEUq^}Kt;=fZ^fqqEUdoto_wEwdfwKo;ZotKGdKf;_fUfwZK;dqGt_qUU=I=^wUf&qtUwoZ=o_w,^f^3oUwo^qGdqf_^K>ftqZ5GKq=_=0dtE=Zd^UwtG^qtoo_Z_w^fd?=UG=ZZ^d_f__otqKwZEw;qq_t,fdlfKdbGw_=^qEG=UGdGo^=^ZtKK;wUGK_d=d;Et;ZZd;GKqfUwEq;GGEqq_PEtddftGoqEqKUdEUoEZdd/^E=wZ^tfKw;^GZ_EUot;K;;Zfw#d&GEf=ddofwtQKoU_=w;EwUqU=dUtotKwwEfd_wEZtq;qGtwd_=E=EZfE_dwtqt^wtE=dZwwUf;I^oKKt;EGEGG=EZwt;=^dUG=q;gdtoZFwKGZq^Y;o_Gdqrdfqt^=E=o)K;dqGs_^&;=dKqGKf-oqZEtEKZZqGEt_MKEdo^Z;d__qU_owo=ZUw^_tIKZf"));local e=(-4682+(function()local d,e=0,1;(function(n,e)e(e(e,e),e(e,n and e))end)(function(n,t)if d>105 then return t end d=d+1 e=(e*946)%38933 if(e%1934)<967 then e=(e+150)%49649 return n(n(n and t,t),t(n,n))else return t end return n end,function(n,t)if d>293 then return n end d=d+1 e=(e*861)%48632 if(e%1994)<=997 then return n(n(n,n),t(t,t))else return n end return n end)return e;end)())local ae=(getfenv)or(function()return _ENV end);local z=r.moQCOYRr or r.WjCFyfOv;local g=1;local t=2;local l=3;local f=4;local function de(b,...)local s=o(e,"O+t5daR3zqC<&W%!Wtztd5rd&Rz<d3Jz&q!CC%RW5q!CaB+3W+qta5Rdd+!3WL3Wd<6Wa&tRWWq%a!R3dR+R<Rzqa3+&W2z<d%C<3at&%WC%W<q!at+R%RCzR3+!%aq!!C<%3<5&!W5t!z<pRR&az5dd,a&Rz3dzYq&Cz&aqVW&%z!C!3v+d%a<Cz5d+%q<qaW5%+5qWtuW%q!Rxt+%tC5RdRa%3CWRztq%C+%%Nq!a3+WW35t+q<53d5adC+!%+C&+Ct+%aCqR5W!!3Ct3a%5!d<33a5<%WC&3%5X!_RWza5zld<q5tt{r5&dzdtC!W<&5C5+&!a%tRW!CcR+zzaz+t&zqCar+3W3t<GdC&RWt%5&+!%DC0dR+qWzqadCt&%<C5Rqt5!PzRRztd%aC33+{a!q<C3q&qz!dCo<&&U#<53<5a!d&R+d!IqaaR+355%d&5z!arxt&&3Rd++5&3zEUd_qWaq%aR+aWqz&aG&WWdqkaq+WW3q3!a<q3R53!z5#W<CWRC<%zt5!Lh&+%%<tRatqz3d<cz&qzC<tRW5C!5at+fW+qtaR+dWaqRaz+!WqqCa<Rda++t&!R3dR+RRdtz%aCRR3z!dC+3W0tW5dC%R!5:aqtR%3CdRz!ICRR3R<+<!tRCRdt3!5Cz3Rtd!z<3RC5z%C<3335%!,<Cz+!&!t<!3%>+!%<3dt5!!%&Rzzd&-2z<qRd5>N&za;adpz&Cqz+a{!&WzCd%+%q<qCd!+zW%R8aW+RCtC+R<+z3z5q!C<<z55W!%<!qtR&Ht&5zdd3,R&3zzRqtB&<z&dW1%&!q+a+td%Cqda3+RWCqzaq+CW<<daWt+W!C+R+tt%5CdR3tR%3CzR&tC%<C&RW5C%!<u3+5t!5<d3a5R+_<z3q5C!&<&3W5%!!&Cz+dt_5&azCdR43&zW!C<33d+!td!+aW:q+at3&dd!R<!zqd<qCa!+<W&qW&%ztd+LW&%td!dCaRRt355+tW%q!a++<&aq1Rt+R<dCaaW+qWWq&!q&33C5<!&_5%3CWRd-3%<<a335q&qC!3+5a%%d&;!&Wz%d!aqddW5ad+WWaqRa3aCdz7q&33t5%ICWdza%tCRR5td%a!d&zqad%C&R&tW!&C%R!5xatt3%3q&tttq%&q<a&+!%%C!R555%<d+b+&tz5da}a&Rz3dq+3&Cz<d&ad55 5qd3Rda!R<qz55C!z&RzWdWq<a&+WW%CdR-t+%tC5R3ta%RC3Rztq%CC<z&dG%%C!3A5+!t<d3d5aP&<33z5q!<<<3&5W!%&tzJd+:t&5zddacR&3q&dqEC&<zWdW;%&!q/qd+tW5qdR3atW3qzaq+&W<q&aW+%!dCyRttt%5CdRatR%3<tRqt<%<CWRWt%%!<9zW5t!5<d3a5R!q<z3Wd!!<<&3W3&!!&+z+Rt+<&dzCdRK<&zz%dC+Wb5zWaay!Wdq+at+5WdW<aR+&WzCAaC+WW&C5<d+!%aC+zHt5%aCaRRt3%&&WRCt<%&&<R%5{!xW+zC55!C<a3<53!W<qz&3t!&&a3%dqED&+ztd5dC&az&d3+j&qz&d<+t+%z%aa+2%+qtad+dWRqRa<5&WqqCa<t&WWq!a!tdTaCtR5tdY5CRRztzpq&tR<55%W<dR!5R!+&dCC5d!%<R3%5z!q<C3<zt!W&a3!dq7+&dz5dCa<&Rz%dzta&Cz&d&*W&%q53d++Wtq53,+aW3q33z5<WCCta&t5W%CERbd3%<C5R<ta!!C3Rqtq!5C<3Da+%%C!3xdC!t<d3d5a#R<33!5q!C<<3&5W!%&azkdz;t&dzddafR&3zqdq++&<z%dWu%&!qd3a+tW5qd35+RWzqzaqtYW<C5aW+!W!CoR+tt%dCdR&tR%qCzRqtC!WC&RW5d%!<53+5t!5<C<q5R!%<z3q5C!&<&3%5%!!W+z+dtU5&zzadRf3&z<+dC++&&z!d%+RW6q3R&+5WCqa3<+3Wqqqa<+<%i&+a%+!%c&RRttd%dCqzCt3%zCqC3t<%WCWz>t!!i<q3t5a!d<a3R53tR<qz55<U5<W3%5!=T.!ztd<Td&3zRa+2z&WC%d<T&&W&qd!++W+<t3a+d%tqRR5+z%+qCz+a3WWC<a!a<%+C5R5t%%aCCz<tz%qCCCRt&%%C%z!dz!+<!35dn!a<&33dC5F<CzC5&Jd<%3!di2+szz5a+{aWaz3dCUqWI%+d&+C&%&zaJ+tWtq5ad+q!Cq3az+q+5q<aW+W!%&+Rmt%%tC!RdtR%R&WC5tq!3C<C+tW%!C!3q5+!RW33d5a!R%&3z5C!C<!CJ5W!%<!<Rd+/5&5zdaaARWdzzdqwC&<z&dW+d&!qWa++5W5qdaa+RWzqzRR+CWWq&aW+%%5&dR+tt%5W!Rat3%3CzR!tC!zC&R%t%%!<u3+55!5&+3a5z!3<z3qdsb5<&za5%tz&Qztdtea&dzqRC,3&zzq35f<&WzWd%d&Wiqdat+5WdqaaR+W%-qqaC+<%+qWa!+!%tC+RRd3%dCaRRt&%zCCRCt<!tCWR%t!!8<+3t55!d<R3R53!z<<3C5<!&<Wzz5!J2&+z5d5Fd&azRat4z&qzCd&++&Wz%d!zP5d!5<!zPWRq%a3+zWq%5&qz!a+!!&Wz5dRC5Rqtd%aCR&%zWaW+t%.qa%%<&R!5G!+!zW&Ctaq!&%{CCR&t%<%CdRRtC%5d++R&tz5ddd<t!!aC&d!55!W<!z+++!3<q3W5R%t<Cazdt!z&<z&W<CRa&+WW%%<&!zdd5L!<dq+d3tX&Wq<%<<ER&tW%%t5W+q5a%+z3a5%!R<33zzqRR+&!aCt3weR!aCCe5&<zddafRtW!W<3RW5!!a<&3&W qRa++tW5)z&%zR5&P3<!+<%+q&aW+%dz(%Wdz3aa+zRRtR%3CzR&tC%<C&R%5z%!<(3+3qaztz&zq<Rqt%%tqWRr<Wzd5%!!&J&d<+3atq&&<<3c&qzWdCA<&&!dC!3&5aq+at+5Wdq<aR+3WzC<3W+<W&qWR++!%wC+zt5J%dCaRRt3%zCCRC5W!!CW31t!!t<+3t55!d&&3R53!z<<3C5W!&<Wqa5!{I&+ztd57d&azRaRnz&qzCd&N&&Wz%d!d<W+qta5+dt+qRa3+zWqqCa<+&%!<qa!t+%+C&R5td%a<z3qtz%<CCR%t&%WC%R!5C!+<5355R!a<z33a%!<<C3&5&9d<%zIdgfC&tz3RzEa&Rz3d!;q&<z<a45+&%z!aYtzWtqdadt3WRq3aq+qW<q<a&+W!;q!R}t5%tCRRdta%RC3qwtq%<C<R%tW!YC!3R5q!t<d3ddt!R<z3z5C!C<!C?5W!%<!zWd+o5&5zzRqlR&3zzRh=C&&z&a!:%&!q5a++&W5qdaa+RI3qzaW+CWWq&aW+%W!CzR+ta%5CRRatz%3&%3ztC%%C&zdt%!V<6355t!3Wz3a5R!3&!3q5<!<&%3W5%gt&mzzdtI5&dCaRzl3&<zqdWQ<W3zWd%5WWbqaat+5WdqaaR+3,Rqqa!+<W%qWa%+!%#<aRttR%dCCRRtz%zCq<Ct<%WCWR!t!!B<+zd55!d<33R5z!z<q3Cd+dm<Wz+5!Eh&+z5d5_a&azRaz1z&qzCd&Z&&Wz%d!+&W+qda5+RWaq3a3+%tCqCa&+&!&q%R-t0%tCtR3dz%aCRR3d3%qC<R<5H++C%R!5_+a<t3d5dY3<R335C!q&+3<5&!WW%C+ds=5&tzadd+j&Rz33RQq&Wz<d&{W&%z!a{5!Wtq3ad+RWRq3az+q%%q<a%+W%tq!R+t+%t<qRdt3%RC3Rztq%C&<z%tW!>C!3t5+!z<53Cz<!R<q3z3t!C<&3&5W!%&5Cdd+st&5<Wda_3&3CzR+6C&%z&d!K%WdqGR5dqW5qqaa+%W3qzaq+Ct+q&RN+%%dCAR5tt%q!CRatq%3WRRqt<%<C&RW5t+5<)3+5tt+<d3R5R!<W&3q5C!<%W3W5!!!%8qqdt)R&dz3dR6<&zq<z+0<W+zWaRD!W8q+ataqWdqzaR+&Wzq<aCt+tWqWR++!+dC+R5t5%aCaRCd<%zCqRCa!%&C%R%55+d<+3t55tW<a3353HC<q3C5!!&&d3%5!gY%+Cdd5Bz&azCd3+5&qzC3qu&Wtz%d!+0W+qta5dtWaq&a3+<WqqCa<+&!+q%R5tu%3CtRdtd%aC3R3tz%qC&R<t&%WC%3q5G!+<t3d5d!a<R333d!q<C3<5&E<<%3!d)nt&tz5dd+3%tz3dzXqWRz<d&pW%_CdaY++WtqCad+aWR<WR!+qWCq<Rt+WW!q!RCt+%R&3Rdta%RCWRztC%CC!qetW%%C!335+!5<53d5!!R<33z5C!C<<3&d!!%<!z6d++5&5zddatRxazzdqKC&<z&aYS%%+C3a++dW5qRaa+RW3qz3++CW<q&a!+%%+CyR3RR%5CaRatz%3CqRqt<%<C&3%t%%!<S3+5t!5<d3<3C!3<C3q5<!<<W3W5!!!&}qtdt*5&dzRdRH3&zzqzW8<&!zWaoH!W2q+at+dWdqzaR+zWzq<aCt+%tqWR++!!dC+R5t5%aCaRCd<%zCqRC5!%&C%R%55+d<+3t55t!<a3353,C<q3C5%!&<%3%5!Hl&5zWd5bz&azRd3?z&qzC35K&W(z%a++_Waqtaq+WWaqqa35tWqq<a<+WWWCtz5tM%+Ct3Wtd%RCRR<d&%qCCR<R5%WC!R!dt!+<t3z5d!C<R335z!q%C3<dt!W&t3!d}_+&tzadd_C&Rzqdzf<&C<+aCkWW5z!z3++W5q5aW+aWC<<az+qWCWta&+%W%q!<5t+%3C5Rzta%RC33R3R%C<+R&Rd%%<r3>5R!t<3qz5a!R<3C!5q!<<<z%5W!%&dzIda#t&5zdd<a3&3zWdq5c&<zWdW,!&!qd3a+tW5qd3<+RWzqzR<+CW<C+aWt%W!C_R+5d%5CdR<tR!dCzRqtC!W%+RW5a%!<z3+5t!5&Rq+5R!!<z3C5C!<<&3Wda!!&qz+d3_5&dzadR+W&zq5dCU!&&zWd%e!Wdq+aC+5W%qaaR+3WzqCaCt+W&qWa%t+%Y<53+t5%<CaR<t3%zCqRCaq%&<aR%5a!m<+3t55tW<a3W53!C<q3&5<tt&53%dRVF!dztdd_dWDzRd<t&&qzCd<5!&Wz!d!+d!aqta5+d+>qRaz+z%<qCa<t5WWq!a!t;%+CtRatd%WCRRWtz%qCCR<dR%W<aR!5t!+<5355z!3<R335z5d<C3&5&1!<%3!dam+W+z5dd*aWz<ddz=!&Cqqd&EW&%z!a<++W3q5aR+aW3q3a&+CWCq<a&azW%C-R t+%&C5Rdta%3C3Rztq%C");local n=0;r.XSfpcvWB(function()r.wbxCECYO()n=n+1 end)local function e(d,e)if e then return n end;n=d+n;end local d,n,c=a(0,a,e,s,r.SuxolfoU);local function o()local n,d=r.SuxolfoU(s,e(1,3),e(5,6)+2);e(2);return(d*256)+n;end;local u=true;local u=0 local function p()local t=n();local e=n();local l=1;local t=(d(e,1,20)*(2^32))+t;local n=d(e,21,31);local e=((-1)^d(e,32));if(n==0)then if(t==u)then return e*0;else n=1;l=0;end;elseif(n==2047)then return(t==0)and(e*(1/0))or(e*(0/0));end;return r.VISlqquV(e,n-1023)*(l+(t/(2^52)));end;local _=n;local function k(n)local d;if(not n)then n=_();if(n==0)then return'';end;end;d=r.sawatiCK(s,e(1,3),e(5,6)+n-1);e(n)local e=""for n=(1+u),#d do e=e..r.sawatiCK(d,n,n)end return e;end;local u=#r.qWAhplZM(h('\49.\48'))~=1 local e=n;local function le(...)return{...},r.hnhxPeET('#',...)end local function de()local e={};local h={};local a={};local s={h,a,nil,e};local e=n()local z={}for t=1,e do local d=c();local e;if(d==2)then e=(c()~=#{});elseif(d==3)then local n=p();if u and r.BlSMsUQm(r.qWAhplZM(n),'.(\48+)$')then n=r.LDAolWLR(n);end e=n;elseif(d==1)then e=k();end;z[t]=e;end;for e=1,n()do a[e-(#{1})]=de();end;for s=1,n()do local e=c();if(d(e,1,1)==0)then local a=d(e,2,3);local r=d(e,4,6);local e={o(),o(),nil,nil};if(a==0)then e[l]=o();e[f]=o();elseif(a==#{1})then e[l]=n();elseif(a==b[2])then e[l]=n()-(2^16)elseif(a==b[3])then e[l]=n()-(2^16)e[f]=o();end;if(d(r,1,1)==1)then e[t]=z[e[t]]end if(d(r,2,2)==1)then e[l]=z[e[l]]end if(d(r,3,3)==1)then e[f]=z[e[f]]end h[s]=e;end end;s[3]=c();return s;end;local function te(d,e,n)local t=e;local t=n;return h(r.BlSMsUQm(r.BlSMsUQm(({r.XSfpcvWB(d)})[2],e),n))end local function _(m,s,h)local function de(...)local o,k,p,ne,b,d,c,ee,y,j,u,n;local e=0;while-1<e do if 3>e then if 0>=e then o=a(6,12,1,13,m);k=a(6,63,2,84,m);else if-1~=e then for n=39,66 do if 1<e then d=-41;c=-1;break;end;p=a(6,95,3,20,m);b=le ne=0;break;end;else p=a(6,95,3,20,m);b=le ne=0;end end else if e<5 then if e~=3 then j=r.hnhxPeET('#',...)-1;u={};else ee={};y={...};end else if 1<=e then repeat if 6~=e then n=a(7);break;end;e=-2;until true;else n=a(7);end end end e=e+1;end;for e=0,j do if(e>=p)then ee[e-p]=y[e+1];else n[e]=y[e+1];end;end;local e=j-p+1 local e;local a;local function p(...)while true do end end while true do if d<-40 then d=d+42 end e=o[d];a=e[g];if 43>=a then if 22>a then if a>=11 then if 16>a then if a>=13 then if 14>a then if(e[t]<n[e[f]])then d=d+1;else d=e[l];end;else if a>=13 then for r=24,57 do if 15~=a then for a=0,3 do if a<=1 then if-1<a then for f=30,93 do if 0~=a then h[e[l]]=n[e[t]];d=d+1;e=o[d];break;end;n[e[t]]=(e[l]~=0);d=d+1;e=o[d];break;end;else n[e[t]]=(e[l]~=0);d=d+1;e=o[d];end else if-2<a then for r=20,54 do if 2~=a then if(n[e[t]]==e[f])then d=d+1;else d=e[l];end;break;end;n[e[t]]=h[e[l]];d=d+1;e=o[d];break;end;else n[e[t]]=h[e[l]];d=d+1;e=o[d];end end end break;end;n[e[t]]=h[e[l]];break;end;else n[e[t]]=h[e[l]];end end else if 12~=a then n[e[t]]=_(k[e[l]],nil,h);else local e=e[t]n[e](n[e+1])end end else if a<19 then if 17>a then n[e[t]]=(e[l]~=0);d=d+1;else if 18==a then local d=e[t]local t,e=b(n[d](z(n,d+1,e[l])))c=e+d-1 local e=0;for d=d,c do e=e+1;n[d]=t[e];end;else local a,c,z,f,r,o;local d=0;while d>-1 do if 4<=d then if d>=6 then if 7==d then d=-2;else n[o]=r;end else if d>4 then o=a[c];else r=f[a[z]];end end else if d>=2 then if 2==d then z=l;else f=n;end else if d>=-4 then repeat if 0~=d then c=t;break;end;a=e;until true;else a=e;end end end d=d+1 end end end else if 19>=a then s[e[l]]=n[e[t]];else if 20==a then local d=e[t]n[d](z(n,d+1,e[l]))else local e=e[t]local t,d=b(n[e]())c=d+e-1 local d=0;for e=e,c do d=d+1;n[e]=t[d];end;end end end end else if a>4 then if a<8 then if a>=6 then if 6<a then local e=e[t];do return z(n,e,c)end;else n[e[t]]=(e[l]~=0);end else if(n[e[t]]==e[f])then d=d+1;else d=e[l];end;end else if 8<a then if a>=6 then for o=29,75 do if 9~=a then do return end;break;end;if(n[e[t]]~=e[f])then d=d+1;else d=e[l];end;break;end;else do return end;end else local t=e[t];local o=e[f];local a=t+2 local t={n[t](n[t+1],n[a])};for e=1,o do n[a+e]=t[e];end;local t=t[1]if t then n[a]=t d=e[l];else d=d+1;end;end end else if a<=1 then if-4<a then for d=42,58 do if a~=1 then n[e[t]]=h[e[l]];break;end;do return n[e[t]]end break;end;else do return n[e[t]]end end else if 2>=a then local a;for f=0,2 do if 1<=f then if f>=0 then repeat if 2>f then a=e[t]n[a](n[a+1])d=d+1;e=o[d];break;end;d=e[l];until true;else a=e[t]n[a](n[a+1])d=d+1;e=o[d];end else n[e[t]]=n[e[l]];d=d+1;e=o[d];end end else if 2<=a then repeat if a~=4 then local a,r;n[e[t]]=s[e[l]];d=d+1;e=o[d];a=e[t];r=n[e[l]];n[a+1]=r;n[a]=r[e[f]];d=d+1;e=o[d];a=e[t];do return n[a](z(n,a+1,e[l]))end;d=d+1;e=o[d];a=e[t];do return z(n,a,c)end;d=d+1;e=o[d];do return end;break;end;local e=e[t];do return z(n,e,c)end;until true;else local e=e[t];do return z(n,e,c)end;end end end end end else if a>=33 then if 37>=a then if a>=35 then if 36<=a then if a<37 then d=e[l];else local e=e[t]n[e]=n[e](z(n,e+1,c))end else local a,r;n[e[t]]=h[e[l]];d=d+1;e=o[d];a=e[t];r=n[e[l]];n[a+1]=r;n[a]=r[e[f]];d=d+1;e=o[d];n(e[t],e[l]);d=d+1;e=o[d];a=e[t]n[a]=n[a](z(n,a+1,e[l]))d=d+1;e=o[d];s[e[l]]=n[e[t]];d=d+1;e=o[d];do return end;end else if a~=34 then local d=e[t];do return n[d](z(n,d+1,e[l]))end;else n[e[t]]=n[e[l]][e[f]];end end else if 40<a then if a<=41 then local e=e[t]n[e]=n[e]()else if 41<=a then repeat if 42~=a then local a,r;n[e[t]]=h[e[l]];d=d+1;e=o[d];a=e[t];r=n[e[l]];n[a+1]=r;n[a]=r[e[f]];d=d+1;e=o[d];n(e[t],e[l]);d=d+1;e=o[d];n[e[t]]=(e[l]~=0);d=d+1;e=o[d];a=e[t];do return n[a](z(n,a+1,e[l]))end;d=d+1;e=o[d];a=e[t];do return z(n,a,c)end;d=d+1;e=o[d];do return end;break;end;n[e[t]]={};until true;else n[e[t]]={};end end else if 39>a then for e=e[t],e[l]do n[e]=nil;end;else if 37~=a then for r=24,62 do if 40~=a then local e=e[t]n[e]=n[e](n[e+1])break;end;local a,z,r;for c=0,1 do if c>=-1 then for h=38,55 do if 0<c then if not n[e[t]]then d=d+1;else d=e[l];end;break;end;a=e[t]z={n[a](n[a+1])};r=0;for e=a,e[f]do r=r+1;n[e]=z[r];end d=d+1;e=o[d];break;end;else a=e[t]z={n[a](n[a+1])};r=0;for e=a,e[f]do r=r+1;n[e]=z[r];end d=d+1;e=o[d];end end break;end;else local r,z,a;for c=0,1 do if c>=-1 then for h=38,55 do if 0<c then if not n[e[t]]then d=d+1;else d=e[l];end;break;end;r=e[t]z={n[r](n[r+1])};a=0;for e=r,e[f]do a=a+1;n[e]=z[a];end d=d+1;e=o[d];break;end;else r=e[t]z={n[r](n[r+1])};a=0;for e=r,e[f]do a=a+1;n[e]=z[a];end d=d+1;e=o[d];end end end end end end else if 27>a then if a>=24 then if 25<=a then if a~=24 then repeat if 25<a then if not n[e[t]]then d=d+1;else d=e[l];end;break;end;local d=e[t]local t,e=b(n[d](z(n,d+1,e[l])))c=e+d-1 local e=0;for d=d,c do e=e+1;n[d]=t[e];end;until true;else if not n[e[t]]then d=d+1;else d=e[l];end;end else local t=e[t];local d=n[e[l]];n[t+1]=d;n[t]=d[e[f]];end else if 21~=a then for d=29,89 do if a<23 then n[e[t]]=s[e[l]];break;end;local d=e[t]local l={n[d](n[d+1])};local t=0;for e=d,e[f]do t=t+1;n[e]=l[t];end break;end;else n[e[t]]=s[e[l]];end end else if 30<=a then if a<=30 then local e=e[t]local t,d=b(n[e]())c=d+e-1 local d=0;for e=e,c do d=d+1;n[e]=t[d];end;else if 32>a then s[e[l]]=n[e[t]];else d=e[l];end end else if a<28 then do return n[e[t]]end else if 28<a then n[e[t]]=_(k[e[l]],nil,h);else local a=e[t];local l={};for e=1,#u do local e=u[e];for d=0,#e do local d=e[d];local t=d[1];local e=d[2];if t==n and e>=a then l[e]=t[e];d[1]=l;end;end;end;end end end end end end else if a>=66 then if a>76 then if 81<a then if 84>=a then if a<83 then local d=e[t];local t=n[e[l]];n[d+1]=t;n[d]=t[e[f]];else if 79<=a then for d=45,93 do if 84>a then n[e[t]]=#n[e[l]];break;end;n[e[t]]=(e[l]~=0);break;end;else n[e[t]]=#n[e[l]];end end else if 86<=a then if a>82 then repeat if 87~=a then if n[e[t]]then d=d+1;else d=e[l];end;break;end;local d=e[t]local l={n[d](z(n,d+1,c))};local t=0;for e=d,e[f]do t=t+1;n[e]=l[t];end until true;else local t=e[t]local l={n[t](z(n,t+1,c))};local d=0;for e=t,e[f]do d=d+1;n[e]=l[d];end end else n[e[t]]=(e[l]~=0);d=d+1;end end else if a<=78 then if 74~=a then for o=47,88 do if 77~=a then local t=e[t]local l={n[t](n[t+1])};local d=0;for e=t,e[f]do d=d+1;n[e]=l[d];end break;end;if(e[t]<n[e[f]])then d=d+1;else d=e[l];end;break;end;else if(e[t]<n[e[f]])then d=d+1;else d=e[l];end;end else if 80>a then local d=e[t]n[d]=n[d](z(n,d+1,e[l]))else if a~=80 then if not n[e[t]]then d=d+1;else d=e[l];end;else for e=e[t],e[l]do n[e]=nil;end;end end end end else if a<71 then if a<=67 then if 62<=a then for f=22,67 do if 67>a then local d=e[t];do return n[d](z(n,d+1,e[l]))end;break;end;local a;for f=0,2 do if f<1 then n[e[t]]=n[e[l]];d=d+1;e=o[d];else if f==1 then a=e[t]n[a]=n[a]()d=d+1;e=o[d];else if not n[e[t]]then d=d+1;else d=e[l];end;end end end break;end;else local d=e[t];do return n[d](z(n,d+1,e[l]))end;end else if 68>=a then local c=k[e[l]];local z;local a={};z=r.xHDeXLoo({},{__index=function(n,e)local e=a[e];return e[1][e[2]];end,__newindex=function(d,e,n)local e=a[e]e[1][e[2]]=n;end;});for t=1,e[f]do d=d+1;local e=o[d];if e[g]==17 then a[t-1]={n,e[l]};else a[t-1]={s,e[l]};end;u[#u+1]=a;end;n[e[t]]=_(c,z,h);else if 70>a then if n[e[t]]then d=d+1;else d=e[l];end;else local d=e[t]n[d]=n[d](z(n,d+1,e[l]))end end end else if 73>=a then if a<=71 then local t=e[t];local o=e[f];local a=t+2 local t={n[t](n[t+1],n[a])};for e=1,o do n[a+e]=t[e];end;local t=t[1]if t then n[a]=t d=e[l];else d=d+1;end;else if a~=72 then do return end;else if(n[e[t]]~=e[f])then d=d+1;else d=e[l];end;end end else if a<75 then local e=e[t]n[e]=n[e]()else if 75<a then local r;for a=0,4 do if a>=2 then if 3>a then n[e[t]]=h[e[l]];d=d+1;e=o[d];else if 4>a then r=e[t]n[r]=n[r](n[r+1])d=d+1;e=o[d];else if(n[e[t]]~=e[f])then d=d+1;else d=e[l];end;end end else if 1>a then n[e[t]]={};d=d+1;e=o[d];else n[e[t]]=h[e[l]];d=d+1;e=o[d];end end end else local d=e[t]n[d](z(n,d+1,e[l]))end end end end end else if a>54 then if a<60 then if 57<=a then if a<=57 then local a;for r=0,1 do if-4~=r then repeat if 1>r then a=e[t]n[a]=n[a](n[a+1])d=d+1;e=o[d];break;end;if(n[e[t]]~=e[f])then d=d+1;else d=e[l];end;until true;else a=e[t]n[a]=n[a](n[a+1])d=d+1;e=o[d];end end else if 55~=a then repeat if 59~=a then h[e[l]]=n[e[t]];break;end;if(n[e[t]]==e[f])then d=d+1;else d=e[l];end;until true;else h[e[l]]=n[e[t]];end end else if a>53 then for d=42,58 do if 56~=a then n(e[t],e[l]);break;end;local e=e[t]n[e](n[e+1])break;end;else n(e[t],e[l]);end end else if a>62 then if 63<a then if a~=62 then repeat if 64<a then n(e[t],e[l]);break;end;n[e[t]]={};until true;else n(e[t],e[l]);end else local e=e[t]n[e]=n[e](z(n,e+1,c))end else if a>=61 then if 62>a then local a=e[t];local t={};for e=1,#u do local e=u[e];for d=0,#e do local e=e[d];local l=e[1];local d=e[2];if l==n and d>=a then t[d]=l[d];e[1]=t;end;end;end;else local a,r;for c=0,2 do if 0<c then if c~=2 then n(e[t],e[l]);d=d+1;e=o[d];else a=e[t]n[a]=n[a](z(n,a+1,e[l]))end else a=e[t];r=n[e[l]];n[a+1]=r;n[a]=r[e[f]];d=d+1;e=o[d];end end end else local a,u,_,r,k;for u=0,4 do if 2<=u then if 3>u then a=e[t]k,_=b(n[a]())c=_+a-1 r=0;for e=a,c do r=r+1;n[e]=k[r];end;d=d+1;e=o[d];else if u>2 then repeat if u~=4 then a=e[t]k={n[a](z(n,a+1,c))};r=0;for e=a,e[f]do r=r+1;n[e]=k[r];end d=d+1;e=o[d];break;end;d=e[l];until true;else a=e[t]k={n[a](z(n,a+1,c))};r=0;for e=a,e[f]do r=r+1;n[e]=k[r];end d=d+1;e=o[d];end end else if-3<=u then for a=39,73 do if 0~=u then n[e[t]]=s[e[l]];d=d+1;e=o[d];break;end;n[e[t]]=h[e[l]];d=d+1;e=o[d];break;end;else n[e[t]]=s[e[l]];d=d+1;e=o[d];end end end end end end else if a<49 then if a>45 then if 47>a then n[e[t]]=n[e[l]];else if a~=43 then for r=17,55 do if a~=48 then n[e[t]]=n[e[l]][e[f]];break;end;local a;for r=0,2 do if 1>r then n[e[t]]=n[e[l]];d=d+1;e=o[d];else if-3<r then for z=42,76 do if 1~=r then if(n[e[t]]==e[f])then d=d+1;else d=e[l];end;break;end;a=e[t]n[a]=n[a](n[a+1])d=d+1;e=o[d];break;end;else if(n[e[t]]==e[f])then d=d+1;else d=e[l];end;end end end break;end;else n[e[t]]=n[e[l]][e[f]];end end else if 43<=a then for r=32,81 do if a~=44 then local a;for f=0,2 do if f<1 then n(e[t],e[l]);d=d+1;e=o[d];else if f>=-1 then repeat if 2>f then a=e[t]n[a](n[a+1])d=d+1;e=o[d];break;end;d=e[l];until true;else a=e[t]n[a](n[a+1])d=d+1;e=o[d];end end end break;end;local t=e[t]local l={n[t](z(n,t+1,c))};local d=0;for e=t,e[f]do d=d+1;n[e]=l[d];end break;end;else local t=e[t]local l={n[t](z(n,t+1,c))};local d=0;for e=t,e[f]do d=d+1;n[e]=l[d];end end end else if 52<=a then if 52>=a then h[e[l]]=n[e[t]];else if a==54 then n[e[t]]=s[e[l]];else local a,u,s,r;for f=0,6 do if 3>f then if f<1 then n(e[t],e[l]);d=d+1;e=o[d];else if f<2 then n[e[t]]=h[e[l]];d=d+1;e=o[d];else n[e[t]]=n[e[l]];d=d+1;e=o[d];end end else if f<5 then if 0<=f then for h=38,53 do if 3<f then a=e[t]u,s=b(n[a](z(n,a+1,e[l])))c=s+a-1 r=0;for e=a,c do r=r+1;n[e]=u[r];end;d=d+1;e=o[d];break;end;n[e[t]]=n[e[l]];d=d+1;e=o[d];break;end;else n[e[t]]=n[e[l]];d=d+1;e=o[d];end else if f~=3 then repeat if 5~=f then n[e[t]]=h[e[l]];break;end;a=e[t]n[a]=n[a](z(n,a+1,c))d=d+1;e=o[d];until true;else a=e[t]n[a]=n[a](z(n,a+1,c))d=d+1;e=o[d];end end end end end end else if a>49 then if a>48 then repeat if a~=50 then local e=e[t]n[e]=n[e](n[e+1])break;end;local c=k[e[l]];local z;local a={};z=r.xHDeXLoo({},{__index=function(n,e)local e=a[e];return e[1][e[2]];end,__newindex=function(d,e,n)local e=a[e]e[1][e[2]]=n;end;});for t=1,e[f]do d=d+1;local e=o[d];if e[g]==17 then a[t-1]={n,e[l]};else a[t-1]={s,e[l]};end;u[#u+1]=a;end;n[e[t]]=_(c,z,h);until true;else local c=k[e[l]];local z;local a={};z=r.xHDeXLoo({},{__index=function(n,e)local e=a[e];return e[1][e[2]];end,__newindex=function(d,e,n)local e=a[e]e[1][e[2]]=n;end;});for t=1,e[f]do d=d+1;local e=o[d];if e[g]==17 then a[t-1]={n,e[l]};else a[t-1]={s,e[l]};end;u[#u+1]=a;end;n[e[t]]=_(c,z,h);end else n[e[t]]=#n[e[l]];end end end end end end d=1+d;end;end;return de end;local t=0xff;local c={};local a=(1);local l='';(function(n)local d=n local o=0x00 local e=0x00 d={(function(f)if o>0x2d then return f end o=o+1 e=(e+0x55e-f)%0x1f return(e%0x03==0x0 and(function(d)if not n[d]then e=e+0x01 n[d]=(0x2e);end return true end)'nWmlZ'and d[0x1](0xe2+f))or(e%0x03==0x2 and(function(d)if not n[d]then e=e+0x01 n[d]=(0x9d);t[2]=(t[2]*(te(function()c()end,z(l))-te(t[1],z(l))))+1;c[a]={};t=t[2];a=a+t;end return true end)'bvApB'and d[0x3](f+0x103))or(e%0x03==0x1 and(function(d)if not n[d]then e=e+0x01 n[d]=(0x7c);end return true end)'OXctR'and d[0x2](f+0x1a5))or f end),(function(f)if o>0x2b then return f end o=o+1 e=(e+0x9f9-f)%0xd return(e%0x03==0x0 and(function(d)if not n[d]then e=e+0x01 n[d]=(0x24);l='\37';t={function()t()end};l=l..'\100\43';end return true end)'GrdO_'and d[0x2](0x1bf+f))or(e%0x03==0x1 and(function(d)if not n[d]then e=e+0x01 n[d]=(0xba);l={l..'\58 a',l};c[a]=de();a=a+((not r.pIoSHTdn)and 1 or 0);l[1]='\58'..l[1];t[2]=0xff;end return true end)'BToZy'and d[0x1](f+0x178))or(e%0x03==0x2 and(function(d)if not n[d]then e=e+0x01 n[d]=(0xf);end return true end)'ORPCi'and d[0x3](f+0x3a4))or f end),(function(l)if o>0x24 then return l end o=o+1 e=(e+0x70c-l)%0x44 return(e%0x03==0x2 and(function(d)if not n[d]then e=e+0x01 n[d]=(0xc5);end return true end)'KWRmB'and d[0x3](0x2e7+l))or(e%0x03==0x0 and(function(d)if not n[d]then e=e+0x01 n[d]=(0x2f);c[a]=ae();a=a+t;end return true end)'btDIR'and d[0x1](l+0x302))or(e%0x03==0x1 and(function(d)if not n[d]then e=e+0x01 n[d]=(0x5d);end return true end)'lRLED'and d[0x2](l+0x102))or l end)}d[0x2](0x23bc)end){};local e=_(z(c));return e(...);end return de((function()local n={}local e=0x01;local d;if r.pIoSHTdn then d=r.pIoSHTdn(de)else d=''end if r.BlSMsUQm(d,r.OsUTrGiq)then e=e+0;else e=e+1;end n[e]=0x02;n[n[e]+0x01]=0x03;return n;end)(),...)end)((function(d,e,n,t,l,a)local a;if d<4 then if 2<=d then if-2<d then repeat if 3~=d then do return 16777216,65536,256 end;break;end;do return e(1),e(4,l,t,n,e),e(5,l,t,n)end;until true;else do return 16777216,65536,256 end;end else if-3~=d then for a=22,89 do if d>0 then do return function(n,e,d)if d then local e=(n/2^(e-1))%2^((d-1)-(e-1)+1);return e-e%1;else local e=2^(e-1);return(n%(e+e)>=e)and 1 or 0;end;end;end;break;end;do return e(1),e(4,l,t,n,e),e(5,l,t,n)end;break;end;else do return e(1),e(4,l,t,n,e),e(5,l,t,n)end;end end else if d>=6 then if 6<d then if d>=3 then for e=18,58 do if d>7 then do return n(d,nil,n);end break;end;do return setmetatable({},{['__\99\97\108\108']=function(e,d,t,l,n)if n then return e[n]elseif l then return e else e[d]=t end end})end break;end;else do return n(d,nil,n);end end else do return l[n]end;end else if d>=2 then repeat if 4~=d then local d=t;do return function()local e=e(n,d(d,d),d(d,d));d(1);return e;end;end;break;end;local d=t;local t,o,a=l(2);do return function()local l,f,n,e=e(n,d(d,d),d(d,d)+3);d(4);return(e*t)+(n*o)+(f*a)+l;end;end;until true;else local d=t;do return function()local e=e(n,d(d,d),d(d,d));d(1);return e;end;end;end end end end),...)
+print([[
+KuromiWare On Top
+==========================================================
+|                        KuromiWare                      |
+|--------------------------------------------------------|
+| Version: v1.01                                         |
+|                                                        |
+| Bypass loading expect lag                              |
+|                                                        |
+| Undected: Maybe:3                                      |
+| Loaded? Yes! Thanks for using KuromiWare               |
+| Status: Loaded and ready to use!                       |
+==========================================================
+]])
+
+loadstring(game:HttpGet('https://raw.githubusercontent.com/KuromiWare-v1/freebypasslmao/refs/heads/main/uhhhidk.lua'))()
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
+
+local correctPlaceId = 4991214437
+
+if game.PlaceId ~= correctPlaceId then
+    player:Kick("Wrong game!")
+end
+
+
+if getgenv().KittenWareLoaded or getgenv().KittenWareLoading then return end
+getgenv().KittenWareLoading = true
+
+----------------------------------------------------------------
+-- Services & Locals
+----------------------------------------------------------------
+local Players     = game:GetService("Players")
+local RunService  = game:GetService("RunService")
+local UIS         = game:GetService("UserInputService")
+local StarterGui  = game:GetService("StarterGui")
+local Lighting    = game:GetService("Lighting")
+local Workspace   = game:GetService("Workspace")
+local Stats       = game:GetService("Stats")
+local MPS         = game:GetService("MarketplaceService")
+local VIM         = game:GetService("VirtualInputManager")
+
+local LP          = Players.LocalPlayer
+local Camera      = Workspace.CurrentCamera
+
+local function notify(t,x,d) pcall(function() StarterGui:SetCore("SendNotification",{Title=t,Text=x,Duration=d or 3}) end) end
+local function clamp(v,a,b) return (v<a) and a or ((v>b) and b or v) end
+local function lerp(a,b,t) return a + (b-a)*t end
+
+----------------------------------------------------------------
+-- UI (Exunys)
+----------------------------------------------------------------
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Roblox-Functions-Library/main/Library.lua"))()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/kitty92pm/AirHub-V2/refs/heads/main/src/UI%20Library.lua"))()
+
+-- Tabs
+local MainUI   = GUI:Load()
+local Combat   = MainUI:Tab("Combat")
+local SilentTab = MainUI:Tab("Silent")
+local ESPTab   = MainUI:Tab("Visual")
+local World    = MainUI:Tab("World")
+local MiscTab = MainUI:Tab("Misc")
+local HUDTab   = MainUI:Tab("HUD")
+local Config   = MainUI:Tab("WL")
+local About    = MainUI:Tab("Settings")
+
+----------------------------------------------------------------
+-- GLOBAL COLORS
+----------------------------------------------------------------
+local Theme = {
+  Accent       = Color3.fromRGB(170, 120, 255),
+  Good         = Color3.fromRGB(50, 220, 140),
+  Danger       = Color3.fromRGB(255, 120, 120),
+  Secondary    = Color3.fromRGB(230, 230, 235),
+  PanelDark    = Color3.fromRGB(20, 20, 26),
+  PanelMid     = Color3.fromRGB(40, 40, 55),
+}
+
+----------------------------------------------------------------
+-- No Recoil (rename "Recoil" tags)
+----------------------------------------------------------------
+local nrEnabled, nrConns, charAddedConn = false, {}, nil
+local function renameOne(inst) if inst and inst.Name=="Recoil" and not inst:GetAttribute("KW") then inst:SetAttribute("KW",true) inst.Name="_Recoil" end end
+local function revertOne(inst) if inst and inst.Name=="_Recoil" and inst:GetAttribute("KW") then inst.Name="Recoil" inst:SetAttribute("KW",nil) end end
+local function sweep(c) if c then for _,d in ipairs(c:GetDescendants()) do renameOne(d) end renameOne(c) end end
+local function revert(c) if c then for _,d in ipairs(c:GetDescendants()) do revertOne(d) end revertOne(c) end end
+local function watch(c) if not c then return end table.insert(nrConns,c.DescendantAdded:Connect(renameOne)) table.insert(nrConns,c.ChildAdded:Connect(renameOne)) end
+local function unwatch() for _,c in ipairs(nrConns) do if c then c:Disconnect() end end nrConns={} end
+local function onCharacter(ch) if not nrEnabled then return end sweep(ch) watch(ch) local bp=LP:FindFirstChildOfClass("Backpack") if bp then sweep(bp) watch(bp) end end
+local function enableNR() nrEnabled=true unwatch() sweep(LP) watch(LP) onCharacter(LP.Character or LP.CharacterAdded:Wait()) if charAddedConn then charAddedConn:Disconnect() end charAddedConn=LP.CharacterAdded:Connect(onCharacter) end
+local function disableNR() nrEnabled=false unwatch() if charAddedConn then charAddedConn:Disconnect() charAddedConn=nil end revert(LP) if LP.Character then revert(LP.Character) end local bp=LP:FindFirstChildOfClass("Backpack") if bp then revert(bp) end end
+
+Combat:Section({Name="No Recoil", Side="Left"})
+:Toggle({Name="Enabled",Flag="KW_NR",Default=false,Callback=function(v) if v then enableNR() else disableNR() end end})
+
+----------------------------------------------------------------
+-- ESP++ (Players + Drones) — Drawing API
+----------------------------------------------------------------
+local hasDrawing = (typeof(Drawing)=="table" and typeof(Drawing.new)=="function")
+if not hasDrawing then notify("KuromiWare","Drawing API not found | ESP & HUD disabled.",5) end
+
+local esp = {
+  enabled          = false,
+  conn             = nil,
+  perfMode         = "Auto",
+  updateEvery      = 1,
+  counter          = 0,
+
+  showSkeleton     = true,
+  showBox          = true,
+  showCornerBox    = true,
+  showFilledBox    = false,
+  cornerLen        = 8,
+  fillAlpha        = 0.15,
+
+  showTracers      = true,
+  tracerOrigin     = "Bottom",
+
+  showNames        = true,
+  showHealth       = true,
+  showDistance     = true,
+
+  teamCheck        = false,
+  useTeamColors    = false,
+  onlyVisible      = false,
+  passiveESP       = true,
+  passiveTag       = " (P)",
+  passiveColor     = Color3.fromRGB(150,210,255),
+
+  maxDistance      = 2500,
+  fadeByDistance   = true,
+  visColor         = Color3.fromRGB(0,255,255),
+  occColor         = Color3.fromRGB(255,100,100),
+  thicknessBase    = 2.5,
+  nearThick        = 3.0,
+  farThick         = 1.0,
+  alphaBase        = 0.9,
+
+  itemESP          = true,
+  itemESPColor     = Color3.fromRGB(255, 200, 120),
+  itemSize         = 13,
+  itemOffsetY      = 14,
+  itemWhenNoTool   = false,
+
+  droneEnabled     = true,
+  droneColor       = Color3.fromRGB(255, 180, 60),
+  droneName        = "DRONE",
+  droneMaxDist     = 3000,
+  droneTracers     = true,
+  droneFilled      = true,
+  droneFillAlpha   = 0.12,
+}
+
+local whitelist, ignorelist = {}, {}
+
+local function sameTeam(plr)
+  if not esp.teamCheck then return false end
+  if LP.Team and plr.Team then return LP.Team==plr.Team end
+  if LP.TeamColor and plr.TeamColor then return LP.TeamColor==plr.TeamColor end
+  return false
+end
+
+local function isPassive(char)
+  if not char then return false end
+  if char:FindFirstChildOfClass("ForceField") then return true end
+  for _,bp in ipairs(char:GetDescendants()) do
+    if bp:IsA("BasePart") and bp.Material==Enum.Material.ForceField then return true end
+  end
+  local hum = char:FindFirstChildOfClass("Humanoid")
+  if hum and (hum:GetAttribute("Passive")==true or hum:GetAttribute("Invulnerable")==true) then return true end
+  if char:GetAttribute("Passive")==true then return true end
+  return false
+end
+
+local function parts(char)
+  return {
+    hum = char:FindFirstChildOfClass("Humanoid"),
+    hrp = char:FindFirstChild("HumanoidRootPart"),
+    head= char:FindFirstChild("Head"),
+    torso= char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso"),
+    lower= char:FindFirstChild("LowerTorso"),
+    luArm= char:FindFirstChild("LeftUpperArm") or char:FindFirstChild("Left Arm"),
+    llArm= char:FindFirstChild("LeftLowerArm"),
+    lHand= char:FindFirstChild("LeftHand"),
+    ruArm= char:FindFirstChild("RightUpperArm") or char:FindFirstChild("Right Arm"),
+    rlArm= char:FindFirstChild("RightLowerArm"),
+    rHand= char:FindFirstChild("RightHand"),
+    luLeg= char:FindFirstChild("LeftUpperLeg") or char:FindFirstChild("Left Leg"),
+    llLeg= char:FindFirstChild("LeftLowerLeg"),
+    ruLeg= char:FindFirstChild("RightUpperLeg") or char:FindFirstChild("Right Leg"),
+    rlLeg= char:FindFirstChild("RightLowerLeg"),
+  }
+end
+
+local function vp(v3) local v,o=Camera:WorldToViewportPoint(v3); return Vector2.new(v.X,v.Y), o end
+
+local function mkLine() local l=Drawing.new("Line") l.Visible=false l.Color=Color3.new(1,1,1) l.Thickness=esp.thicknessBase l.Transparency=esp.alphaBase return l end
+local function mkText() local t=Drawing.new("Text") t.Visible=false t.Center=true t.Size=14 t.Outline=true t.Transparency=1 t.Color=Theme.Secondary return t end
+local function mkSquare() local s=Drawing.new("Square") s.Visible=false s.Thickness=esp.thicknessBase s.Filled=false s.Color=Theme.Secondary s.Transparency=esp.alphaBase return s end
+
+local buckets, signalMap = {}, {}
+local function getBucket(plr)
+  if buckets[plr] then return buckets[plr] end
+  local b = {
+    torso=mkLine(), lower=mkLine(), head=mkLine(),
+    luArm=mkLine(), llArm=mkLine(), lHand=mkLine(),
+    ruArm=mkLine(), rlArm=mkLine(), rHand=mkLine(),
+    luLeg=mkLine(), llLeg=mkLine(), ruLeg=mkLine(), rlLeg=mkLine(),
+    boxT=mkLine(), boxB=mkLine(), boxL=mkLine(), boxR=mkLine(),
+    cTL1=mkLine(), cTL2=mkLine(), cTR1=mkLine(), cTR2=mkLine(),
+    cBL1=mkLine(), cBL2=mkLine(), cBR1=mkLine(), cBR2=mkLine(),
+    boxFill=mkSquare(),
+    tracer=mkLine(),
+    nameText=mkText(),
+    distText=mkText(),
+    itemText=mkText(),
+    hpBack=mkSquare(),
+    hpBar=mkSquare(),
+  }
+  buckets[plr]=b; return b
+end
+local function hideBucket(b) if not b then return end for _,o in pairs(b) do o.Visible=false end end
+local function cleanPlayer(plr)
+  local b=buckets[plr]; if b then for _,o in pairs(b) do o:Remove() end end buckets[plr]=nil
+  local sigs=signalMap[plr]; if sigs then for _,c in ipairs(sigs) do if c then c:Disconnect() end end end signalMap[plr]=nil
+end
+
+local droneMap = {}  -- [Model] = bucket
+local function mkDroneBucket()
+  return {
+    boxT=mkLine(), boxB=mkLine(), boxL=mkLine(), boxR=mkLine(),
+    fill=mkSquare(),
+    tracer=mkLine(),
+    label=mkText(),
+    dist=mkText(),
+  }
+end
+local function hideDroneBucket(b) if not b then return end for _,o in pairs(b) do o.Visible=false end end
+local function cleanDrone(m) local b=droneMap[m]; if b then for _,o in pairs(b) do o:Remove() end end droneMap[m]=nil end
+
+local function dynThickness(dist)
+  if not esp.fadeByDistance then return esp.thicknessBase, esp.alphaBase end
+  local t = clamp(dist/esp.maxDistance, 0, 1)
+  return lerp(esp.nearThick, esp.farThick, t), lerp(esp.alphaBase, 0.35, t)
+end
+
+local function LOS(part, char)
+  local rp=RaycastParams.new(); rp.FilterType=Enum.RaycastFilterType.Blacklist
+  rp.FilterDescendantsInstances={LP.Character, char}
+  local origin=Camera.CFrame.Position
+  local dir=part.Position-origin
+  return Workspace:Raycast(origin,dir,rp)==nil
+end
+
+local function computeBBox(model)
+  local cf,size = model:GetBoundingBox()
+  local hx,hy,hz=size.X/2,size.Y/2,size.Z/2
+  local C={Vector3.new( hx, hy, hz),Vector3.new(-hx, hy, hz),Vector3.new( hx, hy,-hz),Vector3.new(-hx, hy,-hz),
+           Vector3.new( hx,-hy, hz),Vector3.new(-hx,-hy, hz),Vector3.new( hx,-hy,-hz),Vector3.new(-hx,-hy,-hz)}
+  local minX,minY,maxX,maxY=math.huge,math.huge,-math.huge,-math.huge
+  local on=false
+  for _,c in ipairs(C) do
+    local p=cf:PointToWorldSpace(c)
+    local v,vis=Camera:WorldToViewportPoint(p)
+    if vis then on=true end
+    minX=math.min(minX,v.X); minY=math.min(minY,v.Y)
+    maxX=math.max(maxX,v.X); maxY=math.max(maxY,v.Y)
+  end
+  return minX,minY,maxX,maxY,on
+end
+
+local function setLine(line,a,b,col,th,al)
+  local av,ao=vp(a); local bv,bo=vp(b)
+  if ao and bo then line.From=av line.To=bv line.Color=col line.Thickness=th line.Transparency=al line.Visible=true else line.Visible=false end
+end
+
+local function drawBoxLines(b,tl,tr,bl,br,col,th,al)
+  b.boxT.From=tl; b.boxT.To=tr; b.boxT.Color=col; b.boxT.Thickness=th; b.boxT.Transparency=al; b.boxT.Visible=true
+  b.boxB.From=bl; b.boxB.To=br; b.boxB.Color=col; b.boxB.Thickness=th; b.boxB.Transparency=al; b.boxB.Visible=true
+  b.boxL.From=tl; b.boxL.To=bl; b.boxL.Color=col; b.boxL.Thickness=th; b.boxL.Transparency=al; b.boxL.Visible=true
+  b.boxR.From=tr; b.boxR.To=br; b.boxR.Color=col; b.boxR.Thickness=th; b.boxR.Transparency=al; b.boxR.Visible=true
+end
+
+local function corners(b,tl,tr,bl,br,col,th,al,L)
+  local function set(ln,a,b2) ln.From=a; ln.To=b2; ln.Color=col; ln.Thickness=th; ln.Transparency=al; ln.Visible=true end
+  set(b.cTL1, tl, tl + Vector2.new(L,0)); set(b.cTL2, tl, tl + Vector2.new(0,L))
+  set(b.cTR1, tr, tr + Vector2.new(-L,0)); set(b.cTR2, tr, tr + Vector2.new(0,L))
+  set(b.cBL1, bl, bl + Vector2.new(L,0)); set(b.cBL2, bl, bl + Vector2.new(0,-L))
+  set(b.cBR1, br, br + Vector2.new(-L,0)); set(b.cBR2, br, br + Vector2.new(0,-L))
+end
+
+local function tracerAnchor()
+  if esp.tracerOrigin=="Center" then return Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2)
+  elseif esp.tracerOrigin=="Mouse" then local m=UIS:GetMouseLocation(); return Vector2.new(m.X,m.Y)
+  else return Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y) end
+end
+
+local function equippedName(ch)
+  if not ch then return nil end
+  for _,o in ipairs(ch:GetChildren()) do if o:IsA("Tool") then return o.Name end end
+  return nil
+end
+
+local function updatePlayer(plr)
+  if plr==LP or ignorelist[plr.Name] then local b=buckets[plr]; if b then hideBucket(b) end return end
+  if sameTeam(plr) then local b=buckets[plr]; if b then hideBucket(b) end return end
+
+  local ch=plr.Character; if not ch then local b=buckets[plr]; if b then hideBucket(b) end return end
+  local p=parts(ch); local hum,hrp=p.hum,p.hrp
+  if not hrp or not hum or hum.Health<=0 then local b=buckets[plr]; if b then hideBucket(b) end return end
+
+  local dist=(hrp.Position - Camera.CFrame.Position).Magnitude
+  if dist>esp.maxDistance then local b=buckets[plr]; if b then hideBucket(b) end return end
+
+  local vis = LOS(hrp, ch) or (p.torso and LOS(p.torso, ch))
+  if esp.onlyVisible and not vis then local b=buckets[plr]; if b then hideBucket(b) end return end
+
+  local base = vis and esp.visColor or esp.occColor
+  if esp.useTeamColors and plr.TeamColor then base = plr.TeamColor.Color end
+  if esp.passiveESP and isPassive(ch) then base = esp.passiveColor end
+  local col=base
+  local th,a = dynThickness(dist)
+
+  local b=getBucket(plr)
+
+  if esp.showSkeleton then
+    if p.torso then
+      setLine(b.torso, p.torso.Position, hrp.Position, col, th, a)
+      setLine(b.head,  (p.head and p.head.Position) or p.torso.Position, p.torso.Position, col, th, a)
+      setLine(b.lower, (p.lower and p.lower.Position) or p.torso.Position, p.torso.Position, col, th, a)
+    else b.torso.Visible=false b.head.Visible=false b.lower.Visible=false end
+    setLine(b.luArm, (p.luArm and p.luArm.Position), (p.torso and p.torso.Position) or hrp.Position, col, th, a)
+    if p.llArm then setLine(b.llArm, p.llArm.Position, (p.luArm and p.luArm.Position) or ((p.torso or hrp).Position), col, th, a) else b.llArm.Visible=false end
+    if p.lHand then setLine(b.lHand, p.lHand.Position, (p.llArm and p.llArm.Position) or (p.luArm and p.luArm.Position), col, th, a) else b.lHand.Visible=false end
+    setLine(b.ruArm, (p.ruArm and p.ruArm.Position), (p.torso and p.torso.Position) or hrp.Position, col, th, a)
+    if p.rlArm then setLine(b.rlArm, p.rlArm.Position, (p.ruArm and p.ruArm.Position) or ((p.torso or hrp).Position), col, th, a) else b.rlArm.Visible=false end
+    if p.rHand then setLine(b.rHand, p.rHand.Position, (p.rlArm and p.rlArm.Position) or (p.ruArm and p.ruArm.Position), col, th, a) else b.rHand.Visible=false end
+    local pelvis = p.lower or p.torso or hrp
+    setLine(b.luLeg, (p.luLeg and p.luLeg.Position), pelvis.Position, col, th, a)
+    if p.llLeg then setLine(b.llLeg, p.llLeg.Position, (p.luLeg and p.luLeg.Position), col, th, a) else b.llLeg.Visible=false end
+    setLine(b.ruLeg, (p.ruLeg and p.ruLeg.Position), pelvis.Position, col, th, a)
+    if p.rlLeg then setLine(b.rlLeg, p.rlLeg.Position, (p.ruLeg and p.ruLeg.Position), col, th, a) else b.rlLeg.Visible=false end
+  else
+    b.torso.Visible=false b.head.Visible=false b.lower.Visible=false
+    b.luArm.Visible=false b.llArm.Visible=false b.lHand.Visible=false
+    b.ruArm.Visible=false b.rlArm.Visible=false b.rHand.Visible=false
+    b.luLeg.Visible=false b.llLeg.Visible=false b.ruLeg.Visible=false b.rlLeg.Visible=false
+  end
+
+  local minX,minY,maxX,maxY,onScr = computeBBox(ch)
+  local tl,tr,bl,br = Vector2.new(minX,minY), Vector2.new(maxX,minY), Vector2.new(minX,maxY), Vector2.new(maxX,maxY)
+  if esp.showBox and onScr then
+    drawBoxLines(b, tl,tr,bl,br, col, th, a)
+    if esp.showCornerBox then corners(b, tl,tr,bl,br, col, th+0.5, a, esp.cornerLen)
+    else b.cTL1.Visible=false b.cTL2.Visible=false b.cTR1.Visible=false b.cTR2.Visible=false
+         b.cBL1.Visible=false b.cBL2.Visible=false b.cBR1.Visible=false b.cBR2.Visible=false end
+    if esp.showFilledBox then
+      b.boxFill.Filled=true; b.boxFill.Color=col; b.boxFill.Transparency=clamp(esp.fillAlpha,0.05,0.8)
+      b.boxFill.Position=tl; b.boxFill.Size=Vector2.new(maxX-minX, maxY-minY); b.boxFill.Visible=true
+    else b.boxFill.Visible=false end
+  else
+    b.boxT.Visible=false b.boxB.Visible=false b.boxL.Visible=false b.boxR.Visible=false
+    b.cTL1.Visible=false b.cTL2.Visible=false b.cTR1.Visible=false b.cTR2.Visible=false
+    b.cBL1.Visible=false b.cBL2.Visible=false b.cBR1.Visible=false b.cBR2.Visible=false
+    b.boxFill.Visible=false
+  end
+
+  if esp.showHealth and hum and onScr then
+    local hp, mh = hum.Health, math.max(1, hum.MaxHealth)
+    local pct = clamp(hp/mh, 0, 1)
+    local H   = (maxY - minY)
+    local fill= H * pct
+    local bw  = 4
+    b.hpBack.Filled=true; b.hpBack.Color=Color3.fromRGB(30,30,30); b.hpBack.Transparency=0.6
+    b.hpBack.Position=Vector2.new(minX - (bw+3), minY); b.hpBack.Size=Vector2.new(bw, H); b.hpBack.Visible=true
+    local colhp = Color3.new(lerp(1,0,pct), 1, 0)
+    b.hpBar.Filled=true; b.hpBar.Color=colhp; b.hpBar.Transparency=0.2
+    b.hpBar.Position=Vector2.new(minX - (bw+3), maxY - fill); b.hpBar.Size=Vector2.new(bw, fill); b.hpBar.Visible=true
+  else b.hpBack.Visible=false b.hpBar.Visible=false end
+
+  local nameY = math.max(0, minY - 14)
+  if esp.showNames and onScr then
+    local name = plr.Name
+    if esp.passiveESP and isPassive(ch) then name = name .. esp.passiveTag end
+    local base = plr.TeamColor and esp.useTeamColors and plr.TeamColor.Color or Theme.Secondary
+    if esp.passiveESP and isPassive(ch) then base = esp.passiveColor end
+    b.nameText.Text = name; b.nameText.Color=base; b.nameText.Position=Vector2.new((minX+maxX)/2, nameY); b.nameText.Size=14; b.nameText.Visible=true
+  else b.nameText.Visible=false end
+
+  if esp.showDistance and onScr then
+    b.distText.Text = string.format("%.0f", dist).."s"
+    b.distText.Color=Theme.Secondary; b.distText.Position=Vector2.new((minX+maxX)/2, maxY+12); b.distText.Size=13; b.distText.Visible=true
+  else b.distText.Visible=false end
+
+  if esp.itemESP and onScr then
+    local tname = equippedName(ch)
+    if tname or esp.itemWhenNoTool then
+      b.itemText.Text  = tname or ""
+      b.itemText.Color = esp.itemESPColor
+      b.itemText.Size  = esp.itemSize
+      b.itemText.Position = Vector2.new((minX+maxX)/2, nameY + esp.itemOffsetY)
+      b.itemText.Visible = (tname ~= nil) or esp.itemWhenNoTool
+    else b.itemText.Visible=false end
+  else b.itemText.Visible=false end
+
+  if esp.showTracers and onScr then
+    local p,_=Camera:WorldToViewportPoint(hrp.Position)
+    b.tracer.From = tracerAnchor()
+    b.tracer.To   = Vector2.new(p.X,p.Y)
+    b.tracer.Color= col; b.tracer.Thickness=th; b.tracer.Transparency=a; b.tracer.Visible=true
+  else b.tracer.Visible=false end
+end
+
+local function updateDrone(model)
+  local b = droneMap[model] or mkDroneBucket(); droneMap[model]=b
+  if not esp.droneEnabled then hideDroneBucket(b) return end
+
+  local cf,_ = model:GetBoundingBox()
+  local center = cf.Position
+  local dist = (center - Camera.CFrame.Position).Magnitude
+  if dist > esp.droneMaxDist then hideDroneBucket(b) return end
+
+  local minX,minY,maxX,maxY,onScr = computeBBox(model)
+  if not onScr then hideDroneBucket(b) return end
+
+  local tl,tr,bl,br = Vector2.new(minX,minY), Vector2.new(maxX,minY), Vector2.new(minX,maxY), Vector2.new(maxX,maxY)
+  local th, al = 2, 0.9
+  drawBoxLines(b, tl,tr,bl,br, esp.droneColor, th, al)
+
+  if esp.droneFilled then
+    b.fill.Filled=true; b.fill.Color=esp.droneColor; b.fill.Transparency=clamp(esp.droneFillAlpha,0.05,0.8)
+    b.fill.Position=tl; b.fill.Size=Vector2.new(maxX-minX, maxY-minY); b.fill.Visible=true
+  else b.fill.Visible=false end
+
+  b.label.Text = (model.Name and model.Name ~= "" and model.Name) or "DRONE"
+  b.label.Color = esp.droneColor
+  b.label.Size = 14
+  b.label.Position = Vector2.new((minX+maxX)/2, math.max(0, minY - 14))
+  b.label.Visible = true
+
+  b.dist.Text = string.format("%.0f", dist).."s"
+  b.dist.Color = Theme.Secondary
+  b.dist.Size = 13
+  b.dist.Position = Vector2.new((minX+maxX)/2, maxY + 12)
+  b.dist.Visible = true
+
+  if esp.droneTracers then
+    local v,_ = Camera:WorldToViewportPoint(center)
+    b.tracer.From = tracerAnchor()
+    b.tracer.To = Vector2.new(v.X, v.Y)
+    b.tracer.Color = esp.droneColor
+    b.tracer.Thickness = 2
+    b.tracer.Transparency = 0.9
+    b.tracer.Visible = true
+  else b.tracer.Visible=false end
+end
+
+local DroneFolderSet = {} -- [Model] = true
+local function considerInstance(inst)
+  if inst:IsA("Model") and inst.Name == "DroneModel" then
+    DroneFolderSet[inst] = true
+  end
+end
+for _,d in ipairs(Workspace:GetDescendants()) do considerInstance(d) end
+local descAddConn = Workspace.DescendantAdded:Connect(considerInstance)
+local descRemConn = Workspace.DescendantRemoving:Connect(function(inst)
+  if DroneFolderSet[inst] then DroneFolderSet[inst]=nil cleanDrone(inst) end
+end)
+
+local signalMapGlobal = {}
+local function hookSignals(plr)
+  signalMap[plr] = signalMap[plr] or {}
+  table.insert(signalMap[plr], plr.CharacterRemoving:Connect(function() local b=buckets[plr]; if b then hideBucket(b) end end))
+end
+
+local function updateESP()
+  esp.counter += 1
+  local stepEvery = (esp.perfMode=="Fast") and 2 or 1
+  if esp.perfMode=="Max" then stepEvery=1 end
+  if esp.counter % stepEvery ~= 0 then return end
+
+  for _,plr in ipairs(Players:GetPlayers()) do updatePlayer(plr) end
+  for model,_ in pairs(DroneFolderSet) do
+    if model and model.Parent then updateDrone(model) else DroneFolderSet[model]=nil cleanDrone(model) end
+  end
+end
+
+local function enableESP()
+  if not hasDrawing then notify("KuromiWare","ESP requires Drawing API",4) return end
+  if esp.conn then esp.conn:Disconnect() end
+  esp.enabled=true
+  esp.conn = RunService.RenderStepped:Connect(updateESP)
+  for _,plr in ipairs(Players:GetPlayers()) do hookSignals(plr) end
+  if not signalMapGlobal.__rem then
+    signalMapGlobal.__rem = Players.PlayerRemoving:Connect(function(plr) cleanPlayer(plr) end)
+    signalMapGlobal.__add = Players.PlayerAdded:Connect(function(plr) hookSignals(plr) end)
+  end
+end
+local function disableESP()
+  esp.enabled=false
+  if esp.conn then esp.conn:Disconnect() esp.conn=nil end
+  for plr in pairs(buckets) do cleanPlayer(plr) end
+  for m in pairs(droneMap) do cleanDrone(m) end
+end
+
+do
+  local L = ESPTab:Section({Name="Players | Core", Side="Left"})
+  L:Toggle({Name="Enable ESP", Flag="KW_ESP_EN", Default=false, Callback=function(v) if v then enableESP() else disableESP() end end})
+  L:Dropdown({Name="Performance", Flag="KW_ESP_PERF", Content={"Auto","Fast","Max"}, Default="Auto", Callback=function(v) esp.perfMode=v end})
+  L:Slider({Name="Max Distance", Flag="KW_ESP_MD", Default=esp.maxDistance, Min=200, Max=6000, Callback=function(v) esp.maxDistance=v end})
+  L:Toggle({Name="Fade by Distance", Flag="KW_ESP_FBD", Default=esp.fadeByDistance, Callback=function(v) esp.fadeByDistance=v end})
+  L:Toggle({Name="Only Visible (LOS)", Flag="KW_ESP_VIS", Default=esp.onlyVisible, Callback=function(v) esp.onlyVisible=v end})
+  L:Toggle({Name="Team Check", Flag="KW_ESP_TC", Default=esp.teamCheck, Callback=function(v) esp.teamCheck=v end})
+  L:Toggle({Name="Use Team Colors", Flag="KW_ESP_UCT", Default=esp.useTeamColors, Callback=function(v) esp.useTeamColors=v end})
+
+  local R = ESPTab:Section({Name="Players | Elements", Side="Right"})
+  R:Toggle({Name="Skeleton", Flag="KW_ESP_SKEL", Default=esp.showSkeleton, Callback=function(v) esp.showSkeleton=v end})
+  R:Toggle({Name="Box", Flag="KW_ESP_BOX", Default=esp.showBox, Callback=function(v) esp.showBox=v end})
+  R:Toggle({Name="Corner Box", Flag="KW_ESP_CBOX", Default=esp.showCornerBox, Callback=function(v) esp.showCornerBox=v end})
+  R:Slider({Name="Corner Length", Flag="KW_ESP_CL", Default=esp.cornerLen, Min=4, Max=24, Callback=function(v) esp.cornerLen=v end})
+  R:Toggle({Name="Fill Box", Flag="KW_ESP_FILL", Default=esp.showFilledBox, Callback=function(v) esp.showFilledBox=v end})
+  R:Slider({Name="Fill Alpha %", Flag="KW_ESP_FA", Default=math.floor(esp.fillAlpha*100), Min=5, Max=80, Callback=function(v) esp.fillAlpha=clamp(v/100,0.05,0.8) end})
+  R:Toggle({Name="Tracers", Flag="KW_ESP_TR", Default=esp.showTracers, Callback=function(v) esp.showTracers=v end})
+  R:Dropdown({Name="Tracer Origin", Flag="KW_ESP_TO", Content={"Bottom","Center","Mouse"}, Default=esp.tracerOrigin, Callback=function(v) esp.tracerOrigin=v end})
+  R:Toggle({Name="Name", Flag="KW_ESP_NAME", Default=esp.showNames, Callback=function(v) esp.showNames=v end})
+  R:Toggle({Name="Health Bar", Flag="KW_ESP_HP", Default=esp.showHealth, Callback=function(v) esp.showHealth=v end})
+  R:Toggle({Name="Distance", Flag="KW_ESP_DIST", Default=esp.showDistance, Callback=function(v) esp.showDistance=v end})
+
+  local I = ESPTab:Section({Name="Players | Item ESP | Style", Side="Left"})
+  I:Toggle({Name="Item ESP", Flag="KW_ITEM_EN", Default=esp.itemESP, Callback=function(v) esp.itemESP=v end})
+  I:Colorpicker({Name="Item Text Color", Flag="KW_ITEM_COL", Default=esp.itemESPColor, Callback=function(c) esp.itemESPColor=c end})
+  I:Slider({Name="Item Size", Flag="KW_ITEM_SZ", Default=esp.itemSize, Min=10, Max=22, Callback=function(v) esp.itemSize=math.floor(v) end})
+  I:Slider({Name="Item Offset Y", Flag="KW_ITEM_OY", Default=esp.itemOffsetY, Min=8, Max=28, Callback=function(v) esp.itemOffsetY=math.floor(v) end})
+  I:Toggle({Name="Show When No Tool", Flag="KW_ITEM_SNT", Default=esp.itemWhenNoTool, Callback=function(v) esp.itemWhenNoTool=v end})
+
+  local P = ESPTab:Section({Name="Players | Passive | Colors", Side="Right"})
+  P:Toggle({Name="Show (P) tag", Flag="KW_PAS_TAG", Default=esp.passiveESP, Callback=function(v) esp.passiveESP=v end})
+  P:Colorpicker({Name="Passive Color", Flag="KW_PAS_COL", Default=esp.passiveColor, Callback=function(c) esp.passiveColor=c end})
+  P:Colorpicker({Name="Visible Color", Flag="KW_C_V", Default=esp.visColor, Callback=function(c) esp.visColor=c end})
+  P:Colorpicker({Name="Occluded Color", Flag="KW_C_O", Default=esp.occColor, Callback=function(c) esp.occColor=c end})
+
+  local D = ESPTab:Section({Name="Drones | DroneModel ESP", Side="Left"})
+  D:Toggle({Name="Enable Drone ESP", Flag="KW_DR_EN", Default=esp.droneEnabled, Callback=function(v) esp.droneEnabled=v end})
+  D:Slider({Name="Max Distance", Flag="KW_DR_MD", Default=esp.droneMaxDist, Min=300, Max=8000, Callback=function(v) esp.droneMaxDist=v end})
+  D:Toggle({Name="Tracer", Flag="KW_DR_TR", Default=esp.droneTracers, Callback=function(v) esp.droneTracers=v end})
+  D:Toggle({Name="Filled Box", Flag="KW_DR_FILL", Default=esp.droneFilled, Callback=function(v) esp.droneFilled=v end})
+  D:Slider({Name="Fill Alpha %", Flag="KW_DR_FA", Default=math.floor(esp.droneFillAlpha*100), Min=5, Max=80, Callback=function(v) esp.droneFillAlpha=clamp(v/100,0.05,0.8) end})
+  D:Colorpicker({Name="Drone Color", Flag="KW_DR_COL", Default=esp.droneColor, Callback=function(c) esp.droneColor=c end})
+end
+
+----------------------------------------------------------------
+-- Aimbot (stutter-fixed | min HP stop)
+----------------------------------------------------------------
+local aim = {
+  enabled       = false,
+  holdToUse     = false,
+  toggleKey     = Enum.KeyCode.Q,
+  holdButton    = Enum.UserInputType.MouseButton2,
+
+  teamCheck     = false,
+  wallCheck     = true,
+  passiveIgnore = true,
+  targetPart    = "Head",
+  fov           = 150,
+  smooth        = 0.18,
+  maxDistance   = 1200,
+  showHUD       = true,
+
+  minHPToLock   = 1,
+
+  prediction    = false,
+  bulletSpeed   = 300,
+  leadStrength  = 1.0,
+
+  selectInterval= 0.08,
+  losRefresh    = 0.20,
+  lastSelect    = 0,
+  lastLOSCheck  = 0,
+  currentPart   = nil,
+
+  conn          = nil,
+  fovCircle     = nil,
+  hudText       = nil,
+}
+
+local silentAim = {
+    enabled = false,
+    droneOnly = false,
+    target = nil,
+    teamCheck = false,
+    wallCheck = true,
+    passiveIgnore = true,
+    targetPart = "Head",
+    fov = 100,
+    maxDistance = 1200,
+    prediction = 0.1,
+    bulletSpeed = 300,
+    leadStrength = 1.0,
+    selectInterval = 0.1,
+    losRefresh = 0.20,
+    lastSelect = 0,
+    lastLOSCheck = 0,
+    FinalTarget = nil
+}
+
+if hasDrawing then
+  aim.fovCircle = Drawing.new("Circle")
+  aim.fovCircle.Visible=false
+  aim.fovCircle.Filled=false
+  aim.fovCircle.Thickness=1.5
+  aim.fovCircle.Transparency=0.9
+  aim.fovCircle.Color=Color3.fromRGB(180,220,255)
+
+  aim.hudText = Drawing.new("Text")
+  aim.hudText.Visible=false
+  aim.hudText.Center=true
+  aim.hudText.Size=14
+  aim.hudText.Outline=true
+  aim.hudText.Color=Color3.fromRGB(230,230,255)
+end
+
+local holding=false
+UIS.InputBegan:Connect(function(i,gpe)
+  if gpe then return end
+  if i.UserInputType==aim.holdButton then holding=true end
+  if i.KeyCode==aim.toggleKey then
+    aim.enabled = not aim.enabled
+    if aim.fovCircle then aim.fovCircle.Visible = aim.enabled end
+    if not aim.enabled then aim.currentPart=nil end
+  end
+end)
+UIS.InputEnded:Connect(function(i) if i.UserInputType==aim.holdButton then holding=false end end)
+
+local function setAimHUD(txt)
+  if aim.hudText then
+    if aim.showHUD and txt then
+      aim.hudText.Text = txt
+      aim.hudText.Position = Vector2.new(Camera.ViewportSize.X/2, 72)
+      aim.hudText.Visible = true
+    else aim.hudText.Visible=false end
+  end
+end
+
+local function updFOV()
+  if not aim.fovCircle then return end
+  local m=UIS:GetMouseLocation()
+  aim.fovCircle.Position=Vector2.new(m.X,m.Y)
+  if silentAim.enabled then
+    aim.fovCircle.Radius=silentAim.fov
+  else
+    aim.fovCircle.Radius=aim.fov
+  end
+  aim.fovCircle.Visible = silentAim.enabled or aim.enabled
+end
+
+local function canSee(part, char)
+    if not aim.wallCheck then return true end
+    if not char then return false end
+    local RaycastOrigin = Camera.CFrame.Position
+
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances = {LP.Character, char}
+
+    local result = Workspace:Raycast(RaycastOrigin, part.Position - RaycastOrigin, params)
+    return not result or result.Instance:IsDescendantOf(char)
+end
+
+local function validHealth(hum)
+  if not hum then return false end
+  if hum.Health <= 0 then return false end
+  if hum.Health <= aim.minHPToLock then return false end
+  return true
+end
+
+local function findCandidate()
+  local m=UIS:GetMouseLocation()
+  local best, bd = nil, math.huge
+  local camPos = Camera.CFrame.Position
+  for _,plr in ipairs(Players:GetPlayers()) do
+    if plr~=LP and not ignorelist[plr.Name] then
+      if not (aim.teamCheck and sameTeam(plr)) then
+        local ch=plr.Character
+        if ch and not (aim.passiveIgnore and isPassive(ch)) then
+          local hum = ch:FindFirstChildOfClass("Humanoid")
+          if validHealth(hum) then
+            local part = ch:FindFirstChild(aim.targetPart) or ch:FindFirstChild("HumanoidRootPart")
+            if part then
+              local dist = (part.Position - camPos).Magnitude
+              if dist <= aim.maxDistance then
+                local p, on = Camera:WorldToViewportPoint(part.Position)
+                if on then
+                  local d = (Vector2.new(p.X,p.Y) - Vector2.new(m.X,m.Y)).Magnitude
+                  if d <= aim.fov and d < bd then
+                    if canSee(part, ch) then
+                      best, bd = part, d
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+  return best
+end
+
+local function predictedPosition(part)
+  if not aim.prediction then return part.Position end
+  local vel = (part.AssemblyLinearVelocity or Vector3.zero)
+  local dist = (part.Position - Camera.CFrame.Position).Magnitude
+  local t = dist / math.max(20, aim.bulletSpeed)
+  return part.Position + vel * t * aim.leadStrength
+end
+
+local function framerateSmooth(dt, s)
+  local perFrame = clamp(s, 0.01, 1)
+  local factor = 1 - math.pow(1 - perFrame, dt * 60)
+  return clamp(factor, 0.01, 1)
+end
+
+local function aimAt(part, dt)
+  local cf = Camera.CFrame
+  local goal = CFrame.new(cf.Position, predictedPosition(part))
+  local blend = framerateSmooth(dt, aim.smooth)
+  Camera.CFrame = cf:Lerp(goal, blend)
+end
+
+local lastStep = tick()
+local function stepAim()
+  local now = tick()
+  local dt = now - lastStep
+  lastStep = now
+
+  updFOV()
+  if not aim.enabled or (aim.holdToUse and not holding) then setAimHUD(nil) aim.currentPart=nil return end
+
+  if (now - aim.lastSelect) >= aim.selectInterval or not aim.currentPart then
+    aim.currentPart = findCandidate()
+    aim.lastSelect = now
+    aim.lastLOSCheck = now
+  else
+    local part = aim.currentPart
+    local ch = part and part.Parent
+    local hum = ch and ch:FindFirstChildOfClass("Humanoid")
+    if not part or not ch or not hum or not validHealth(hum) then
+      aim.currentPart = nil
+    else
+      local camPos = Camera.CFrame.Position
+      local dist = (part.Position - camPos).Magnitude
+      if dist > aim.maxDistance then aim.currentPart=nil
+      else
+        local m=UIS:GetMouseLocation()
+        local p,on = Camera:WorldToViewportPoint(part.Position)
+        if not on or (Vector2.new(p.X,p.Y)-Vector2.new(m.X,m.Y)).Magnitude > aim.fov then
+          aim.currentPart=nil
+        elseif (now - aim.lastLOSCheck) >= aim.losRefresh then
+          if not canSee(part, ch) then aim.currentPart=nil end
+          aim.lastLOSCheck = now
+        end
+      end
+    end
+  end
+
+  local t = aim.currentPart
+  if t then
+    aimAt(t, dt)
+    local ch = t.Parent
+    local pl = ch and Players:GetPlayerFromCharacter(ch)
+    local who = pl and pl.Name or "Target"
+    if ch and isPassive(ch) then who = who.." (P)" end
+    local dist = (t.Position - Camera.CFrame.Position).Magnitude
+    setAimHUD(string.format("%s  |  %.0fs", who, dist))
+  else
+    setAimHUD(nil)
+  end
+end
+
+local function enableAim() if aim.conn then aim.conn:Disconnect() end aim.conn = RunService.RenderStepped:Connect(stepAim); if aim.fovCircle then aim.fovCircle.Visible=true end end
+local function disableAim() if aim.conn then aim.conn:Disconnect() aim.conn=nil end if aim.fovCircle then aim.fovCircle.Visible=false end setAimHUD(nil) aim.currentPart=nil end
+
+do
+  local L = Combat:Section({Name="Aimbot | Core", Side="Left"})
+  L:Toggle({Name="Enabled", Flag="KW_AIM_EN", Default=false, Callback=function(v) if v then enableAim() else disableAim() end end})
+  L:Toggle({Name="Hold RMB", Flag="KW_AIM_HOLD", Default=false, Callback=function(v) aim.holdToUse=v end})
+  L:Keybind({Name="Toggle Key", Flag="KW_AIM_KEY", Default=aim.toggleKey, Callback=function(k) if typeof(k)=="EnumItem" then aim.toggleKey=k end end})
+  L:Slider({Name="FOV", Flag="KW_AIM_FOV", Default=aim.fov, Min=40, Max=600, Callback=function(v) aim.fov=v end})
+  L:Slider({Name="Smooth", Flag="KW_AIM_SM", Default=math.floor(aim.smooth*100), Min=1, Max=100, Callback=function(v) aim.smooth=clamp(v/100,0.01,1) end})
+  L:Slider({Name="Max Distance", Flag="KW_AIM_MD", Default=aim.maxDistance, Min=200, Max=6000, Callback=function(v) aim.maxDistance=v end})
+
+  local F = Combat:Section({Name="Aimbot | Filters", Side="Right"})
+  F:Toggle({Name="Team Check", Flag="KW_AIM_TC", Default=aim.teamCheck, Callback=function(v) aim.teamCheck=v end})
+  F:Toggle({Name="Wall Check", Flag="KW_AIM_WC", Default=aim.wallCheck, Callback=function(v) aim.wallCheck=v end})
+  F:Toggle({Name="Ignore Passive", Flag="KW_AIM_PI", Default=aim.passiveIgnore, Callback=function(v) aim.passiveIgnore=v end})
+  F:Dropdown({Name="Target Part", Flag="KW_AIM_TP", Content={"Head","HumanoidRootPart"}, Default=aim.targetPart, Callback=function(v) aim.targetPart=v end})
+  F:Slider({Name="Min HP to Lock", Flag="KW_AIM_MHP", Default=aim.minHPToLock, Min=0, Max=100, Callback=function(v) aim.minHPToLock=math.max(0, math.floor(v)) end})
+  F:Slider({Name="Select Interval (ms)", Flag="KW_AIM_SI", Default=math.floor(aim.selectInterval*1000), Min=30, Max=200, Callback=function(v) aim.selectInterval=clamp(v/1000,0.03,0.2) end})
+
+  local P = Combat:Section({Name="Aimbot | Prediction", Side="Left"})
+  P:Toggle({Name="Velocity Prediction", Flag="KW_AIM_PR", Default=false, Callback=function(v) aim.prediction=v end})
+  P:Slider({Name="Bullet Speed", Flag="KW_AIM_BS", Default=aim.bulletSpeed, Min=100, Max=1200, Callback=function(v) aim.bulletSpeed=math.floor(v) end})
+  P:Slider({Name="Lead Strength", Flag="KW_AIM_LS", Default=math.floor(aim.leadStrength*10), Min=5, Max=20, Callback=function(v) aim.leadStrength=clamp(v/10,0.5,2.0) end})
+end
+
+
+local mt = getrawmetatable(game)
+local old_namecall = mt.__namecall
+setreadonly(mt, false)
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+    if silentAim.enabled and not silentAim.droneOnly and method == "FireServer" and tostring(self) == "FireEvent" and silentAim.FinalTarget then
+        args[1] = {{{
+            silentAim.FinalTarget.Character[silentAim.targetPart],
+            silentAim.FinalTarget.Character[silentAim.targetPart].Position,
+            Vector3.new(0,0,0),
+            Enum.Material.Plastic,
+            LP.Character.HumanoidRootPart.Position,
+            self.Parent.Flash
+        }}}
+        args[2] = true
+    end
+    return old_namecall(self, unpack(args))
+end)
+setreadonly(mt, true)
+
+local mouse = LP:GetMouse()
+local old_mouse_index
+old_mouse_index = hookmetamethod(mouse, "__index", function(self, key)
+    if silentAim.enabled and silentAim.droneOnly and (key == "Hit" or key == "Target" or key == "TargetFilter") and aim.currentPart then
+        if key == "Hit" then
+            return CFrame.new(aim.currentPart.Position)
+        elseif key == "Target" then
+            return aim.currentPart
+        elseif key == "TargetFilter" then
+            return aim.currentPart.Parent
+        end
+    end
+    return old_mouse_index(self, key)
+end)
+
+----------------------------------------------------------------
+----------------------------------------------------------------
+local semigod = {
+    enabled = false,
+    heartbeatConn = nil,
+}
+
+-- goofy ahh
+
+local function equipItem(itemName)
+    local item = LP.Backpack:WaitForChild(itemName, 2)
+    if not item then
+        notify("KuromiWare", "Could not find " .. itemName, 3)
+        return
+    end
+
+    item.Parent = LP.Character
+    task.wait(0.2)
+
+    local viewportSize = Camera.ViewportSize
+    local centerX = viewportSize.X / 2
+    local centerY = viewportSize.Y / 2
+
+    VIM:SendMouseButtonEvent(centerX, centerY, 0, true, game, 1)
+    task.wait(0.05)
+    VIM:SendMouseButtonEvent(centerX, centerY, 0, false, game, 1)
+end
+
+local function handleSemigod()
+    if not semigod.enabled then return end
+
+    local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
+    
+    if not LP.Character:FindFirstChild("Medkit") and not LP.Backpack:FindFirstChild("Medkit") then
+        local args = {"!spawn medkit"}
+        commandFunction:InvokeServer(unpack(args))
+    end
+    if not LP.Character:FindFirstChild("Ballistics Helmet") and not LP.Backpack:FindFirstChild("Ballistics Helmet") then
+        local args = {"!spawn ball"}
+        commandFunction:InvokeServer(unpack(args))
+    end
+    if not LP.Character:FindFirstChild("Ballistics Vest") and not LP.Backpack:FindFirstChild("Ballistics Vest") then
+        local args = {"!spawn ballisticsvest"}
+        commandFunction:InvokeServer(unpack(args))
+    end
+    if not LP.Character:FindFirstChild("Wrench") and not LP.Backpack:FindFirstChild("Wrench") then
+        local args = {"!spawn wrench"}
+        commandFunction:InvokeServer(unpack(args))
+    end
+
+    task.wait(1) 
+
+    if not LP.Character:FindFirstChild("Ballistics Helmet") then
+        equipItem("Ballistics Helmet")
+    end
+    if not LP.Character:FindFirstChild("Ballistics Vest") then
+        equipItem("Ballistics Vest")
+    end
+
+    if semigod.heartbeatConn then semigod.heartbeatConn:Disconnect() end
+    semigod.heartbeatConn = RunService.Heartbeat:Connect(function()
+        if not semigod.enabled then
+            if semigod.heartbeatConn then semigod.heartbeatConn:Disconnect(); semigod.heartbeatConn = nil end
+            return
+        end
+        local char = LP.Character
+        if not char then return end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum and hum.Health > 0 and hum.Health < 100 then
+            local medkit = LP.Backpack:FindFirstChild("Medkit")
+            if medkit then
+                local originalParent = medkit.Parent
+                medkit.Parent = char
+                task.wait()
+                local actionMain = medkit:FindFirstChild("ActionMain")
+                if actionMain and actionMain:IsA("RemoteEvent") then
+                    actionMain:FireServer("heal", char)
+                end
+                task.wait()
+                medkit.Parent = originalParent
+            else
+                local equippedMedkit = char:FindFirstChild("Medkit")
+                if equippedMedkit then
+                    local actionMain = equippedMedkit:FindFirstChild("ActionMain")
+                    if actionMain and actionMain:IsA("RemoteEvent") then
+                        actionMain:FireServer("heal", char)
+                    end
+                end
+            end
+
+            local wrench = LP.Backpack:FindFirstChild("Wrench")
+            if wrench then
+                local originalParent = wrench.Parent
+                wrench.Parent = char
+                task.wait()
+                local actionMain = wrench:FindFirstChild("ActionMain")
+                if actionMain and actionMain:IsA("RemoteEvent") then
+                    actionMain:FireServer("heal", char)
+                end
+                task.wait()
+                wrench.Parent = originalParent
+            else
+                local equippedWrench = char:FindFirstChild("Wrench")
+                if equippedWrench then
+                    local actionMain = equippedWrench:FindFirstChild("ActionMain")
+                    if actionMain and actionMain:IsA("RemoteEvent") then
+                        actionMain:FireServer("heal", char)
+                    end
+                end
+            end
+        end
+    end)
+end
+
+local function enableSemigod()
+    semigod.enabled = true
+    task.spawn(handleSemigod)
+end
+
+local function disableSemigod()
+    semigod.enabled = false
+    if semigod.heartbeatConn then
+        semigod.heartbeatConn:Disconnect()
+        semigod.heartbeatConn = nil
+    end
+end
+
+----------------------------------------------------------------
+----------------------------------------------------------------
+local ir = {
+  enabled   = true,
+  speed     = 4.0,
+  cooldown  = 300,   -- ms
+  interval  = 0.06,  -- s
+  conn      = nil,
+  acc       = 0,
+  touched   = {},
+}
+local function isReloadTrack(track)
+  local n=(track.Name or ""):lower()
+  if n:find("reload") or n:find("mag") or n:find("clip") then return true end
+  local anim=track.Animation
+  if anim and anim.AnimationId then
+    local id=tostring(anim.AnimationId):lower()
+    if id:find("reload") or id:find("mag") or id:find("clip") then return true end
+  end
+  return false
+end
+local function irStep(dt)
+  ir.acc += dt
+  if ir.acc < ir.interval then return end
+  ir.acc = 0
+  if not ir.enabled then return end
+  local ch=LP.Character; if not ch then return end
+  local hum=ch:FindFirstChildOfClass("Humanoid"); if not hum then return end
+  local animator=hum:FindFirstChildOfClass("Animator"); if not animator then return end
+  for _,track in ipairs(animator:GetPlayingAnimationTracks()) do
+    if isReloadTrack(track) then
+      local now=os.clock()
+      if ir.touched[track] and (now - ir.touched[track]) * 1000 < ir.cooldown then
+      else
+        ir.touched[track]=now
+        pcall(function() track:AdjustSpeed(clamp(ir.speed,1,20)) end)
+      end
+    end
+  end
+end
+local function enableIR() if ir.conn then ir.conn:Disconnect() end ir.enabled=true ir.acc=0 ir.conn=RunService.Heartbeat:Connect(irStep) end
+local function disableIR() if ir.conn then ir.conn:Disconnect() ir.conn=nil end ir.enabled=false end
+
+do
+  local L = Combat:Section({Name="Insta Reload (Speed)", Side="Left"})
+  L:Toggle({Name="Enabled", Flag="KW_IR_EN", Default=ir.enabled, Callback=function(v) if v then enableIR() else disableIR() end end})
+  L:Slider({Name="Reload Speed ×", Flag="KW_IR_SPD", Default=ir.speed, Min=1, Max=20, Callback=function(v) ir.speed=v end})
+  local R = Combat:Section({Name="IR | Advanced", Side="Right"})
+  R:Slider({Name="Per-Reload Cooldown (ms)", Flag="KW_IR_CD", Default=ir.cooldown, Min=100, Max=1000, Callback=function(v) ir.cooldown=math.floor(v) end})
+  R:Slider({Name="Scan Interval (ms)", Flag="KW_IR_IV", Default=math.floor(ir.interval*1000), Min=30, Max=150, Callback=function(v) ir.interval=clamp(v/1000,0.03,0.15) end})
+end
+
+
+do
+  local L = Combat:Section({Name="Aimbot | Core", Side="Left"})
+  L:Toggle({Name="Enabled", Flag="KW_AIM_EN", Default=false, Callback=function(v) if v then enableAim() else disableAim() end end})
+  L:Toggle({Name="Hold RMB", Flag="KW_AIM_HOLD", Default=false, Callback=function(v) aim.holdToUse=v end})
+  L:Keybind({Name="Toggle Key", Flag="KW_AIM_KEY", Default=aim.toggleKey, Callback=function(k) if typeof(k)=="EnumItem" then aim.toggleKey=k end end})
+  L:Slider({Name="FOV", Flag="KW_AIM_FOV", Default=aim.fov, Min=40, Max=600, Callback=function(v) aim.fov=v end})
+  L:Slider({Name="Smooth", Flag="KW_AIM_SM", Default=math.floor(aim.smooth*100), Min=1, Max=100, Callback=function(v) aim.smooth=clamp(v/100,0.01,1) end})
+  L:Slider({Name="Max Distance", Flag="KW_AIM_MD", Default=aim.maxDistance, Min=200, Max=6000, Callback=function(v) aim.maxDistance=v end})
+
+  local F = Combat:Section({Name="Aimbot | Filters", Side="Right"})
+  F:Toggle({Name="Team Check", Flag="KW_AIM_TC", Default=aim.teamCheck, Callback=function(v) aim.teamCheck=v end})
+  F:Toggle({Name="Wall Check", Flag="KW_AIM_WC", Default=aim.wallCheck, Callback=function(v) aim.wallCheck=v end})
+  F:Toggle({Name="Ignore Passive", Flag="KW_AIM_PI", Default=aim.passiveIgnore, Callback=function(v) aim.passiveIgnore=v end})
+  F:Dropdown({Name="Target Part", Flag="KW_AIM_TP", Content={"Head","HumanoidRootPart"}, Default=aim.targetPart, Callback=function(v) aim.targetPart=v end})
+  F:Slider({Name="Min HP to Lock", Flag="KW_AIM_MHP", Default=aim.minHPToLock, Min=0, Max=100, Callback=function(v) aim.minHPToLock=math.max(0, math.floor(v)) end})
+  F:Slider({Name="Select Interval (ms)", Flag="KW_AIM_SI", Default=math.floor(aim.selectInterval*1000), Min=30, Max=200, Callback=function(v) aim.selectInterval=clamp(v/1000,0.03,0.2) end})
+
+  local P = Combat:Section({Name="Aimbot | Prediction", Side="Left"})
+  P:Toggle({Name="Velocity Prediction", Flag="KW_AIM_PR", Default=false, Callback=function(v) aim.prediction=v end})
+  P:Slider({Name="Bullet Speed", Flag="KW_AIM_BS", Default=aim.bulletSpeed, Min=100, Max=1200, Callback=function(v) aim.bulletSpeed=math.floor(v) end})
+  P:Slider({Name="Lead Strength", Flag="KW_AIM_LS", Default=math.floor(aim.leadStrength*10), Min=5, Max=20, Callback=function(v) aim.leadStrength=clamp(v/10,0.5,2.0) end})
+end
+
+do
+    local S = MiscTab:Section({Name="Semigod", Side="Left"})
+    S:Toggle({Name="Enabled", Flag="KW_SEMIGOD_EN", Default=false, Callback=function(v) if v then enableSemigod() else disableSemigod() end end})
+    
+    local SA = MiscTab:Section({Name="Drone Silent Aim", Side="Right"})
+    SA:Toggle({Name="Enabled", Flag="KW_SA_DRONE", Default=false, Callback=function(v) silentAim.droneOnly=v end})
+
+    local KA = MiscTab:Section({Name="Kill All", Side="Left"})
+    KA:Button({Name="Execute", Callback=function()
+        task.spawn(function()
+            local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
+            commandFunction:InvokeServer(unpack({"!spawn l9"}))
+            
+            local Gun = LP.Backpack:WaitForChild("L96A1", 2)
+            if not Gun then notify("KuromiWare", "L96A1 not found", 3) return end
+            
+            local FireEvent = Gun:WaitForChild("FireEvent", 1)
+            if not FireEvent then notify("KuromiWare", "FireEvent not found", 3) return end
+
+            local gunSettings
+            pcall(function() gunSettings = require(Gun.Settings) end)
+            local waitTime = (gunSettings and gunSettings.waittime) or 0.05
+
+            local targets = {}
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LP and player.Character and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+                    table.insert(targets, player)
+                end
+            end
+
+            while #targets > 0 do
+                for i = #targets, 1, -1 do
+                    local player = targets[i]
+                    local char = player and player.Character
+                    local hum = char and char:FindFirstChildOfClass("Humanoid")
+                    
+                    if hum and hum.Health > 0 then
+                        local head = char:FindFirstChild("Head")
+                        if head then
+                            pcall(function()
+                                FireEvent:FireServer({
+                                    {{{
+                                        head,
+                                        head.Position,
+                                        Vector3.new(0, 0, 0),
+                                        Enum.Material.Plastic,
+                                        LP.Character.Head.Position,
+                                        Gun.Flash
+                                    }}}
+                                }, true, nil, Vector3.new(0, 0, 0), nil, 1, waitTime, 3.6)
+                            end)
+                        end
+                    else
+                        table.remove(targets, i)
+                    end
+                end
+                task.wait(waitTime)
+            end
+
+            pcall(function()
+                Gun:Destroy()
+            end)
+        end)
+    end})
+end
+
+do
+    local L = SilentTab:Section({Name="Silent Aim | Core", Side="Left"})
+    L:Toggle({Name="Enabled", Flag="KW_SA_EN", Default=false, Callback=function(v) silentAim.enabled=v end})
+    L:Toggle({Name="Hold RMB", Flag="KW_SA_HOLD", Default=false, Callback=function(v) silentAim.holdToUse=v end})
+    L:Keybind({Name="Toggle Key", Flag="KW_SA_KEY", Default=Enum.KeyCode.Q, Callback=function(k) if typeof(k)=="EnumItem" then silentAim.toggleKey=k end end})
+    L:Slider({Name="FOV", Flag="KW_SA_FOV", Default=silentAim.fov, Min=40, Max=600, Callback=function(v) silentAim.fov=v end})
+    L:Slider({Name="Max Distance", Flag="KW_SA_MD", Default=silentAim.maxDistance, Min=200, Max=6000, Callback=function(v) silentAim.maxDistance=v end})
+
+    local F = SilentTab:Section({Name="Silent Aim | Filters", Side="Right"})
+    F:Toggle({Name="Team Check", Flag="KW_SA_TC", Default=silentAim.teamCheck, Callback=function(v) silentAim.teamCheck=v end})
+    F:Toggle({Name="Wall Check", Flag="KW_SA_WC", Default=silentAim.wallCheck, Callback=function(v) silentAim.wallCheck=v end})
+    F:Toggle({Name="Ignore Passive", Flag="KW_SA_PI", Default=silentAim.passiveIgnore, Callback=function(v) silentAim.passiveIgnore=v end})
+    F:Dropdown({Name="Target Part", Flag="KW_SA_TP", Content={"Head","HumanoidRootPart"}, Default=silentAim.targetPart, Callback=function(v) silentAim.targetPart=v end})
+    F:Slider({Name="Min HP to Lock", Flag="KW_SA_MHP", Default=1, Min=0, Max=100, Callback=function(v) silentAim.minHPToLock=math.max(0, math.floor(v)) end})
+    F:Slider({Name="Select Interval (ms)", Flag="KW_SA_SI", Default=math.floor(silentAim.selectInterval*1000), Min=30, Max=200, Callback=function(v) silentAim.selectInterval=clamp(v/1000,0.03,0.2) end})
+
+    local P = SilentTab:Section({Name="Silent Aim | Prediction", Side="Left"})
+    P:Toggle({Name="Velocity Prediction", Flag="KW_SA_PR", Default=false, Callback=function(v) silentAim.prediction=v end})
+    P:Slider({Name="Bullet Speed", Flag="KW_SA_BS", Default=silentAim.bulletSpeed, Min=100, Max=1200, Callback=function(v) silentAim.bulletSpeed=math.floor(v) end})
+    P:Slider({Name="Lead Strength", Flag="KW_SA_LS", Default=math.floor(silentAim.leadStrength*10), Min=5, Max=20, Callback=function(v) silentAim.leadStrength=clamp(v/10,0.5,2.0) end})
+end
+
+local function silentCanSee(TargetCharacter)
+	if not silentAim.wallCheck then return true end
+	if not TargetCharacter then return false end
+	local RaycastOrigin = Camera.CFrame.Position
+
+	local partsToCheck = {"Head", "HumanoidRootPart", "Torso"}
+
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Blacklist
+
+	for _, partName in ipairs(partsToCheck) do
+		local TargetPart = TargetCharacter:FindFirstChild(partName)
+		if TargetPart then
+			local direction = TargetPart.Position - RaycastOrigin
+			params.FilterDescendantsInstances = {LP.Character}
+			local result = Workspace:Raycast(RaycastOrigin, direction, params)
+
+			if result then
+				if result.Instance:IsDescendantOf(TargetCharacter) then
+					return true
+				end
+			else
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
+RunService.RenderStepped:Connect(function()
+    if not silentAim.enabled then silentAim.FinalTarget = nil return end
+
+    local isFinalTargetValid = false
+    if silentAim.FinalTarget and silentAim.FinalTarget.Character and silentAim.FinalTarget.Character:FindFirstChild("HumanoidRootPart") then
+        local TargetPart = silentAim.FinalTarget.Character.HumanoidRootPart
+        local TargetPos, onScreen = Camera:WorldToViewportPoint(TargetPart.Position)
+        local MousePos = UIS:GetMouseLocation()
+
+        if onScreen and ((TargetPos.X - MousePos.X)^2 + (TargetPos.Y - MousePos.Y)^2) <= (silentAim.fov^2) and
+           not silentAim.FinalTarget.Character:FindFirstChild("ForceField") and
+           silentAim.FinalTarget.Character.Humanoid.Health > 0 and
+           (not silentAim.wallCheck or silentCanSee(silentAim.FinalTarget.Character)) then
+         isFinalTargetValid = true
+        end
+    end
+
+    if not isFinalTargetValid then
+        silentAim.FinalTarget = nil
+        if tick() - silentAim.lastSelect > silentAim.selectInterval then
+            silentAim.lastSelect = tick()
+            local PotentialTargets = {}
+            for _, Player in pairs(Players:GetPlayers()) do
+                if Player ~= LP and Player.Character and not ignorelist[Player.Name] and not (silentAim.teamCheck and sameTeam(Player)) then
+                    local TargetPart = Player.Character:FindFirstChild("HumanoidRootPart")
+                    if TargetPart then
+                        local TargetPos, onScreen = Camera:WorldToViewportPoint(TargetPart.Position)
+                        local MousePos = UIS:GetMouseLocation()
+                        if onScreen and ((TargetPos.X - MousePos.X)^2 + (TargetPos.Y - MousePos.Y)^2) <= (silentAim.fov^2) and
+                           not Player.Character:FindFirstChild("ForceField") and
+                           Player.Character.Humanoid.Health > 0 then
+                            table.insert(PotentialTargets, Player)
+                        end
+                    end
+                end
+            end
+
+            if #PotentialTargets > 0 then
+                table.sort(PotentialTargets, function(a, b)
+                    if not (a.Character and a.Character:FindFirstChild("HumanoidRootPart") and b.Character and b.Character:FindFirstChild("HumanoidRootPart") and LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")) then return false end
+                    local a_dist = (a.Character.HumanoidRootPart.Position - LP.Character.HumanoidRootPart.Position).magnitude
+                    local b_dist = (b.Character.HumanoidRootPart.Position - LP.Character.HumanoidRootPart.Position).magnitude
+                    return a_dist < b_dist
+                end)
+
+                if not silentAim.wallCheck then
+                    silentAim.FinalTarget = PotentialTargets[1]
+                else
+                    for _, Player in ipairs(PotentialTargets) do
+                        if Player.Character and silentCanSee(Player.Character) then
+                            silentAim.FinalTarget = Player
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+
+----------------------------------------------------------------
+----------------------------------------------------------------
+local ir = {
+  enabled   = true,
+  speed     = 4.0,
+  cooldown  = 300,   -- ms
+  interval  = 0.06,  -- s
+  conn      = nil,
+  acc       = 0,
+  touched   = {},
+}
+local function isReloadTrack(track)
+  local n=(track.Name or ""):lower()
+  if n:find("reload") or n:find("mag") or n:find("clip") then return true end
+  local anim=track.Animation
+  if anim and anim.AnimationId then
+    local id=tostring(anim.AnimationId):lower()
+    if id:find("reload") or id:find("mag") or id:find("clip") then return true end
+  end
+  return false
+end
+local function irStep(dt)
+  ir.acc += dt
+  if ir.acc < ir.interval then return end
+  ir.acc = 0
+  if not ir.enabled then return end
+  local ch=LP.Character; if not ch then return end
+  local hum=ch:FindFirstChildOfClass("Humanoid"); if not hum then return end
+  local animator=hum:FindFirstChildOfClass("Animator"); if not animator then return end
+  for _,track in ipairs(animator:GetPlayingAnimationTracks()) do
+    if isReloadTrack(track) then
+      local now=os.clock()
+      if ir.touched[track] and (now - ir.touched[track]) * 1000 < ir.cooldown then
+      else
+        ir.touched[track]=now
+        pcall(function() track:AdjustSpeed(clamp(ir.speed,1,20)) end)
+      end
+    end
+  end
+end
+local function enableIR() if ir.conn then ir.conn:Disconnect() end ir.enabled=true ir.acc=0 ir.conn=RunService.Heartbeat:Connect(irStep) end
+local function disableIR() if ir.conn then ir.conn:Disconnect() ir.conn=nil end ir.enabled=false end
+
+do
+  local L = Combat:Section({Name="Insta Reload (Speed)", Side="Left"})
+  L:Toggle({Name="Enabled", Flag="KW_IR_EN", Default=ir.enabled, Callback=function(v) if v then enableIR() else disableIR() end end})
+  L:Slider({Name="Reload Speed ×", Flag="KW_IR_SPD", Default=ir.speed, Min=1, Max=20, Callback=function(v) ir.speed=v end})
+  local R = Combat:Section({Name="IR | Advanced", Side="Right"})
+  R:Slider({Name="Per-Reload Cooldown (ms)", Flag="KW_IR_CD", Default=ir.cooldown, Min=100, Max=1000, Callback=function(v) ir.cooldown=math.floor(v) end})
+  R:Slider({Name="Scan Interval (ms)", Flag="KW_IR_IV", Default=math.floor(ir.interval*1000), Min=30, Max=150, Callback=function(v) ir.interval=clamp(v/1000,0.03,0.15) end})
+end
+
+----------------------------------------------------------------
+----------------------------------------------------------------
+local fb = { enabled=false, brightness=3, clock=14, noShadows=true, noFog=true, conn=nil, saved={}, cc=nil }
+local fov = { lock=false, value=80, conn=nil }
+local function saveLight()
+  fb.saved.Ambient=Lighting.Ambient; fb.saved.OutdoorAmbient=Lighting.OutdoorAmbient
+  fb.saved.Brightness=Lighting.Brightness; fb.saved.ClockTime=Lighting.ClockTime
+  fb.saved.GlobalShadows=Lighting.GlobalShadows; fb.saved.FogStart=Lighting.FogStart; fb.saved.FogEnd=Lighting.FogEnd
+end
+local function applyFB()
+  Lighting.Ambient=Color3.new(1,1,1); Lighting.OutdoorAmbient=Color3.new(1,1,1)
+  Lighting.Brightness=fb.brightness; Lighting.ClockTime=fb.clock; Lighting.GlobalShadows=not fb.noShadows
+  if fb.noFog then Lighting.FogStart=0 Lighting.FogEnd=1e6 end
+  if not fb.cc then fb.cc=Instance.new("ColorCorrectionEffect") fb.cc.Name="KW_Fullbright" fb.cc.Brightness=0.05 fb.cc.Contrast=0.05 fb.cc.Saturation=0.05 fb.cc.Parent=Lighting end
+end
+local function enableFB() if fb.enabled then return end saveLight() applyFB() fb.conn=RunService.RenderStepped:Connect(applyFB) fb.enabled=true end
+local function disableFB() if not fb.enabled then return end fb.enabled=false if fb.conn then fb.conn:Disconnect() fb.conn=nil end if fb.cc then fb.cc:Destroy() fb.cc=nil end for k,v in pairs(fb.saved) do Lighting[k]=v end end
+local function enableFOV() if fov.conn then fov.conn:Disconnect() end fov.lock=true fov.conn=RunService.RenderStepped:Connect(function() Camera.FieldOfView=fov.value end) end
+local function disableFOV() fov.lock=false if fov.conn then fov.conn:Disconnect() fov.conn=nil end end
+
+do
+  local L=World:Section({Name="Fullbright", Side="Left"})
+  L:Toggle({Name="Enabled (lock)", Flag="KW_FB_EN", Default=false, Callback=function(v) if v then enableFB() else disableFB() end end})
+  L:Slider({Name="Brightness", Flag="KW_FB_BR", Default=fb.brightness, Min=1, Max=6, Callback=function(v) fb.brightness=v end})
+  L:Slider({Name="ClockTime", Flag="KW_FB_CT", Default=fb.clock, Min=0, Max=24, Callback=function(v) fb.clock=v end})
+  L:Toggle({Name="No Shadows", Flag="KW_FB_NS", Default=fb.noShadows, Callback=function(v) fb.noShadows=v end})
+  L:Toggle({Name="No Fog", Flag="KW_FB_NF", Default=fb.noFog, Callback=function(v) fb.noFog=v end})
+
+  local R=World:Section({Name="Camera FOV", Side="Right"})
+  R:Toggle({Name="FOV Lock", Flag="KW_FOV_L", Default=false, Callback=function(v) if v then enableFOV() else disableFOV() end end})
+  R:Slider({Name="FOV", Flag="KW_FOV_V", Default=fov.value, Min=40, Max=120, Callback=function(v) fov.value=v end})
+end
+
+----------------------------------------------------------------
+----------------------------------------------------------------
+local placeName = "Place"
+pcall(function()
+  local info = MPS:GetProductInfo(game.PlaceId)
+  if info and info.Name and #info.Name > 0 then placeName = info.Name end
+end)
+
+local hud = {
+  -- Header
+  showHeaderBar   = true,     -- bar background
+  showAccentLine  = true,     -- animated accent strip
+  accentPulse     = true,
+  accentSpeed     = 0.12,     -- hue speed
+  headerAlpha     = 0.18,
+  shadowAlpha     = 0.35,
+  headerHeight    = 34,
+  headerAutoWidth = true,
+  headerWidth     = 480,
+  headerFontSize  = 15,
+
+  showFPS         = true,
+  showPing        = true,
+  showPlayers     = true,
+  showTime        = true,
+  showPlace       = true,
+  showUsername    = false,
+
+  showCrosshair   = true,
+  crossGap        = 7,
+  crossLen        = 9,
+  crossThick      = 1.5,
+}
+
+local headerBar, headerShadow, headerText, accentLine
+local statText = nil
+if hasDrawing then
+  headerBar    = Drawing.new("Square")
+  headerShadow = Drawing.new("Square")
+  headerText   = Drawing.new("Text")
+  accentLine   = Drawing.new("Line")
+  statText     = Drawing.new("Text")
+
+  for _,sq in ipairs({headerBar, headerShadow}) do
+    sq.Visible=false; sq.Filled=true; sq.Color=Theme.PanelMid; sq.Thickness=1
+  end
+  headerShadow.Color = Theme.PanelDark
+
+  headerText.Visible=true; headerText.Center=true; headerText.Size=hud.headerFontSize; headerText.Outline=true; headerText.Color=Theme.Secondary
+  statText.Visible=true; statText.Center=true; statText.Size=hud.headerFontSize-1; statText.Outline=true; statText.Color=Color3.fromRGB(200,200,210)
+
+  accentLine.Visible=true; accentLine.Thickness=2
+end
+
+local crossLines = {}
+if hasDrawing then
+  for i=1,4 do local l=Drawing.new("Line"); l.Color=Theme.Secondary; l.Thickness=hud.crossThick; l.Visible=false; crossLines[i]=l end
+end
+
+local pingItem = Stats and Stats.Network and Stats.Network.ServerStatsItem and Stats.Network.ServerStatsItem["Data Ping"] or nil
+local fpsCounter,lastFPS,fpsAccum = 0,60,0
+
+local function buildHeaderStrings()
+  local left = "KuromiWare - By list"
+  local rightParts = {}
+
+  if hud.showFPS then table.insert(rightParts, ("FPS %d"):format(lastFPS)) end
+  if hud.showPing and pingItem then table.insert(rightParts, ("Ping %dms"):format(math.max(0, math.floor(pingItem:GetValue() or 0)))) end
+  if hud.showPlayers then table.insert(rightParts, ("Players %d"):format(#Players:GetPlayers())) end
+  if hud.showTime then table.insert(rightParts, os.date("%H:%M:%S")) end
+  if hud.showPlace then table.insert(rightParts, placeName) end
+  if hud.showUsername then table.insert(rightParts, ("@%s"):format(LP.Name)) end
+
+  local right = table.concat(rightParts, " | ")
+  return left, right
+end
+
+RunService.RenderStepped:Connect(function(dt)
+  if not hasDrawing then return end
+
+  if silentAim.enabled or aim.enabled then
+    updFOV()
+  end
+
+  fpsAccum += dt; fpsCounter += 1
+  if fpsAccum >= 0.25 then lastFPS = math.floor(fpsCounter / fpsAccum + 0.5); fpsAccum, fpsCounter = 0, 0 end
+
+  local left, right = buildHeaderStrings()
+  local combined = (right ~= "" and (left.." | "..right)) or left
+
+  local vw = Camera.ViewportSize.X
+  local vh = Camera.ViewportSize.Y
+  local textSize = hud.headerFontSize
+  headerText.Size = textSize
+  statText.Size   = textSize - 1
+
+  local approxWidth = math.clamp(#combined * textSize * 0.56 + 40, 260, math.min(vw - 24, 720))
+  local w = hud.headerAutoWidth and approxWidth or hud.headerWidth
+  local h = hud.headerHeight
+  local x = math.floor((vw - w) / 2)
+  local y = 8
+
+  if hud.showHeaderBar then
+    headerShadow.Position     = Vector2.new(x, y+2)
+    headerShadow.Size         = Vector2.new(w, h)
+    headerShadow.Transparency = hud.shadowAlpha
+    headerShadow.Visible      = true
+
+    headerBar.Position        = Vector2.new(x, y)
+    headerBar.Size            = Vector2.new(w, h)
+    headerBar.Transparency    = hud.headerAlpha
+    headerBar.Visible         = true
+  else
+    headerShadow.Visible = false
+    headerBar.Visible    = false
+  end
+
+  local accent = Theme.Accent
+  if hud.accentPulse then
+    local hue = (os.clock() * hud.accentSpeed) % 1
+    accent = Color3.fromHSV(hue, 0.5, 1)
+  end
+  if hud.showAccentLine then
+    accentLine.From         = Vector2.new(x+8, y+h-2)
+    accentLine.To           = Vector2.new(x+w-8, y+h-2)
+    accentLine.Color        = accent
+    accentLine.Transparency = 0.9
+    accentLine.Visible      = true
+  else
+    accentLine.Visible = false
+  end
+
+  headerText.Text      = combined
+  headerText.Color     = Theme.Secondary
+  headerText.Position  = Vector2.new(vw/2, y + h/2 + 1)
+  headerText.Visible   = true
+
+  statText.Text        = " "
+  statText.Color       = accent
+  statText.Position    = Vector2.new(vw/2, y + h + 14)
+  statText.Visible     = true
+
+  local m=UIS:GetMouseLocation()
+  local cgap,clen=hud.crossGap,hud.crossLen
+  local pts={{Vector2.new(m.X - cgap - clen, m.Y), Vector2.new(m.X - cgap, m.Y)},
+             {Vector2.new(m.X + cgap, m.Y),       Vector2.new(m.X + cgap + clen, m.Y)},
+             {Vector2.new(m.X, m.Y - cgap - clen), Vector2.new(m.X, m.Y - cgap)},
+             {Vector2.new(m.X, m.Y + cgap),        Vector2.new(m.X, m.Y + cgap + clen)}}
+  for i=1,4 do
+    local L=crossLines[i]
+    if hud.showCrosshair then
+      L.Thickness = hud.crossThick
+      L.From=pts[i][1]; L.To=pts[i][2]; L.Visible=true
+    else L.Visible=false end
+  end
+end)
+
+do
+  local H = HUDTab:Section({Name="Header | Centered Banner", Side="Left"})
+  H:Toggle({Name="Show Header Bar", Flag="KW_HD_BAR", Default=hud.showHeaderBar, Callback=function(v) hud.showHeaderBar=v end})
+  H:Toggle({Name="Accent Pulse", Flag="KW_HD_AP", Default=hud.accentPulse, Callback=function(v) hud.accentPulse=v end})
+  H:Toggle({Name="Accent Line", Flag="KW_HD_AL", Default=hud.showAccentLine, Callback=function(v) hud.showAccentLine=v end})
+  H:Slider({Name="Header Height", Flag="KW_HD_H", Default=hud.headerHeight, Min=24, Max=50, Callback=function(v) hud.headerHeight=math.floor(v) end})
+  H:Slider({Name="Header Alpha %", Flag="KW_HD_A", Default=math.floor(hud.headerAlpha*100), Min=0, Max=80, Callback=function(v) hud.headerAlpha=clamp(v/100,0,0.8) end})
+  H:Slider({Name="Shadow Alpha %", Flag="KW_HD_SA", Default=math.floor(hud.shadowAlpha*100), Min=0, Max=80, Callback=function(v) hud.shadowAlpha=clamp(v/100,0,0.8) end})
+  H:Toggle({Name="Auto Width", Flag="KW_HD_AW", Default=hud.headerAutoWidth, Callback=function(v) hud.headerAutoWidth=v end})
+  H:Slider({Name="Manual Width", Flag="KW_HD_MW", Default=hud.headerWidth, Min=260, Max=720, Callback=function(v) hud.headerWidth=math.floor(v) end})
+  H:Slider({Name="Font Size", Flag="KW_HD_FS", Default=hud.headerFontSize, Min=12, Max=20, Callback=function(v) hud.headerFontSize=math.floor(v) end})
+
+  local D = HUDTab:Section({Name="Header | Data Chips", Side="Right"})
+  D:Toggle({Name="Show FPS", Flag="KW_HD_FPS", Default=hud.showFPS, Callback=function(v) hud.showFPS=v end})
+  D:Toggle({Name="Show Ping", Flag="KW_HD_PING", Default=hud.showPing, Callback=function(v) hud.showPing=v end})
+  D:Toggle({Name="Show Players", Flag="KW_HD_PLR", Default=hud.showPlayers, Callback=function(v) hud.showPlayers=v end})
+  D:Toggle({Name="Show Time", Flag="KW_HD_TIME", Default=hud.showTime, Callback=function(v) hud.showTime=v end})
+  D:Toggle({Name="Show Place Name", Flag="KW_HD_PLACE", Default=hud.showPlace, Callback=function(v) hud.showPlace=v end})
+  D:Toggle({Name="Show Username", Flag="KW_HD_USER", Default=hud.showUsername, Callback=function(v) hud.showUsername=v end})
+
+  local C = HUDTab:Section({Name="Crosshair", Side="Left"})
+  C:Toggle({Name="Enabled", Flag="KW_CH_EN", Default=hud.showCrosshair, Callback=function(v) hud.showCrosshair=v end})
+  C:Slider({Name="Gap (px)", Flag="KW_CH_GAP", Default=hud.crossGap, Min=3, Max=24, Callback=function(v) hud.crossGap=math.floor(v) end})
+  C:Slider({Name="Length (px)", Flag="KW_CH_LEN", Default=hud.crossLen, Min=4, Max=24, Callback=function(v) hud.crossLen=math.floor(v) end})
+  C:Slider({Name="Thickness", Flag="KW_CH_TH", Default=math.floor(hud.crossThick*10), Min=10, Max=40, Callback=function(v) hud.crossThick=clamp(v/10,0.5,4) end})
+end
+
+----------------------------------------------------------------
+----------------------------------------------------------------
+do
+  local R = Config:Section({Name="Friends | Ignores", Side="Left"})
+  local userBox = R:Box({Name="Player Name", Flag="KW_USER_BOX", Placeholder="Exact name"})
+  R:Button({Name="Add to Friends (Whitelist)", Callback=function() local n=GUI.flags["KW_USER_BOX"]; if n and n~="" then whitelist[n]=true end userBox:Set("") end})
+  R:Button({Name="Remove Friend", Callback=function() local n=GUI.flags["KW_USER_BOX"]; if n then whitelist[n]=nil end userBox:Set("") end})
+  R:Button({Name="Add to Ignore", Callback=function() local n=GUI.flags["KW_USER_BOX"]; if n and n~="" then ignorelist[n]=true end userBox:Set("") end})
+  R:Button({Name="Remove Ignore", Callback=function() local n=GUI.flags["KW_USER_BOX"]; if n then ignorelist[n]=nil end userBox:Set("") end})
+end
+
+----------------------------------------------------------------
+----------------------------------------------------------------
+local S = About:Section({Name="KuromiWare", Side="Left"})
+S:Keybind({Name="Toggle UI", Flag="KW_UI_TOG", Default=Enum.KeyCode.RightShift, Callback=function(_, newKey) if not newKey then GUI:Close() end end})
+S:Button({Name="Unload", Callback=function()
+  disableESP(); if descAddConn then descAddConn:Disconnect() end; if descRemConn then descRemConn:Disconnect() end
+  disableAim(); disableIR(); disableFB(); disableFOV(); disableSemigod()
+  GUI:Unload(); getgenv().KittenWareLoaded=nil
+end})
+
+UIS.InputBegan:Connect(function(i,gpe)
+  if gpe then return end
+  if i.KeyCode==Enum.KeyCode.N then if nrEnabled then disableNR() else enableNR() end end
+  if i.KeyCode==Enum.KeyCode.B then if esp.enabled then disableESP() else enableESP() end end
+end)
+
+enableIR()
+
+
+getgenv().KittenWareLoaded = true
+getgenv().KittenWareLoading = nil
+GUI:Close()
