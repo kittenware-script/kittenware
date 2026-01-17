@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.01                                         |
+| Version: v1.02                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -555,7 +555,7 @@ end
 local aim = {
   enabled       = false,
   holdToUse     = false,
-  toggleKey     = Enum.KeyCode.Q,
+  toggleKey     = Enum.KeyCode.G,
   holdButton    = Enum.UserInputType.MouseButton2,
 
   teamCheck     = false,
@@ -1115,7 +1115,7 @@ do
     local L = SilentTab:Section({Name="Silent Aim | Core", Side="Left"})
     L:Toggle({Name="Enabled", Flag="KW_SA_EN", Default=false, Callback=function(v) silentAim.enabled=v end})
     L:Toggle({Name="Hold RMB", Flag="KW_SA_HOLD", Default=false, Callback=function(v) silentAim.holdToUse=v end})
-    L:Keybind({Name="Toggle Key", Flag="KW_SA_KEY", Default=Enum.KeyCode.Q, Callback=function(k) if typeof(k)=="EnumItem" then silentAim.toggleKey=k end end})
+    L:Keybind({Name="Toggle Key", Flag="KW_SA_KEY", Default=Enum.KeyCode.G, Callback=function(k) if typeof(k)=="EnumItem" then silentAim.toggleKey=k end end})
     L:Slider({Name="FOV", Flag="KW_SA_FOV", Default=silentAim.fov, Min=40, Max=600, Callback=function(v) silentAim.fov=v end})
     L:Slider({Name="Max Distance", Flag="KW_SA_MD", Default=silentAim.maxDistance, Min=200, Max=6000, Callback=function(v) silentAim.maxDistance=v end})
 
