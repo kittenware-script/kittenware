@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.02                                         |
+| Version: v1.03                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -555,7 +555,6 @@ end
 local aim = {
   enabled       = false,
   holdToUse     = false,
-  toggleKey     = Enum.KeyCode.G,
   holdButton    = Enum.UserInputType.MouseButton2,
 
   teamCheck     = false,
@@ -1023,29 +1022,6 @@ end
 
 
 do
-  local L = Combat:Section({Name="Aimbot | Core", Side="Left"})
-  L:Toggle({Name="Enabled", Flag="KW_AIM_EN", Default=false, Callback=function(v) if v then enableAim() else disableAim() end end})
-  L:Toggle({Name="Hold RMB", Flag="KW_AIM_HOLD", Default=false, Callback=function(v) aim.holdToUse=v end})
-  L:Keybind({Name="Toggle Key", Flag="KW_AIM_KEY", Default=aim.toggleKey, Callback=function(k) if typeof(k)=="EnumItem" then aim.toggleKey=k end end})
-  L:Slider({Name="FOV", Flag="KW_AIM_FOV", Default=aim.fov, Min=40, Max=600, Callback=function(v) aim.fov=v end})
-  L:Slider({Name="Smooth", Flag="KW_AIM_SM", Default=math.floor(aim.smooth*100), Min=1, Max=100, Callback=function(v) aim.smooth=clamp(v/100,0.01,1) end})
-  L:Slider({Name="Max Distance", Flag="KW_AIM_MD", Default=aim.maxDistance, Min=200, Max=6000, Callback=function(v) aim.maxDistance=v end})
-
-  local F = Combat:Section({Name="Aimbot | Filters", Side="Right"})
-  F:Toggle({Name="Team Check", Flag="KW_AIM_TC", Default=aim.teamCheck, Callback=function(v) aim.teamCheck=v end})
-  F:Toggle({Name="Wall Check", Flag="KW_AIM_WC", Default=aim.wallCheck, Callback=function(v) aim.wallCheck=v end})
-  F:Toggle({Name="Ignore Passive", Flag="KW_AIM_PI", Default=aim.passiveIgnore, Callback=function(v) aim.passiveIgnore=v end})
-  F:Dropdown({Name="Target Part", Flag="KW_AIM_TP", Content={"Head","HumanoidRootPart"}, Default=aim.targetPart, Callback=function(v) aim.targetPart=v end})
-  F:Slider({Name="Min HP to Lock", Flag="KW_AIM_MHP", Default=aim.minHPToLock, Min=0, Max=100, Callback=function(v) aim.minHPToLock=math.max(0, math.floor(v)) end})
-  F:Slider({Name="Select Interval (ms)", Flag="KW_AIM_SI", Default=math.floor(aim.selectInterval*1000), Min=30, Max=200, Callback=function(v) aim.selectInterval=clamp(v/1000,0.03,0.2) end})
-
-  local P = Combat:Section({Name="Aimbot | Prediction", Side="Left"})
-  P:Toggle({Name="Velocity Prediction", Flag="KW_AIM_PR", Default=false, Callback=function(v) aim.prediction=v end})
-  P:Slider({Name="Bullet Speed", Flag="KW_AIM_BS", Default=aim.bulletSpeed, Min=100, Max=1200, Callback=function(v) aim.bulletSpeed=math.floor(v) end})
-  P:Slider({Name="Lead Strength", Flag="KW_AIM_LS", Default=math.floor(aim.leadStrength*10), Min=5, Max=20, Callback=function(v) aim.leadStrength=clamp(v/10,0.5,2.0) end})
-end
-
-do
     local S = MiscTab:Section({Name="Semigod", Side="Left"})
     S:Toggle({Name="Enabled", Flag="KW_SEMIGOD_EN", Default=false, Callback=function(v) if v then enableSemigod() else disableSemigod() end end})
     
@@ -1115,7 +1091,7 @@ do
     local L = SilentTab:Section({Name="Silent Aim | Core", Side="Left"})
     L:Toggle({Name="Enabled", Flag="KW_SA_EN", Default=false, Callback=function(v) silentAim.enabled=v end})
     L:Toggle({Name="Hold RMB", Flag="KW_SA_HOLD", Default=false, Callback=function(v) silentAim.holdToUse=v end})
-    L:Keybind({Name="Toggle Key", Flag="KW_SA_KEY", Default=Enum.KeyCode.G, Callback=function(k) if typeof(k)=="EnumItem" then silentAim.toggleKey=k end end})
+    L:Keybind({Name="Toggle Key", Flag="KW_SA_KEY", Callback=function(k) if typeof(k)=="EnumItem" then silentAim.toggleKey=k end end})
     L:Slider({Name="FOV", Flag="KW_SA_FOV", Default=silentAim.fov, Min=40, Max=600, Callback=function(v) silentAim.fov=v end})
     L:Slider({Name="Max Distance", Flag="KW_SA_MD", Default=silentAim.maxDistance, Min=200, Max=6000, Callback=function(v) silentAim.maxDistance=v end})
 
@@ -1267,14 +1243,7 @@ end
 local function enableIR() if ir.conn then ir.conn:Disconnect() end ir.enabled=true ir.acc=0 ir.conn=RunService.Heartbeat:Connect(irStep) end
 local function disableIR() if ir.conn then ir.conn:Disconnect() ir.conn=nil end ir.enabled=false end
 
-do
-  local L = Combat:Section({Name="Insta Reload (Speed)", Side="Left"})
-  L:Toggle({Name="Enabled", Flag="KW_IR_EN", Default=ir.enabled, Callback=function(v) if v then enableIR() else disableIR() end end})
-  L:Slider({Name="Reload Speed ×", Flag="KW_IR_SPD", Default=ir.speed, Min=1, Max=20, Callback=function(v) ir.speed=v end})
-  local R = Combat:Section({Name="IR | Advanced", Side="Right"})
-  R:Slider({Name="Per-Reload Cooldown (ms)", Flag="KW_IR_CD", Default=ir.cooldown, Min=100, Max=1000, Callback=function(v) ir.cooldown=math.floor(v) end})
-  R:Slider({Name="Scan Interval (ms)", Flag="KW_IR_IV", Default=math.floor(ir.interval*1000), Min=30, Max=150, Callback=function(v) ir.interval=clamp(v/1000,0.03,0.15) end})
-end
+
 
 ----------------------------------------------------------------
 ----------------------------------------------------------------
@@ -1318,11 +1287,10 @@ pcall(function()
 end)
 
 local hud = {
-  -- Header
-  showHeaderBar   = true,     -- bar background
-  showAccentLine  = true,     -- animated accent strip
+  showHeaderBar   = false,     
+  showAccentLine  = false,     
   accentPulse     = true,
-  accentSpeed     = 0.12,     -- hue speed
+  accentSpeed     = 0.12,     
   headerAlpha     = 0.18,
   shadowAlpha     = 0.35,
   headerHeight    = 34,
@@ -1332,12 +1300,12 @@ local hud = {
 
   showFPS         = true,
   showPing        = true,
-  showPlayers     = true,
-  showTime        = true,
+  showPlayers     = false,
+  showTime        = false,
   showPlace       = true,
   showUsername    = false,
 
-  showCrosshair   = true,
+  showCrosshair   = false,
   crossGap        = 7,
   crossLen        = 9,
   crossThick      = 1.5,
@@ -1493,8 +1461,6 @@ do
   C:Slider({Name="Thickness", Flag="KW_CH_TH", Default=math.floor(hud.crossThick*10), Min=10, Max=40, Callback=function(v) hud.crossThick=clamp(v/10,0.5,4) end})
 end
 
-----------------------------------------------------------------
-----------------------------------------------------------------
 do
   local R = Config:Section({Name="Friends | Ignores", Side="Left"})
   local userBox = R:Box({Name="Player Name", Flag="KW_USER_BOX", Placeholder="Exact name"})
@@ -1504,8 +1470,6 @@ do
   R:Button({Name="Remove Ignore", Callback=function() local n=GUI.flags["KW_USER_BOX"]; if n then ignorelist[n]=nil end userBox:Set("") end})
 end
 
-----------------------------------------------------------------
-----------------------------------------------------------------
 local S = About:Section({Name="KuromiWare", Side="Left"})
 S:Keybind({Name="Toggle UI", Flag="KW_UI_TOG", Default=Enum.KeyCode.RightShift, Callback=function(_, newKey) if not newKey then GUI:Close() end end})
 S:Button({Name="Unload", Callback=function()
@@ -1516,8 +1480,6 @@ end})
 
 UIS.InputBegan:Connect(function(i,gpe)
   if gpe then return end
-  if i.KeyCode==Enum.KeyCode.N then if nrEnabled then disableNR() else enableNR() end end
-  if i.KeyCode==Enum.KeyCode.B then if esp.enabled then disableESP() else enableESP() end end
 end)
 
 enableIR()
