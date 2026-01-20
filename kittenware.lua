@@ -1029,6 +1029,31 @@ do
     local SA = MiscTab:Section({Name="Drone Silent Aim", Side="Right"})
     SA:Toggle({Name="Enabled", Flag="KW_SA_DRONE", Default=false, Callback=function(v) silentAim.droneOnly=v end})
 
+	local BL = MiscTab:Section({Name="Loadout", Side="Right"})
+BL:Button({Name="Equip Loadout", Callback=function()
+
+	local Players = game:GetService("Players")
+    local LP = Players.LocalPlayer
+
+    local commandFunction = LP:WaitForChild("PlayerGui")
+        :WaitForChild("ChatConsoleGui")
+        :WaitForChild("CommandFunction")
+
+
+
+    local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
+    commandFunction:InvokeServer("!sts ak+eo+ang+pbs sop+eo+ang+pbs mac+blue+acog+ext+sup r7+hunt+pbs+blue wrench medkit")
+
+	local character = LP.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Health = 0
+        end
+    end
+end})
+
+
     local KA = MiscTab:Section({Name="Kill All", Side="Left"})
     KA:Button({Name="Execute", Callback=function()
         task.spawn(function()
