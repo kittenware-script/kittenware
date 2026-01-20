@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.06                                         |
+| Version: v1.07                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -541,7 +541,7 @@ do
   P:Colorpicker({Name="Visible Color", Flag="KW_C_V", Default=esp.visColor, Callback=function(c) esp.visColor=c end})
   P:Colorpicker({Name="Occluded Color", Flag="KW_C_O", Default=esp.occColor, Callback=function(c) esp.occColor=c end})
 
-  local D = ESPTab:Section({Name="Drones | DroneModel ESP", Side="Left"})
+  local D = ESPTab:Section({Name="Drones", Side="Left"})
   D:Toggle({Name="Enable Drone ESP", Flag="KW_DR_EN", Default=esp.droneEnabled, Callback=function(v) esp.droneEnabled=v end})
   D:Slider({Name="Max Distance", Flag="KW_DR_MD", Default=esp.droneMaxDist, Min=300, Max=8000, Callback=function(v) esp.droneMaxDist=v end})
   D:Toggle({Name="Tracer", Flag="KW_DR_TR", Default=esp.droneTracers, Callback=function(v) esp.droneTracers=v end})
@@ -807,73 +807,100 @@ do
   local T = Combat:Section({Name="Trigger bot", Side="Right"})
 
     -- Triggerbot state
-    aim.trigger = {
-        enabled = false,
-        holdToUse = false,
-        delay = 0.03,
-        maxDistance = 3000,
-        targetPart = "Head",
-        teamCheck = false,
-        wallCheck = false
-    }
+ aim.trigger = {
+    enabled = false,
+    holdToUse = false,
+    delay = 0.03,
+    maxDistance = 3000,
+    targetPart = "Head",
+    teamCheck = false,
+    wallCheck = false,
+    passiveIgnore = false -- new
+}
 
     T:Toggle({Name="Enabled", Flag="KW_TRIG_EN", Default=false, Callback=function(v) aim.trigger.enabled=v end})
     T:Toggle({Name="Hold RMB", Flag="KW_TRIG_HOLD", Default=false, Callback=function(v) aim.trigger.holdToUse=v end})
     T:Keybind({Name="Toggle Key", Flag="KW_TRIG_KEY", Default=aim.trigger.toggleKey, Callback=function(k) if typeof(k)=="EnumItem" then aim.trigger.toggleKey=k end end})
     T:Slider({Name="Fire Delay (ms)", Flag="KW_TRIG_DELAY", Default=math.floor(aim.trigger.delay*1000), Min=10, Max=200, Callback=function(v) aim.trigger.delay=clamp(v/1000,0.01,0.2) end})
     T:Slider({Name="Max Distance", Flag="KW_TRIG_MD", Default=aim.trigger.maxDistance, Min=200, Max=6000, Callback=function(v) aim.trigger.maxDistance=v end})
+	T:Toggle({Name="Ignore Passive", Flag="KW_TRIG_PI", Default=aim.trigger.passiveIgnore, Callback=function(v) aim.trigger.passiveIgnore=v end})
 
-    --// Triggerbot Runtime
     task.spawn(function()
-        local lastShot = 0
-        while task.wait() do
-            if not aim.trigger.enabled then continue end
-            if aim.trigger.holdToUse and not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then continue end
+    local lastShot = 0
+    while task.wait() do
+        if not aim.trigger.enabled then continue end
+        if aim.trigger.holdToUse and not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then continue end
 
-            local now = tick()
-            if now - lastShot < aim.trigger.delay then continue end
+        local now = tick()
+        if now - lastShot < aim.trigger.delay then continue end
 
-            local target = getCrosshairTarget(
-                aim.trigger.maxDistance,
-                aim.trigger.targetPart,
-                aim.trigger.teamCheck,
-                aim.trigger.wallCheck
-            )
+        local target = getCrosshairTarget(
+            aim.trigger.maxDistance,
+            aim.trigger.targetPart,
+            aim.trigger.teamCheck,
+            aim.trigger.wallCheck,
+            aim.trigger.passiveIgnore
+        )
 
-            if target then
-                lastShot = now
-                mouse1press()
-                task.wait(0.01)
-                mouse1release()
-            end
+        if target then
+            lastShot = now
+            mouse1press()
+            task.wait(0.01)
+            mouse1release()
         end
-    end)
-
-    --// Crosshair target function
-    function getCrosshairTarget(maxDist, partName, teamCheck, wallCheck)
-        local cam = workspace.CurrentCamera
-        local origin = cam.CFrame.Position
-        local dir = cam.CFrame.LookVector * maxDist
-        local params = RaycastParams.new()
-        params.FilterType = Enum.RaycastFilterType.Blacklist
-        params.FilterDescendantsInstances = {LP.Character, cam}
-
-        local result = workspace:Raycast(origin, dir, params)
-        if not result then return nil end
-
-        local hit = result.Instance
-        local model = hit:FindFirstAncestorOfClass("Model")
-        if not model then return nil end
-        local hum = model:FindFirstChildOfClass("Humanoid")
-        if not hum or hum.Health <= 0 then return nil end
-
-        if teamCheck then
-            local plr = Players:GetPlayerFromCharacter(model)
-            if plr and plr.Team == LP.Team then return nil end
-        end
-
-        return model
     end
+end)
+
+-- Crosshair target function (improved)
+function getCrosshairTarget(maxDist, partName, teamCheck, wallCheck, passiveIgnore)
+    local cam = workspace.CurrentCamera
+    local origin = cam.CFrame.Position
+    local dir = cam.CFrame.LookVector * maxDist
+
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Blacklist
+    params.FilterDescendantsInstances = {LP.Character, cam}
+
+    -- Raycast to see if anything is in line (basic wall check)
+    local result = workspace:Raycast(origin, dir, params)
+    if not result then return nil end
+
+    local hit = result.Instance
+    local model = hit:FindFirstAncestorOfClass("Model")
+    if not model then return nil end
+    local hum = model:FindFirstChildOfClass("Humanoid")
+    if not hum or hum.Health <= 0 then return nil end
+
+    -- Team Check
+    if teamCheck then
+        local plr = Players:GetPlayerFromCharacter(model)
+        if plr and plr.Team == LP.Team then return nil end
+    end
+
+    -- Ignore Passive
+    if passiveIgnore then
+        if model:FindFirstChild("Passive") or model:GetAttribute("Passive") then
+            return nil
+        end
+    end
+
+    -- Improved Wall Check: trigger if your crosshair is directly over target
+    local targetPart = model:FindFirstChild(partName)
+    if not targetPart then return nil end
+
+    if wallCheck then
+        -- ray to part to check walls
+        local rayParams = RaycastParams.new()
+        rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+        rayParams.FilterDescendantsInstances = {LP.Character, cam}
+        local ray = workspace:Raycast(origin, (targetPart.Position - origin).Unit * maxDist, rayParams)
+        if ray and ray.Instance and not ray.Instance:IsDescendantOf(model) then
+            return nil -- wall in the way
+        end
+    end
+
+    return model
+end
 end
 
 
@@ -1043,50 +1070,90 @@ end
 ----------------------------------------------------------------
 ----------------------------------------------------------------
 local ir = {
-  enabled   = true,
-  speed     = 0,
-  cooldown  = 300,   -- ms
-  interval  = 0.06,  -- s
-  conn      = nil,
-  acc       = 0,
-  touched   = {},
+    enabled   = false,
+    speed     = 10,
+    interval  = 0.03,
+    conn      = nil,
 }
+
+-- aggressive reload detection
 local function isReloadTrack(track)
-  local n=(track.Name or ""):lower()
-  if n:find("reload") or n:find("mag") or n:find("clip") then return true end
-  local anim=track.Animation
-  if anim and anim.AnimationId then
-    local id=tostring(anim.AnimationId):lower()
-    if id:find("reload") or id:find("mag") or id:find("clip") then return true end
-  end
-  return false
-end
-local function irStep(dt)
-  ir.acc += dt
-  if ir.acc < ir.interval then return end
-  ir.acc = 0
-  if not ir.enabled then return end
-  local ch=LP.Character; if not ch then return end
-  local hum=ch:FindFirstChildOfClass("Humanoid"); if not hum then return end
-  local animator=hum:FindFirstChildOfClass("Animator"); if not animator then return end
-  for _,track in ipairs(animator:GetPlayingAnimationTracks()) do
-    if isReloadTrack(track) then
-      local now=os.clock()
-      if ir.touched[track] and (now - ir.touched[track]) * 1000 < ir.cooldown then
-      else
-        ir.touched[track]=now
-        pcall(function() track:AdjustSpeed(clamp(ir.speed,1,20)) end)
-      end
+    local name = (track.Name or ""):lower()
+    local anim = track.Animation
+
+    if name:find("reload") or name:find("mag") or name:find("clip") then
+        return true
     end
-  end
+
+    if anim and anim.AnimationId then
+        local id = tostring(anim.AnimationId):lower()
+        if id:find("reload") or id:find("mag") or id:find("clip") then
+            return true
+        end
+    end
+
+    -- fallback: long non-looped animations
+    if track.Length > 1.5 and not track.Looped then
+        return true
+    end
+
+    return false
 end
-local function enableIR() if ir.conn then ir.conn:Disconnect() end ir.enabled=true ir.acc=0 ir.conn=RunService.Heartbeat:Connect(irStep) end
-local function disableIR() if ir.conn then ir.conn:Disconnect() ir.conn=nil end ir.enabled=false end
+
+local function irStep()
+    if not ir.enabled then return end
+
+    local ch = LP.Character
+    if not ch then return end
+
+    local hum = ch:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then return end
+
+    for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+        if isReloadTrack(track) then
+            pcall(function()
+                track:AdjustSpeed(math.clamp(ir.speed, 1, 25))
+            end)
+        end
+    end
+end
+
+local function enableIR()
+    if ir.conn then ir.conn:Disconnect() end
+    ir.enabled = true
+    ir.conn = RunService.Heartbeat:Connect(irStep)
+end
+
+local function disableIR()
+    if ir.conn then ir.conn:Disconnect() ir.conn = nil end
+    ir.enabled = false
+end
 
 do
-  local L = Combat:Section({Name="Insta Reload (Speed)", Side="Left"})
-  L:Toggle({Name="Enabled", Flag="KW_IR_EN", Default=ir.disabled, Callback=function(v) if v then enableIR() else disableIR() end end})
-  L:Slider({Name="Reload Speed", Flag="KW_IR_SPD", Default=ir.speed, Min=0, Max=20, Callback=function(v) ir.speed=v end})
+    local L = Combat:Section({Name="Fast Reload", Side="Left"})
+
+    L:Toggle({
+        Name = "Enabled",
+        Flag = "KW_IR_EN",
+        Default = false,
+        Callback = function(v)
+            if v then enableIR() else disableIR() end
+        end
+    })
+
+    L:Slider({
+        Name = "Reload Speed",
+        Flag = "KW_IR_SPD",
+        Default = ir.speed,
+        Min = 1,
+        Max = 25,
+        Callback = function(v)
+            ir.speed = v
+        end
+    })
 end
 
 
@@ -1196,45 +1263,86 @@ end)
     end})
 
     local KA = MiscTab:Section({Name="Kill All", Side="Left"})
-    KA:Button({Name="Execute", Callback=function()
+KA:Button({
+    Name = "Execute",
+    Callback = function()
         task.spawn(function()
-            local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
+
+            -- spawn gun
+            local commandFunction = LP.PlayerGui.ChatConsoleGui.CommandFunction
             commandFunction:InvokeServer("!spawn l9")
-            local Gun = LP.Backpack:WaitForChild("L96A1", 2)
-            if not Gun then return end
-            local FireEvent = Gun:WaitForChild("FireEvent", 1)
-            if not FireEvent then return end
-            local gunSettings
-            pcall(function() gunSettings = require(Gun.Settings) end)
-            local waitTime = (gunSettings and gunSettings.waittime) or 0.05
-            local targets = {}
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LP and player.Character then
-                    local hum = player.Character:FindFirstChildOfClass("Humanoid")
-                    if hum and hum.Health > 0 then table.insert(targets, player) end
-                end
+
+            local char = LP.Character or LP.CharacterAdded:Wait()
+            local hum = char:WaitForChild("Humanoid")
+
+            local Gun = LP.Backpack:WaitForChild("L96A1", 5)
+            if not Gun then
+                warn("Gun not found")
+                return
             end
-            while #targets > 0 do
-                for i = #targets, 1, -1 do
-                    local player = targets[i]
-                    local char = player.Character
-                    local hum = char and char:FindFirstChildOfClass("Humanoid")
-                    if hum and hum.Health > 0 then
-                        local head = char:FindFirstChild("Head")
-                        if head then
-                            pcall(function()
-                                FireEvent:FireServer({{{head, head.Position, Vector3.new(0,0,0), Enum.Material.Plastic, LP.Character.Head.Position, Gun.Flash}}}, true, nil, Vector3.new(0,0,0), nil, 1, waitTime, 3.6)
-                            end)
-                        end
-                    else
-                        table.remove(targets, i)
+
+            -- equip properly
+            hum:EquipTool(Gun)
+            task.wait(0.2)
+
+            local FireEvent = Gun:FindFirstChild("FireEvent", true)
+            if not FireEvent then
+                warn("FireEvent missing")
+                return
+            end
+
+            local Handle = Gun:FindFirstChild("Handle") or Gun:FindFirstChildWhichIsA("BasePart")
+            if not Handle then
+                warn("Gun handle missing")
+                return
+            end
+
+            -- grab fire delay
+            local waitTime = 0.05
+            pcall(function()
+                local settings = require(Gun.Settings)
+                waitTime = settings.waittime or waitTime
+            end)
+
+            -- fire at every player
+            for _, plr in ipairs(Players:GetPlayers()) do
+                if plr ~= LP and plr.Character then
+                    local hum2 = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local head = plr.Character:FindFirstChild("Head")
+
+                    if hum2 and hum2.Health > 0 and head then
+                        pcall(function()
+                            FireEvent:FireServer(
+                                {
+                                    {
+                                        {
+                                            head,
+                                            head.Position,
+                                            Vector3.zero,
+                                            Enum.Material.Plastic,
+                                            Handle.Position,
+                                            Gun.Flash
+                                        }
+                                    }
+                                },
+                                true,
+                                nil,
+                                Vector3.zero,
+                                nil,
+                                1,
+                                waitTime,
+                                3.6
+                            )
+                        end)
+
+                        task.wait(waitTime)
                     end
                 end
-                task.wait(waitTime)
             end
-            pcall(function() Gun:Destroy() end)
         end)
-    end})
+    end
+})
+
 
     local AY = MiscTab:Section({Name="Anti Yaw", Side="Left"})
     AY:Toggle({Name="Enabled", Flag="KW_ANTIYAW_EN", Default=false, Callback=function(v) antiYaw.enabled=v antiYaw.lockCF=nil end})
