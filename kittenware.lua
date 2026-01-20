@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.03                                         |
+| Version: v1.05                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -1023,80 +1023,95 @@ end
 
 
 do
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local UIS = game:GetService("UserInputService")
+    local LP = Players.LocalPlayer
+
+    local antiYaw = {
+        enabled = false,
+        mode = "Hard Lock",
+        holdToUse = false,
+        smoothStrength = 0.15,
+        randomSpeed = 5,
+        minYaw = -90,
+        maxYaw = 90,
+        lockCF = nil
+    }
+
+    RunService.RenderStepped:Connect(function()
+        if not antiYaw.enabled then return end
+        if antiYaw.holdToUse and not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then return end
+
+        local char = LP.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+
+        local pos = hrp.Position
+        if antiYaw.mode == "Hard Lock" then
+            if not antiYaw.lockCF then antiYaw.lockCF = hrp.CFrame end
+            local _, y, _ = antiYaw.lockCF:ToOrientation()
+            hrp.CFrame = CFrame.new(pos) * CFrame.Angles(0, y, 0)
+        elseif antiYaw.mode == "Smooth" then
+            if not antiYaw.lockCF then antiYaw.lockCF = hrp.CFrame end
+            local targetCF = antiYaw.lockCF
+            hrp.CFrame = hrp.CFrame:Lerp(targetCF, antiYaw.smoothStrength)
+        elseif antiYaw.mode == "Random" then
+            local yawOffset = math.rad(math.random(antiYaw.minYaw*100, antiYaw.maxYaw*100)/100)
+            local _, y, _ = hrp.CFrame:ToOrientation()
+            hrp.CFrame = CFrame.new(pos) * CFrame.Angles(0, y + yawOffset * antiYaw.randomSpeed * RunService.RenderStepped:Wait(), 0)
+        end
+
+        antiYaw.lockCF = hrp.CFrame
+    end)
+
     local S = MiscTab:Section({Name="Semigod", Side="Left"})
     S:Toggle({Name="Enabled", Flag="KW_SEMIGOD_EN", Default=false, Callback=function(v) if v then enableSemigod() else disableSemigod() end end})
-    
+
     local SA = MiscTab:Section({Name="Drone Silent Aim", Side="Right"})
     SA:Toggle({Name="Enabled", Flag="KW_SA_DRONE", Default=false, Callback=function(v) silentAim.droneOnly=v end})
 
-	local BL = MiscTab:Section({Name="Loadout", Side="Right"})
-BL:Button({Name="Equip Loadout", Callback=function()
-
-	local Players = game:GetService("Players")
-    local LP = Players.LocalPlayer
-
-    local commandFunction = LP:WaitForChild("PlayerGui")
-        :WaitForChild("ChatConsoleGui")
-        :WaitForChild("CommandFunction")
-
-
-
-    local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
-    commandFunction:InvokeServer("!sts ak+eo+ang+pbs sop+eo+ang+pbs mac+blue+acog+ext+sup r7+hunt+pbs+blue wrench medkit")
-
-	local character = LP.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.Health = 0
+    local BL = MiscTab:Section({Name="Loadout", Side="Right"})
+    BL:Button({Name="Equip Loadout", Callback=function()
+        local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
+        commandFunction:InvokeServer("!sts ak+eo+ang+pbs sop+eo+ang+pbs mac+blue+acog+ext+sup r7+hunt+pbs+blue wrench medkit")
+        local character = LP.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then humanoid.Health = 0 end
         end
-    end
-end})
-
+    end})
 
     local KA = MiscTab:Section({Name="Kill All", Side="Left"})
     KA:Button({Name="Execute", Callback=function()
         task.spawn(function()
             local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
-            commandFunction:InvokeServer(unpack({"!spawn l9"}))
-            
+            commandFunction:InvokeServer("!spawn l9")
             local Gun = LP.Backpack:WaitForChild("L96A1", 2)
-            if not Gun then notify("KuromiWare", "L96A1 not found", 3) return end
-            
+            if not Gun then return end
             local FireEvent = Gun:WaitForChild("FireEvent", 1)
-            if not FireEvent then notify("KuromiWare", "FireEvent not found", 3) return end
-
+            if not FireEvent then return end
             local gunSettings
             pcall(function() gunSettings = require(Gun.Settings) end)
             local waitTime = (gunSettings and gunSettings.waittime) or 0.05
-
             local targets = {}
             for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LP and player.Character and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
-                    table.insert(targets, player)
+                if player ~= LP and player.Character then
+                    local hum = player.Character:FindFirstChildOfClass("Humanoid")
+                    if hum and hum.Health > 0 then table.insert(targets, player) end
                 end
             end
-
             while #targets > 0 do
                 for i = #targets, 1, -1 do
                     local player = targets[i]
-                    local char = player and player.Character
+                    local char = player.Character
                     local hum = char and char:FindFirstChildOfClass("Humanoid")
-                    
                     if hum and hum.Health > 0 then
                         local head = char:FindFirstChild("Head")
                         if head then
                             pcall(function()
-                                FireEvent:FireServer({
-                                    {{{
-                                        head,
-                                        head.Position,
-                                        Vector3.new(0, 0, 0),
-                                        Enum.Material.Plastic,
-                                        LP.Character.Head.Position,
-                                        Gun.Flash
-                                    }}}
-                                }, true, nil, Vector3.new(0, 0, 0), nil, 1, waitTime, 3.6)
+                                FireEvent:FireServer({{{head, head.Position, Vector3.new(0,0,0), Enum.Material.Plastic, LP.Character.Head.Position, Gun.Flash}}}, true, nil, Vector3.new(0,0,0), nil, 1, waitTime, 3.6)
                             end)
                         end
                     else
@@ -1105,12 +1120,17 @@ end})
                 end
                 task.wait(waitTime)
             end
-
-            pcall(function()
-                Gun:Destroy()
-            end)
+            pcall(function() Gun:Destroy() end)
         end)
     end})
+
+    local AY = MiscTab:Section({Name="Anti Yaw", Side="Left"})
+    AY:Toggle({Name="Enabled", Flag="KW_ANTIYAW_EN", Default=false, Callback=function(v) antiYaw.enabled=v antiYaw.lockCF=nil end})
+    AY:Dropdown({Name="Mode", Flag="KW_ANTIYAW_MODE", Content={"Hard Lock"}, Default=antiYaw.mode, Callback=function(v) antiYaw.mode=v end})
+    AY:Slider({Name="Smooth Strength", Flag="KW_ANTIYAW_SS", Default=math.floor(antiYaw.smoothStrength*100), Min=5, Max=50, Callback=function(v) antiYaw.smoothStrength=clamp(v/100,0.05,0.5) end})
+    AY:Slider({Name="Random Speed", Flag="KW_ANTIYAW_RS", Default=antiYaw.randomSpeed, Min=1, Max=20, Callback=function(v) antiYaw.randomSpeed=v end})
+    AY:Slider({Name="Min Yaw Offset", Flag="KW_ANTIYAW_MIN", Default=antiYaw.minYaw, Min=-180, Max=0, Callback=function(v) antiYaw.minYaw=v end})
+    AY:Slider({Name="Max Yaw Offset", Flag="KW_ANTIYAW_MAX", Default=antiYaw.maxYaw, Min=0, Max=180, Callback=function(v) antiYaw.maxYaw=v end})
 end
 
 do
