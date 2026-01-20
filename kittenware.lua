@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.05                                         |
+| Version: v1.06                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -60,7 +60,7 @@ local MainUI   = GUI:Load()
 local Combat   = MainUI:Tab("Combat")
 local SilentTab = MainUI:Tab("Silent")
 local ESPTab   = MainUI:Tab("Visual")
-local World    = MainUI:Tab("World")
+local World    = MainUI:Tab("Exploits")
 local MiscTab = MainUI:Tab("Misc")
 local HUDTab   = MainUI:Tab("HUD")
 local Config   = MainUI:Tab("WL")
@@ -803,6 +803,77 @@ do
   P:Toggle({Name="Velocity Prediction", Flag="KW_AIM_PR", Default=false, Callback=function(v) aim.prediction=v end})
   P:Slider({Name="Bullet Speed", Flag="KW_AIM_BS", Default=aim.bulletSpeed, Min=100, Max=1200, Callback=function(v) aim.bulletSpeed=math.floor(v) end})
   P:Slider({Name="Lead Strength", Flag="KW_AIM_LS", Default=math.floor(aim.leadStrength*10), Min=5, Max=20, Callback=function(v) aim.leadStrength=clamp(v/10,0.5,2.0) end})
+
+  local T = Combat:Section({Name="Trigger bot", Side="Right"})
+
+    -- Triggerbot state
+    aim.trigger = {
+        enabled = false,
+        holdToUse = false,
+        delay = 0.03,
+        maxDistance = 3000,
+        targetPart = "Head",
+        teamCheck = false,
+        wallCheck = false
+    }
+
+    T:Toggle({Name="Enabled", Flag="KW_TRIG_EN", Default=false, Callback=function(v) aim.trigger.enabled=v end})
+    T:Toggle({Name="Hold RMB", Flag="KW_TRIG_HOLD", Default=false, Callback=function(v) aim.trigger.holdToUse=v end})
+    T:Keybind({Name="Toggle Key", Flag="KW_TRIG_KEY", Default=aim.trigger.toggleKey, Callback=function(k) if typeof(k)=="EnumItem" then aim.trigger.toggleKey=k end end})
+    T:Slider({Name="Fire Delay (ms)", Flag="KW_TRIG_DELAY", Default=math.floor(aim.trigger.delay*1000), Min=10, Max=200, Callback=function(v) aim.trigger.delay=clamp(v/1000,0.01,0.2) end})
+    T:Slider({Name="Max Distance", Flag="KW_TRIG_MD", Default=aim.trigger.maxDistance, Min=200, Max=6000, Callback=function(v) aim.trigger.maxDistance=v end})
+
+    --// Triggerbot Runtime
+    task.spawn(function()
+        local lastShot = 0
+        while task.wait() do
+            if not aim.trigger.enabled then continue end
+            if aim.trigger.holdToUse and not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then continue end
+
+            local now = tick()
+            if now - lastShot < aim.trigger.delay then continue end
+
+            local target = getCrosshairTarget(
+                aim.trigger.maxDistance,
+                aim.trigger.targetPart,
+                aim.trigger.teamCheck,
+                aim.trigger.wallCheck
+            )
+
+            if target then
+                lastShot = now
+                mouse1press()
+                task.wait(0.01)
+                mouse1release()
+            end
+        end
+    end)
+
+    --// Crosshair target function
+    function getCrosshairTarget(maxDist, partName, teamCheck, wallCheck)
+        local cam = workspace.CurrentCamera
+        local origin = cam.CFrame.Position
+        local dir = cam.CFrame.LookVector * maxDist
+        local params = RaycastParams.new()
+        params.FilterType = Enum.RaycastFilterType.Blacklist
+        params.FilterDescendantsInstances = {LP.Character, cam}
+
+        local result = workspace:Raycast(origin, dir, params)
+        if not result then return nil end
+
+        local hit = result.Instance
+        local model = hit:FindFirstAncestorOfClass("Model")
+        if not model then return nil end
+        local hum = model:FindFirstChildOfClass("Humanoid")
+        if not hum or hum.Health <= 0 then return nil end
+
+        if teamCheck then
+            local plr = Players:GetPlayerFromCharacter(model)
+            if plr and plr.Team == LP.Team then return nil end
+        end
+
+        return model
+    end
 end
 
 
@@ -973,7 +1044,7 @@ end
 ----------------------------------------------------------------
 local ir = {
   enabled   = true,
-  speed     = 4.0,
+  speed     = 0,
   cooldown  = 300,   -- ms
   interval  = 0.06,  -- s
   conn      = nil,
@@ -1014,11 +1085,8 @@ local function disableIR() if ir.conn then ir.conn:Disconnect() ir.conn=nil end 
 
 do
   local L = Combat:Section({Name="Insta Reload (Speed)", Side="Left"})
-  L:Toggle({Name="Enabled", Flag="KW_IR_EN", Default=ir.enabled, Callback=function(v) if v then enableIR() else disableIR() end end})
-  L:Slider({Name="Reload Speed ×", Flag="KW_IR_SPD", Default=ir.speed, Min=1, Max=20, Callback=function(v) ir.speed=v end})
-  local R = Combat:Section({Name="IR | Advanced", Side="Right"})
-  R:Slider({Name="Per-Reload Cooldown (ms)", Flag="KW_IR_CD", Default=ir.cooldown, Min=100, Max=1000, Callback=function(v) ir.cooldown=math.floor(v) end})
-  R:Slider({Name="Scan Interval (ms)", Flag="KW_IR_IV", Default=math.floor(ir.interval*1000), Min=30, Max=150, Callback=function(v) ir.interval=clamp(v/1000,0.03,0.15) end})
+  L:Toggle({Name="Enabled", Flag="KW_IR_EN", Default=ir.disabled, Callback=function(v) if v then enableIR() else disableIR() end end})
+  L:Slider({Name="Reload Speed", Flag="KW_IR_SPD", Default=ir.speed, Min=0, Max=20, Callback=function(v) ir.speed=v end})
 end
 
 
@@ -1027,6 +1095,19 @@ do
     local RunService = game:GetService("RunService")
     local UIS = game:GetService("UserInputService")
     local LP = Players.LocalPlayer
+
+	local cframeSpeed = {
+    enabled = false,
+    speed = 2,
+    holdToUse = false
+}
+
+local voidPos = {
+    enabled = false,
+    holdToUse = false,
+    height = 50 -- default void height
+}
+
 
     local antiYaw = {
         enabled = false,
@@ -1065,6 +1146,37 @@ do
 
         antiYaw.lockCF = hrp.CFrame
     end)
+
+	RunService.RenderStepped:Connect(function(dt)
+    if not cframeSpeed.enabled then return end
+    if cframeSpeed.holdToUse and not UIS:IsKeyDown(Enum.KeyCode.LeftShift) then return end
+
+    local char = LP.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+    if hrp and hum and hum.MoveDirection.Magnitude > 0 then
+        local move = hum.MoveDirection * cframeSpeed.speed * dt * 60
+        hrp.CFrame = hrp.CFrame + move
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not voidPos.enabled then return end
+    if voidPos.holdToUse and not UIS:IsKeyDown(Enum.KeyCode.LeftShift) then return end
+
+    local char = LP.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+    if hrp and hum then
+        -- Freeze position at camera X/Z, fixed Y (height)
+        local camPos = workspace.CurrentCamera.CFrame.Position
+        hrp.CFrame = CFrame.new(camPos.X, voidPos.height, camPos.Z)
+        hum.PlatformStand = true -- disables physics on humanoid
+    end
+end)
+
 
     local S = MiscTab:Section({Name="Semigod", Side="Left"})
     S:Toggle({Name="Enabled", Flag="KW_SEMIGOD_EN", Default=false, Callback=function(v) if v then enableSemigod() else disableSemigod() end end})
@@ -1131,6 +1243,77 @@ do
     AY:Slider({Name="Random Speed", Flag="KW_ANTIYAW_RS", Default=antiYaw.randomSpeed, Min=1, Max=20, Callback=function(v) antiYaw.randomSpeed=v end})
     AY:Slider({Name="Min Yaw Offset", Flag="KW_ANTIYAW_MIN", Default=antiYaw.minYaw, Min=-180, Max=0, Callback=function(v) antiYaw.minYaw=v end})
     AY:Slider({Name="Max Yaw Offset", Flag="KW_ANTIYAW_MAX", Default=antiYaw.maxYaw, Min=0, Max=180, Callback=function(v) antiYaw.maxYaw=v end})
+
+	local CS = MiscTab:Section({Name="CFrame Speed", Side="Right"})
+
+CS:Toggle({
+    Name="Enabled",
+    Flag="KW_CFS_EN",
+    Default=false,
+    Callback=function(v)
+        cframeSpeed.enabled = v
+    end
+})
+
+CS:Toggle({
+    Name="Hold Shift",
+    Flag="KW_CFS_HOLD",
+    Default=false,
+    Callback=function(v)
+        cframeSpeed.holdToUse = v
+    end
+})
+
+CS:Slider({
+    Name="Speed",
+    Flag="KW_CFS_SPD",
+    Default=1,
+    Min=0.5,
+    Max=5,
+    Callback=function(v)
+        cframeSpeed.speed = v
+    end
+})
+
+local V = MiscTab:Section({Name="Void Position (Beta)", Side="Left"})
+
+V:Toggle({
+    Name="Enabled",
+    Flag="KW_VOID_EN",
+    Default=false,
+    Callback=function(v)
+        voidPos.enabled = v
+
+        if not v then
+            local char = LP.Character
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.PlatformStand = false
+            end
+        end
+    end
+})
+
+V:Toggle({
+    Name="Hold Shift",
+    Flag="KW_VOID_HOLD",
+    Default=false,
+    Callback=function(v)
+        voidPos.holdToUse = v
+    end
+})
+
+V:Slider({
+    Name="Height",
+    Flag="KW_VOID_HGT",
+    Default=voidPos.height,
+    Min=10,
+    Max=500,
+    Callback=function(v)
+        voidPos.height = v
+    end
+})
+
 end
 
 do
@@ -1250,7 +1433,7 @@ end)
 ----------------------------------------------------------------
 local ir = {
   enabled   = true,
-  speed     = 4.0,
+  speed     = 1.0,
   cooldown  = 300,   -- ms
   interval  = 0.06,  -- s
   conn      = nil,
@@ -1308,8 +1491,68 @@ local function applyFB()
 end
 local function enableFB() if fb.enabled then return end saveLight() applyFB() fb.conn=RunService.RenderStepped:Connect(applyFB) fb.enabled=true end
 local function disableFB() if not fb.enabled then return end fb.enabled=false if fb.conn then fb.conn:Disconnect() fb.conn=nil end if fb.cc then fb.cc:Destroy() fb.cc=nil end for k,v in pairs(fb.saved) do Lighting[k]=v end end
-local function enableFOV() if fov.conn then fov.conn:Disconnect() end fov.lock=true fov.conn=RunService.RenderStepped:Connect(function() Camera.FieldOfView=fov.value end) end
-local function disableFOV() fov.lock=false if fov.conn then fov.conn:Disconnect() fov.conn=nil end end
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LP = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local fov = {
+    value = 120,
+    enabled = false,
+    connections = {}
+}
+
+-- Utility
+local function disconnectAll()
+    for _, c in ipairs(fov.connections) do
+        c:Disconnect()
+    end
+    table.clear(fov.connections)
+end
+
+-- Apply FOV safely
+local function applyFOV()
+    if not Camera then return end
+    if Camera.FieldOfView ~= fov.value then
+        Camera.FieldOfView = fov.value
+    end
+end
+
+-- Lock system
+local function hookCamera(cam)
+    Camera = cam
+    applyFOV()
+
+    -- Detect FOV changes
+    table.insert(fov.connections, Camera:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+        if fov.enabled and Camera.FieldOfView ~= fov.value then
+            Camera.FieldOfView = fov.value
+        end
+    end))
+end
+
+-- Camera replacement handler
+table.insert(fov.connections, workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+    if fov.enabled then
+        hookCamera(workspace.CurrentCamera)
+    end
+end))
+
+-- Public API
+function enableFOV(value)
+    if value then fov.value = value end
+    fov.enabled = true
+
+    disconnectAll()
+    hookCamera(workspace.CurrentCamera)
+end
+
+function disableFOV()
+    fov.enabled = false
+    disconnectAll()
+end
+
 
 do
   local L=World:Section({Name="Fullbright", Side="Left"})
@@ -1319,9 +1562,35 @@ do
   L:Toggle({Name="No Shadows", Flag="KW_FB_NS", Default=fb.noShadows, Callback=function(v) fb.noShadows=v end})
   L:Toggle({Name="No Fog", Flag="KW_FB_NF", Default=fb.noFog, Callback=function(v) fb.noFog=v end})
 
-  local R=World:Section({Name="Camera FOV", Side="Right"})
-  R:Toggle({Name="FOV Lock", Flag="KW_FOV_L", Default=false, Callback=function(v) if v then enableFOV() else disableFOV() end end})
-  R:Slider({Name="FOV", Flag="KW_FOV_V", Default=fov.value, Min=40, Max=120, Callback=function(v) fov.value=v end})
+  local R = World:Section({Name="Camera FOV", Side="Right"})
+
+R:Toggle({
+    Name="FOV Lock",
+    Flag="KW_FOV_L",
+    Default=false,
+    Callback=function(v)
+        if v then 
+            enableFOV()
+        else 
+            disableFOV()
+        end
+    end
+})
+
+R:Slider({
+    Name="FOV",
+    Flag="KW_FOV_V",
+    Default=fov.value,
+    Min=40,
+    Max=120,
+    Callback=function(v)
+        fov.value = v
+
+        if fov.enabled and workspace.CurrentCamera then
+            workspace.CurrentCamera.FieldOfView = v
+        end
+    end
+})
 end
 
 ----------------------------------------------------------------
@@ -1344,11 +1613,11 @@ local hud = {
   headerWidth     = 480,
   headerFontSize  = 15,
 
-  showFPS         = true,
-  showPing        = true,
+  showFPS         = false,
+  showPing        = false,
   showPlayers     = false,
   showTime        = false,
-  showPlace       = true,
+  showPlace       = false,
   showUsername    = false,
 
   showCrosshair   = false,
@@ -1386,7 +1655,7 @@ local pingItem = Stats and Stats.Network and Stats.Network.ServerStatsItem and S
 local fpsCounter,lastFPS,fpsAccum = 0,60,0
 
 local function buildHeaderStrings()
-  local left = "KuromiWare - By list"
+  local left = ""
   local rightParts = {}
 
   if hud.showFPS then table.insert(rightParts, ("FPS %d"):format(lastFPS)) end
