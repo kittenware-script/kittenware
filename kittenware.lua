@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.08                                         |
+| Version: v1.09                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -475,6 +475,114 @@ local function hookSignals(plr)
   table.insert(signalMap[plr], plr.CharacterRemoving:Connect(function() local b=buckets[plr]; if b then hideBucket(b) end end))
 end
 
+esp.chineseHatLocal  = false  -- local player
+esp.chineseHatOthers = false  -- other players
+local chineseHatMap = {}      -- [Character] = cone part
+
+-- Create a cone for a character
+local function createHatESP(character)
+    if not character or chineseHatMap[character] then return end
+    local head = character:FindFirstChild("Head")
+    if not head then return end
+
+    local cone = Instance.new("Part")
+    cone.Name = "KW_ChineseHatESP"
+    cone.Size = Vector3.new(1,1,1)
+    cone.BrickColor = BrickColor.new("White")
+    cone.Transparency = 0.3
+    cone.Anchored = false
+    cone.CanCollide = false
+
+    local mesh = Instance.new("SpecialMesh", cone)
+    mesh.MeshType = Enum.MeshType.FileMesh
+    mesh.MeshId = "rbxassetid://1033714"
+    mesh.Scale = Vector3.new(1.7,1.1,1.7)
+
+    local weld = Instance.new("Weld")
+    weld.Part0 = head
+    weld.Part1 = cone
+    weld.C0 = CFrame.new(0, 0.9, 0)
+
+    cone.Parent = character
+    weld.Parent = cone
+
+    local highlight = Instance.new("Highlight", cone)
+    highlight.FillColor = Color3.fromRGB(255, 105, 180)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineColor = Color3.fromRGB(255, 105, 180)
+    highlight.OutlineTransparency = 0
+
+    chineseHatMap[character] = cone
+end
+
+-- Remove cone from character
+local function removeHatESP(character)
+    local cone = chineseHatMap[character]
+    if cone then
+        cone:Destroy()
+        chineseHatMap[character] = nil
+    end
+end
+
+-- Update all hats based on toggles & ESP state
+local function updateHatESP()
+    if not esp.enabled then
+        -- Hide all hats if ESP is off
+        for char, _ in pairs(chineseHatMap) do
+            removeHatESP(char)
+        end
+        return
+    end
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        local ch = plr.Character
+        if ch then
+            local apply = false
+            if esp.chineseHatLocal and plr == LP then apply = true end
+            if esp.chineseHatOthers and plr ~= LP then apply = true end
+
+            if apply then
+                if not chineseHatMap[ch] then
+                    createHatESP(ch)
+                end
+            else
+                removeHatESP(ch)
+            end
+        end
+    end
+end
+
+-- Reapply hats on player respawn/death
+local function hookPlayer(plr)
+    plr.CharacterAdded:Connect(function(char)
+        char:WaitForChild("Head")
+        task.wait(0.05)
+        updateHatESP()
+    end)
+    plr.CharacterRemoving:Connect(function()
+        local ch = plr.Character
+        if ch then removeHatESP(ch) end
+    end)
+end
+
+-- Hook existing and new players
+for _, plr in ipairs(Players:GetPlayers()) do hookPlayer(plr) end
+Players.PlayerAdded:Connect(hookPlayer)
+
+local oldEnableESP = enableESP
+local oldDisableESP = disableESP
+
+function enableESP()
+    oldEnableESP()
+    updateHatESP()  -- show hats immediately when ESP turns on
+end
+
+function disableESP()
+    oldDisableESP()
+    updateHatESP()  -- hide all hats immediately when ESP turns off
+end
+
+
 local function updateESP()
   esp.counter += 1
   local stepEvery = (esp.perfMode=="Fast") and 2 or 1
@@ -548,6 +656,30 @@ do
   D:Toggle({Name="Filled Box", Flag="KW_DR_FILL", Default=esp.droneFilled, Callback=function(v) esp.droneFilled=v end})
   D:Slider({Name="Fill Alpha %", Flag="KW_DR_FA", Default=math.floor(esp.droneFillAlpha*100), Min=5, Max=80, Callback=function(v) esp.droneFillAlpha=clamp(v/100,0.05,0.8) end})
   D:Colorpicker({Name="Drone Color", Flag="KW_DR_COL", Default=esp.droneColor, Callback=function(c) esp.droneColor=c end})
+
+  do
+    local H = ESPTab:Section({Name="China China", Side="Right"})
+    H:Toggle({
+        Name = "Chinese Hat | Self",
+        Flag = "KW_CH_HAT_LOCAL",
+        Default = esp.chineseHatLocal,
+        Callback = function(v)
+            esp.chineseHatLocal = v
+            updateHatESP()
+        end
+    })
+    H:Toggle({
+        Name = "Chinese Hat | Others",
+        Flag = "KW_CH_HAT_OTHERS",
+        Default = esp.chineseHatOthers,
+        Callback = function(v)
+            esp.chineseHatOthers = v
+            updateHatESP()
+        end
+    })
+end
+
+
 end
 
 ----------------------------------------------------------------
