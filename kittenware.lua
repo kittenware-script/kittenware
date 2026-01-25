@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.07                                         |
+| Version: v1.08                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -1449,18 +1449,18 @@ end
 local function silentCanSee(TargetCharacter)
 	if not silentAim.wallCheck then return true end
 	if not TargetCharacter then return false end
-	local RaycastOrigin = Camera.CFrame.Position
 
-	local partsToCheck = {"Head", "HumanoidRootPart", "Torso"}
+	local RaycastOrigin = Camera.CFrame.Position
+	local partsToCheck = { "Head", "HumanoidRootPart", "Torso" }
 
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Blacklist
+	params.FilterDescendantsInstances = { LP.Character }
 
 	for _, partName in ipairs(partsToCheck) do
-		local TargetPart = TargetCharacter:FindFirstChild(partName)
-		if TargetPart then
-			local direction = TargetPart.Position - RaycastOrigin
-			params.FilterDescendantsInstances = {LP.Character}
+		local part = TargetCharacter:FindFirstChild(partName)
+		if part then
+			local direction = part.Position - RaycastOrigin
 			local result = Workspace:Raycast(RaycastOrigin, direction, params)
 
 			if result then
@@ -1477,64 +1477,77 @@ local function silentCanSee(TargetCharacter)
 end
 
 RunService.RenderStepped:Connect(function()
-    if not silentAim.enabled then silentAim.FinalTarget = nil return end
+	if not silentAim.enabled then
+		silentAim.FinalTarget = nil
+		return
+	end
 
-    local isFinalTargetValid = false
-    if silentAim.FinalTarget and silentAim.FinalTarget.Character and silentAim.FinalTarget.Character:FindFirstChild("HumanoidRootPart") then
-        local TargetPart = silentAim.FinalTarget.Character.HumanoidRootPart
-        local TargetPos, onScreen = Camera:WorldToViewportPoint(TargetPart.Position)
-        local MousePos = UIS:GetMouseLocation()
+	-- Validate existing target
+	local isFinalTargetValid = false
 
-        if onScreen and ((TargetPos.X - MousePos.X)^2 + (TargetPos.Y - MousePos.Y)^2) <= (silentAim.fov^2) and
-           not silentAim.FinalTarget.Character:FindFirstChild("ForceField") and
-           silentAim.FinalTarget.Character.Humanoid.Health > 0 and
-           (not silentAim.wallCheck or silentCanSee(silentAim.FinalTarget.Character)) then
-         isFinalTargetValid = true
-        end
-    end
+	if silentAim.FinalTarget
+	and silentAim.FinalTarget.Character
+	and silentAim.FinalTarget.Character:FindFirstChild("HumanoidRootPart")
+	and silentAim.FinalTarget.Character:FindFirstChild("Humanoid") then
 
-    if not isFinalTargetValid then
-        silentAim.FinalTarget = nil
-        if tick() - silentAim.lastSelect > silentAim.selectInterval then
-            silentAim.lastSelect = tick()
-            local PotentialTargets = {}
-            for _, Player in pairs(Players:GetPlayers()) do
-                if Player ~= LP and Player.Character and not ignorelist[Player.Name] and not (silentAim.teamCheck and sameTeam(Player)) then
-                    local TargetPart = Player.Character:FindFirstChild("HumanoidRootPart")
-                    if TargetPart then
-                        local TargetPos, onScreen = Camera:WorldToViewportPoint(TargetPart.Position)
-                        local MousePos = UIS:GetMouseLocation()
-                        if onScreen and ((TargetPos.X - MousePos.X)^2 + (TargetPos.Y - MousePos.Y)^2) <= (silentAim.fov^2) and
-                           not Player.Character:FindFirstChild("ForceField") and
-                           Player.Character.Humanoid.Health > 0 then
-                            table.insert(PotentialTargets, Player)
-                        end
-                    end
-                end
-            end
+		local char = silentAim.FinalTarget.Character
+		local hrp = char.HumanoidRootPart
+		local hum = char.Humanoid
 
-            if #PotentialTargets > 0 then
-                table.sort(PotentialTargets, function(a, b)
-                    if not (a.Character and a.Character:FindFirstChild("HumanoidRootPart") and b.Character and b.Character:FindFirstChild("HumanoidRootPart") and LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")) then return false end
-                    local a_dist = (a.Character.HumanoidRootPart.Position - LP.Character.HumanoidRootPart.Position).magnitude
-                    local b_dist = (b.Character.HumanoidRootPart.Position - LP.Character.HumanoidRootPart.Position).magnitude
-                    return a_dist < b_dist
-                end)
+		local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+		local mousePos = UIS:GetMouseLocation()
 
-                if not silentAim.wallCheck then
-                    silentAim.FinalTarget = PotentialTargets[1]
-                else
-                    for _, Player in ipairs(PotentialTargets) do
-                        if Player.Character and silentCanSee(Player.Character) then
-                            silentAim.FinalTarget = Player
-                            break
-                        end
-                    end
-                end
-            end
-        end
-    end
+		if onScreen
+		and (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude <= silentAim.fov
+		and hum.Health > 0
+		and not char:FindFirstChild("ForceField")
+		and (not silentAim.wallCheck or silentCanSee(char)) then
+			isFinalTargetValid = true
+		end
+	end
+
+	-- Pick new target if invalid
+	if not isFinalTargetValid then
+		silentAim.FinalTarget = nil
+
+		if tick() - silentAim.lastSelect > silentAim.selectInterval then
+			silentAim.lastSelect = tick()
+
+			local bestTarget = nil
+			local bestDist = math.huge
+			local mousePos = UIS:GetMouseLocation()
+
+			for _, Player in ipairs(Players:GetPlayers()) do
+				if Player ~= LP
+				and Player.Character
+				and Player.Character:FindFirstChild("HumanoidRootPart")
+				and Player.Character:FindFirstChild("Humanoid")
+				and Player.Character.Humanoid.Health > 0
+				and not Player.Character:FindFirstChild("ForceField")
+				and not ignorelist[Player.Name]
+				and not (silentAim.teamCheck and sameTeam(Player)) then
+
+					local hrp = Player.Character.HumanoidRootPart
+					local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+
+					if onScreen then
+						local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+
+						if dist <= silentAim.fov and dist < bestDist then
+							if not silentAim.wallCheck or silentCanSee(Player.Character) then
+								bestDist = dist
+								bestTarget = Player
+							end
+						end
+					end
+				end
+			end
+
+			silentAim.FinalTarget = bestTarget
+		end
+	end
 end)
+
 
 
 ----------------------------------------------------------------
