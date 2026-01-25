@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.09                                         |
+| Version: v1.08                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -477,6 +477,7 @@ end
 
 esp.chineseHatLocal  = false  -- local player
 esp.chineseHatOthers = false  -- other players
+esp.chineseHatColor  = Color3.fromRGB(255, 255, 255) -- default color
 local chineseHatMap = {}      -- [Character] = cone part
 
 -- Create a cone for a character
@@ -507,10 +508,10 @@ local function createHatESP(character)
     weld.Parent = cone
 
     local highlight = Instance.new("Highlight", cone)
-    highlight.FillColor = Color3.fromRGB(255, 105, 180)
+    highlight.FillColor = esp.chineseHatColor
     highlight.FillTransparency = 0.5
-    highlight.OutlineColor = Color3.fromRGB(255, 105, 180)
-    highlight.OutlineTransparency = 0
+    highlight.OutlineColor = esp.chineseHatColor
+    highlight.OutlineTransparency = 1
 
     chineseHatMap[character] = cone
 end
@@ -544,6 +545,13 @@ local function updateHatESP()
             if apply then
                 if not chineseHatMap[ch] then
                     createHatESP(ch)
+                else
+                    -- Update color dynamically
+                    local highlight = chineseHatMap[ch]:FindFirstChildOfClass("Highlight")
+                    if highlight then
+                        highlight.FillColor = esp.chineseHatColor
+                        highlight.OutlineColor = esp.chineseHatColor
+                    end
                 end
             else
                 removeHatESP(ch)
@@ -674,6 +682,15 @@ do
         Default = esp.chineseHatOthers,
         Callback = function(v)
             esp.chineseHatOthers = v
+            updateHatESP()
+        end
+    })
+    H:Colorpicker({
+        Name = "Chinese Hat Color",
+        Flag = "KW_CH_HAT_COLOR",
+        Default = esp.chineseHatColor,
+        Callback = function(c)
+            esp.chineseHatColor = c
             updateHatESP()
         end
     })
