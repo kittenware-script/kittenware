@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.08                                         |
+| Version: v1.07                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -1482,9 +1482,10 @@ RunService.RenderStepped:Connect(function()
 		return
 	end
 
+	local mousePos = UIS:GetMouseLocation()
+
 	-- Validate existing target
 	local isFinalTargetValid = false
-
 	if silentAim.FinalTarget
 	and silentAim.FinalTarget.Character
 	and silentAim.FinalTarget.Character:FindFirstChild("HumanoidRootPart")
@@ -1495,10 +1496,10 @@ RunService.RenderStepped:Connect(function()
 		local hum = char.Humanoid
 
 		local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
-		local mousePos = UIS:GetMouseLocation()
+		local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
 
 		if onScreen
-		and (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude <= silentAim.fov
+		and distToMouse <= silentAim.fov
 		and hum.Health > 0
 		and not char:FindFirstChild("ForceField")
 		and (not silentAim.wallCheck or silentCanSee(char)) then
@@ -1506,7 +1507,7 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
-	-- Pick new target if invalid
+	-- Pick new target ONLY if current is invalid
 	if not isFinalTargetValid then
 		silentAim.FinalTarget = nil
 
@@ -1515,7 +1516,6 @@ RunService.RenderStepped:Connect(function()
 
 			local bestTarget = nil
 			local bestDist = math.huge
-			local mousePos = UIS:GetMouseLocation()
 
 			for _, Player in ipairs(Players:GetPlayers()) do
 				if Player ~= LP
@@ -1547,8 +1547,6 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 end)
-
-
 
 ----------------------------------------------------------------
 ----------------------------------------------------------------
