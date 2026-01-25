@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.07                                         |
+| Version: v1.08                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -60,8 +60,8 @@ local MainUI   = GUI:Load()
 local Combat   = MainUI:Tab("Combat")
 local SilentTab = MainUI:Tab("Silent")
 local ESPTab   = MainUI:Tab("Visual")
-local World    = MainUI:Tab("Exploits")
-local MiscTab = MainUI:Tab("Misc")
+local MiscTab  = MainUI:Tab("Exploits")
+local World    = MainUI:Tab("Misc")
 local HUDTab   = MainUI:Tab("HUD")
 local Config   = MainUI:Tab("WL")
 local About    = MainUI:Tab("Settings")
@@ -1680,6 +1680,24 @@ do
   L:Slider({Name="ClockTime", Flag="KW_FB_CT", Default=fb.clock, Min=0, Max=24, Callback=function(v) fb.clock=v end})
   L:Toggle({Name="No Shadows", Flag="KW_FB_NS", Default=fb.noShadows, Callback=function(v) fb.noShadows=v end})
   L:Toggle({Name="No Fog", Flag="KW_FB_NF", Default=fb.noFog, Callback=function(v) fb.noFog=v end})
+
+  L:Toggle({
+        Name = "Hide Leaves",
+        Flag = "KW_HIDE_LEAVES",
+        Default = false,
+        Callback = function(v)
+            local mapDecos = workspace:FindFirstChild("MapDecorations")
+            if mapDecos then
+                for _, obj in pairs(mapDecos:GetDescendants()) do
+                    if obj:IsA("MeshPart") or obj:IsA("Part") then
+                        if obj.Name == "Leaves" or obj.Name == "leaves" then
+                            obj.Transparency = v and 1 or 0
+                        end
+                    end
+                end
+            end
+        end
+    })
 
   local R = World:Section({Name="Camera FOV", Side="Right"})
 
