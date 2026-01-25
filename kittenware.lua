@@ -1823,61 +1823,169 @@ end
 
 
 do
-  local L=World:Section({Name="Fullbright", Side="Left"})
-  L:Toggle({Name="Enabled (lock)", Flag="KW_FB_EN", Default=false, Callback=function(v) if v then enableFB() else disableFB() end end})
-  L:Slider({Name="Brightness", Flag="KW_FB_BR", Default=fb.brightness, Min=1, Max=6, Callback=function(v) fb.brightness=v end})
-  L:Slider({Name="ClockTime", Flag="KW_FB_CT", Default=fb.clock, Min=0, Max=24, Callback=function(v) fb.clock=v end})
-  L:Toggle({Name="No Shadows", Flag="KW_FB_NS", Default=fb.noShadows, Callback=function(v) fb.noShadows=v end})
-  L:Toggle({Name="No Fog", Flag="KW_FB_NF", Default=fb.noFog, Callback=function(v) fb.noFog=v end})
+    --// Services
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local UIS = game:GetService("UserInputService")
+    local LP = Players.LocalPlayer
+    local Cam = workspace.CurrentCamera
 
-  L:Toggle({
-        Name = "Hide Leaves",
-        Flag = "KW_HIDE_LEAVES",
-        Default = false,
-        Callback = function(v)
+    --// Fullbright
+    local L = World:Section({Name="Fullbright", Side="Left"})
+    L:Toggle({Name="Enabled (lock)", Flag="KW_FB_EN", Default=false, Callback=function(v) if v then enableFB() else disableFB() end end})
+    L:Slider({Name="Brightness", Flag="KW_FB_BR", Default=fb.brightness, Min=1, Max=6, Callback=function(v) fb.brightness=v end})
+    L:Slider({Name="ClockTime", Flag="KW_FB_CT", Default=fb.clock, Min=0, Max=24, Callback=function(v) fb.clock=v end})
+    L:Toggle({Name="No Shadows", Flag="KW_FB_NS", Default=fb.noShadows, Callback=function(v) fb.noShadows=v end})
+    L:Toggle({Name="No Fog", Flag="KW_FB_NF", Default=fb.noFog, Callback=function(v) fb.noFog=v end})
+
+    L:Toggle({
+        Name="Hide Leaves",
+        Flag="KW_HIDE_LEAVES",
+        Default=false,
+        Callback=function(v)
             local mapDecos = workspace:FindFirstChild("MapDecorations")
             if mapDecos then
                 for _, obj in pairs(mapDecos:GetDescendants()) do
-                    if obj:IsA("MeshPart") or obj:IsA("Part") then
-                        if obj.Name == "Leaves" or obj.Name == "leaves" then
-                            obj.Transparency = v and 1 or 0
-                        end
+                    if (obj:IsA("MeshPart") or obj:IsA("Part")) and (obj.Name=="Leaves" or obj.Name=="leaves") then
+                        obj.Transparency = v and 1 or 0
                     end
                 end
             end
         end
     })
 
-  local R = World:Section({Name="Camera FOV", Side="Right"})
+    --// Camera Section
+    local R = World:Section({Name="Camera", Side="Right"})
 
-R:Toggle({
-    Name="FOV Lock",
-    Flag="KW_FOV_L",
-    Default=false,
-    Callback=function(v)
-        if v then 
-            enableFOV()
-        else 
-            disableFOV()
+    R:Toggle({
+        Name="FOV Lock",
+        Flag="KW_FOV_L",
+        Default=false,
+        Callback=function(v)
+            if v then enableFOV() else disableFOV() end
+        end
+    })
+
+    R:Slider({
+        Name="FOV",
+        Flag="KW_FOV_V",
+        Default=fov.value,
+        Min=40,
+        Max=120,
+        Callback=function(v)
+            fov.value = v
+            if fov.enabled and Cam then
+                Cam.FieldOfView = v
+            end
+        end
+    })
+
+    --// Third Person State
+    local thirdPerson = {
+        enabled = false,
+        distance = 6,
+        height = 2,
+        smooth = 0.18,
+        unlockMouse = false,
+        lastMouseBehavior = UIS.MouseBehavior
+    }
+
+    --// Third Person Runtime
+    RunService.RenderStepped:Connect(function()
+    if not thirdPerson.enabled then return end
+
+    local char = LP.Character
+    if not char then return end
+
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local camCF = Cam.CFrame
+    local desired = CFrame.new(
+        hrp.Position
+        - camCF.LookVector * thirdPerson.distance
+        + Vector3.new(0, thirdPerson.height, 0),
+        hrp.Position + Vector3.new(0, thirdPerson.height, 0)
+    )
+
+    Cam.CFrame = Cam.CFrame:Lerp(desired, thirdPerson.smooth)
+
+    --// Force Mouse Unlock
+    if thirdPerson.unlockMouse then
+        if UIS.MouseBehavior ~= Enum.MouseBehavior.Default then
+            UIS.MouseBehavior = Enum.MouseBehavior.Default
         end
     end
-})
+end)
 
-R:Slider({
-    Name="FOV",
-    Flag="KW_FOV_V",
-    Default=fov.value,
-    Min=40,
-    Max=120,
+
+    --// Third Person UI
+    R:Toggle({
+        Name="Third Person",
+        Flag="KW_TP_EN",
+        Default=false,
+        Callback=function(v)
+            thirdPerson.enabled = v
+
+            if not v then
+                -- restore mouse behavior
+                UIS.MouseBehavior = thirdPerson.lastMouseBehavior
+            end
+        end
+    })
+
+    R:Slider({
+        Name="Distance",
+        Flag="KW_TP_DIST",
+        Default=thirdPerson.distance,
+        Min=2,
+        Max=15,
+        Callback=function(v)
+            thirdPerson.distance = v
+        end
+    })
+
+    R:Slider({
+        Name="Height",
+        Flag="KW_TP_H",
+        Default=thirdPerson.height,
+        Min=0,
+        Max=6,
+        Callback=function(v)
+            thirdPerson.height = v
+        end
+    })
+
+    R:Slider({
+        Name="Smooth",
+        Flag="KW_TP_SM",
+        Default=math.floor(thirdPerson.smooth * 100),
+        Min=5,
+        Max=50,
+        Callback=function(v)
+            thirdPerson.smooth = clamp(v / 100, 0.05, 0.5)
+        end
+    })
+
+    --// Force Unlock Mouse
+    R:Toggle({
+    Name="Force Unlock Mouse",
+    Flag="KW_TP_UNLOCK_MOUSE",
+    Default=false,
     Callback=function(v)
-        fov.value = v
-
-        if fov.enabled and workspace.CurrentCamera then
-            workspace.CurrentCamera.FieldOfView = v
+        thirdPerson.unlockMouse = v
+        if v then
+            thirdPerson.lastMouseBehavior = UIS.MouseBehavior
+            -- Immediately force
+            UIS.MouseBehavior = Enum.MouseBehavior.Default
+        else
+            -- Restore previous
+            UIS.MouseBehavior = thirdPerson.lastMouseBehavior
         end
     end
 })
 end
+
 
 ----------------------------------------------------------------
 ----------------------------------------------------------------
