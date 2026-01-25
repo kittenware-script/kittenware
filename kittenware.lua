@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.08                                         |
+| Version: v1.09                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -12,6 +12,52 @@ KuromiWare On Top
 | Status: Loaded and ready to use!                       |
 ==========================================================
 ]])
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KuromiWareIntro"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
+
+local introLabel = Instance.new("TextLabel")
+introLabel.Size = UDim2.new(0, 500, 0, 100)
+introLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+introLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+introLabel.BackgroundTransparency = 1
+introLabel.Text = "KuromiWare"
+introLabel.Font = Enum.Font.GothamBold
+introLabel.TextSize = 64
+introLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- fallback for gradient
+introLabel.TextTransparency = 1 -- start invisible
+introLabel.Parent = screenGui
+
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),   -- Pink
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(128, 0, 255))    -- Purple
+}
+gradient.Rotation = 45
+gradient.Parent = introLabel
+
+local tweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+local fadeIn = TweenService:Create(introLabel, tweenInfo, {TextTransparency = 0})
+fadeIn:Play()
+
+delay(3.5, function()
+    local fadeOut = TweenService:Create(introLabel, tweenInfo, {TextTransparency = 1})
+    fadeOut:Play()
+
+    -- Remove GUI after fade out
+    fadeOut.Completed:Connect(function()
+        screenGui:Destroy()
+    end)
+end)
+
 
 loadstring(game:HttpGet('https://raw.githubusercontent.com/KuromiWare-v1/freebypasslmao/refs/heads/main/uhhhidk.lua'))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/kc-ignore/safety/refs/heads/main/AJKSDHJKDHDJKHSJKDHJDKSHJKSHDJKHD",true))()
