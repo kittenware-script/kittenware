@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.09                                         |
+| Version: v1.1                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -102,7 +102,10 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Roblox-Functio
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/kitty92pm/AirHub-V2/refs/heads/main/src/UI%20Library.lua"))()
 
 -- Tabs
-local MainUI   = GUI:Load()
+local MainUI = GUI:Load({
+    sizex = 520,
+    sizey = 650
+})
 local Combat   = MainUI:Tab("Combat")
 local SilentTab = MainUI:Tab("Silent")
 local ESPTab   = MainUI:Tab("Visual")
