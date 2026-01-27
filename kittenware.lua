@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                        KuromiWare                      |
 |--------------------------------------------------------|
-| Version: v1.1                                         |
+| Version: v1.11                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -106,13 +106,12 @@ local MainUI = GUI:Load({
     sizex = 520,
     sizey = 650
 })
-local Combat   = MainUI:Tab("Combat")
+local Combat   = MainUI:Tab("Aim")
 local SilentTab = MainUI:Tab("Silent")
 local ESPTab   = MainUI:Tab("Visual")
 local MiscTab  = MainUI:Tab("Exploits")
 local World    = MainUI:Tab("Misc")
 local HUDTab   = MainUI:Tab("HUD")
-local Config   = MainUI:Tab("WL")
 local About    = MainUI:Tab("Settings")
 
 ----------------------------------------------------------------
@@ -141,7 +140,7 @@ local function onCharacter(ch) if not nrEnabled then return end sweep(ch) watch(
 local function enableNR() nrEnabled=true unwatch() sweep(LP) watch(LP) onCharacter(LP.Character or LP.CharacterAdded:Wait()) if charAddedConn then charAddedConn:Disconnect() end charAddedConn=LP.CharacterAdded:Connect(onCharacter) end
 local function disableNR() nrEnabled=false unwatch() if charAddedConn then charAddedConn:Disconnect() charAddedConn=nil end revert(LP) if LP.Character then revert(LP.Character) end local bp=LP:FindFirstChildOfClass("Backpack") if bp then revert(bp) end end
 
-Combat:Section({Name="No Recoil", Side="Left"})
+MiscTab:Section({Name="No Recoil", Side="Left"})
 :Toggle({Name="Enabled",Flag="KW_NR",Default=false,Callback=function(v) if v then enableNR() else disableNR() end end})
 
 ----------------------------------------------------------------
@@ -1331,7 +1330,7 @@ local function disableIR()
 end
 
 do
-    local L = Combat:Section({Name="Fast Reload", Side="Left"})
+    local L = MiscTab:Section({Name="Fast Reload", Side="Left"})
 
     L:Toggle({
         Name = "Enabled",
@@ -1446,10 +1445,10 @@ end)
     local S = MiscTab:Section({Name="Semigod", Side="Left"})
     S:Toggle({Name="Enabled", Flag="KW_SEMIGOD_EN", Default=false, Callback=function(v) if v then enableSemigod() else disableSemigod() end end})
 
-    local SA = MiscTab:Section({Name="Drone Silent Aim", Side="Right"})
+    local SA = SilentTab:Section({Name="Drone Silent Aim", Side="Left"})
     SA:Toggle({Name="Enabled", Flag="KW_SA_DRONE", Default=false, Callback=function(v) silentAim.droneOnly=v end})
 
-    local BL = MiscTab:Section({Name="Loadout", Side="Right"})
+    local BL = World:Section({Name="Loadout", Side="Left"})
     BL:Button({Name="Equip Loadout", Callback=function()
         local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
         commandFunction:InvokeServer("!sts ak+eo+ang+pbs sop+eo+ang+pbs mac+blue+acog+ext+sup r7+hunt+pbs+blue wrench medkit")
@@ -1542,7 +1541,7 @@ KA:Button({
 })
 
 
-    local AY = MiscTab:Section({Name="Anti Yaw", Side="Left"})
+    local AY = MiscTab:Section({Name="Anti Yaw", Side="Right"})
     AY:Toggle({Name="Enabled", Flag="KW_ANTIYAW_EN", Default=false, Callback=function(v) antiYaw.enabled=v antiYaw.lockCF=nil end})
     AY:Dropdown({Name="Mode", Flag="KW_ANTIYAW_MODE", Content={"Hard Lock"}, Default=antiYaw.mode, Callback=function(v) antiYaw.mode=v end})
     AY:Slider({Name="Smooth Strength", Flag="KW_ANTIYAW_SS", Default=math.floor(antiYaw.smoothStrength*100), Min=5, Max=50, Callback=function(v) antiYaw.smoothStrength=clamp(v/100,0.05,0.5) end})
@@ -2220,7 +2219,7 @@ do
 end
 
 do
-  local R = Config:Section({Name="Friends | Ignores", Side="Left"})
+  local R = About:Section({Name="Friends | Ignores", Side="Left"})
   local userBox = R:Box({Name="Player Name", Flag="KW_USER_BOX", Placeholder="Exact name"})
   R:Button({Name="Add to Friends (Whitelist)", Callback=function() local n=GUI.flags["KW_USER_BOX"]; if n and n~="" then whitelist[n]=true end userBox:Set("") end})
   R:Button({Name="Remove Friend", Callback=function() local n=GUI.flags["KW_USER_BOX"]; if n then whitelist[n]=nil end userBox:Set("") end})
@@ -2228,7 +2227,7 @@ do
   R:Button({Name="Remove Ignore", Callback=function() local n=GUI.flags["KW_USER_BOX"]; if n then ignorelist[n]=nil end userBox:Set("") end})
 end
 
-local S = About:Section({Name="KuromiWare", Side="Left"})
+local S = About:Section({Name="KuromiWare", Side="Right"})
 S:Keybind({Name="Toggle UI", Flag="KW_UI_TOG", Default=Enum.KeyCode.RightShift, Callback=function(_, newKey) if not newKey then GUI:Close() end end})
 S:Button({Name="Unload", Callback=function()
   disableESP(); if descAddConn then descAddConn:Disconnect() end; if descRemConn then descRemConn:Disconnect() end
