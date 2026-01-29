@@ -1,14 +1,14 @@
 print([[
 KuromiWare On Top
 ==========================================================
-|                        KuromiWare                      |
+|                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.11                                         |
+| Version: v1.12                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
 | Undected: Maybe:3                                      |
-| Loaded? Yes! Thanks for using KuromiWare               |
+| Loaded? Yes! Thanks for using withdraw                 |
 | Status: Loaded and ready to use!                       |
 ==========================================================
 ]])
@@ -28,7 +28,7 @@ introLabel.Size = UDim2.new(0, 500, 0, 100)
 introLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 introLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 introLabel.BackgroundTransparency = 1
-introLabel.Text = "KuromiWare"
+introLabel.Text = "withdraw.cc"
 introLabel.Font = Enum.Font.GothamBold
 introLabel.TextSize = 64
 introLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- fallback for gradient
@@ -37,8 +37,8 @@ introLabel.Parent = screenGui
 
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),   -- Pink
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(128, 0, 255))    -- Purple
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),   -- Pink
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))    -- Purple
 }
 gradient.Rotation = 45
 gradient.Parent = introLabel
@@ -211,16 +211,45 @@ local function sameTeam(plr)
 end
 
 local function isPassive(char)
-  if not char then return false end
-  if char:FindFirstChildOfClass("ForceField") then return true end
-  for _,bp in ipairs(char:GetDescendants()) do
-    if bp:IsA("BasePart") and bp.Material==Enum.Material.ForceField then return true end
-  end
-  local hum = char:FindFirstChildOfClass("Humanoid")
-  if hum and (hum:GetAttribute("Passive")==true or hum:GetAttribute("Invulnerable")==true) then return true end
-  if char:GetAttribute("Passive")==true then return true end
-  return false
+    if not char then return false end
+
+    if char:GetAttribute("Passive") == true
+    or char:GetAttribute("Invulnerable") == true
+    or char:GetAttribute("IFrames") == true then
+        return true
+    end
+
+    if char:FindFirstChildOfClass("ForceField") then
+        return true
+    end
+
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if hum then
+        if hum:GetAttribute("Passive") == true
+        or hum:GetAttribute("Invulnerable") == true
+        or hum:GetAttribute("IFrames") == true
+        or hum.Health <= 0 then
+            return true
+        end
+    end
+
+    local flags = char:FindFirstChild("Passive")
+        or char:FindFirstChild("Invulnerable")
+        or char:FindFirstChild("IFrames")
+
+    if flags and flags:IsA("BoolValue") and flags.Value == true then
+        return true
+    end
+
+    for _, part in ipairs(char:GetChildren()) do
+        if part:IsA("BasePart") and part.Material == Enum.Material.ForceField then
+            return true
+        end
+    end
+
+    return false
 end
+
 
 local function parts(char)
   return {
@@ -429,13 +458,42 @@ local function updatePlayer(plr)
   else b.hpBack.Visible=false b.hpBar.Visible=false end
 
   local nameY = math.max(0, minY - 14)
-  if esp.showNames and onScr then
+  -- cache passive check once
+local passive = esp.passiveESP and isPassive(ch)
+
+if not (esp.showNames and onScr) then
+    b.nameText.Visible = false
+else
+    local nameText = b.nameText
+
+    -- build name
     local name = plr.Name
-    if esp.passiveESP and isPassive(ch) then name = name .. esp.passiveTag end
-    local base = plr.TeamColor and esp.useTeamColors and plr.TeamColor.Color or Theme.Secondary
-    if esp.passiveESP and isPassive(ch) then base = esp.passiveColor end
-    b.nameText.Text = name; b.nameText.Color=base; b.nameText.Position=Vector2.new((minX+maxX)/2, nameY); b.nameText.Size=14; b.nameText.Visible=true
-  else b.nameText.Visible=false end
+    if passive then
+        name = name .. esp.passiveTag
+    end
+
+    -- choose color
+    local base
+    if passive then
+        base = esp.passiveColor
+    elseif esp.useTeamColors and plr.TeamColor then
+        base = plr.TeamColor.Color
+    else
+        base = Theme.Secondary
+    end
+
+    -- position
+    local nameY = minY > 14 and (minY - 14) or 0
+    local pos = Vector2.new((minX + maxX) * 0.5, nameY)
+
+    -- apply
+    nameText.Text = name
+    nameText.Color = base
+    nameText.Position = pos
+    nameText.Size = 14
+    nameText.Visible = true
+end
+
 
   if esp.showDistance and onScr then
     b.distText.Text = string.format("%.0f", dist).."s"
@@ -674,6 +732,18 @@ do
   L:Toggle({Name="Enable ESP", Flag="KW_ESP_EN", Default=false, Callback=function(v) if v then enableESP() else disableESP() end end})
   L:Dropdown({Name="Performance", Flag="KW_ESP_PERF", Content={"Auto","Fast","Max"}, Default="Auto", Callback=function(v) esp.perfMode=v end})
   L:Slider({Name="Max Distance", Flag="KW_ESP_MD", Default=esp.maxDistance, Min=200, Max=6000, Callback=function(v) esp.maxDistance=v end})
+  L:Slider({
+      Name="ESP Thickness",
+      Flag="KW_ESP_THICK",
+      Default=esp.thicknessBase,
+      Min=0.5,
+      Max=5,
+      Callback=function(v)
+          esp.thicknessBase = v
+          esp.nearThick = v
+          esp.farThick = v
+      end
+  })
   L:Toggle({Name="Fade by Distance", Flag="KW_ESP_FBD", Default=esp.fadeByDistance, Callback=function(v) esp.fadeByDistance=v end})
   L:Toggle({Name="Only Visible (LOS)", Flag="KW_ESP_VIS", Default=esp.onlyVisible, Callback=function(v) esp.onlyVisible=v end})
   L:Toggle({Name="Team Check", Flag="KW_ESP_TC", Default=esp.teamCheck, Callback=function(v) esp.teamCheck=v end})
@@ -1618,7 +1688,6 @@ V:Slider({
         voidPos.height = v
     end
 })
-
 end
 
 do
