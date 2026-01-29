@@ -767,7 +767,7 @@ do
   I:Colorpicker({Name="Item Text Color", Flag="KW_ITEM_COL", Default=esp.itemESPColor, Callback=function(c) esp.itemESPColor=c end})
   I:Slider({Name="Item Size", Flag="KW_ITEM_SZ", Default=esp.itemSize, Min=10, Max=22, Callback=function(v) esp.itemSize=math.floor(v) end})
   I:Slider({Name="Item Offset Y", Flag="KW_ITEM_OY", Default=esp.itemOffsetY, Min=8, Max=28, Callback=function(v) esp.itemOffsetY=math.floor(v) end})
-  I:Toggle({Name="Show When No Tool", Flag="KW_ITEM_SNT", Default=esp.itemWhenNoTool, Callback=function(v) esp.itemWhenNoTool=v end})
+  
 
   local P = ESPTab:Section({Name="Players | Passive | Colors", Side="Right"})
   P:Toggle({Name="Show (P) tag", Flag="KW_PAS_TAG", Default=esp.passiveESP, Callback=function(v) esp.passiveESP=v end})
