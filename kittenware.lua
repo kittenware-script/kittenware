@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.13                                         |
+| Version: v1.14                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -1086,6 +1086,16 @@ do
   L:Slider({Name="FOV", Flag="KW_AIM_FOV", Default=aim.fov, Min=40, Max=600, Callback=function(v) aim.fov=v end})
   L:Slider({Name="Smooth", Flag="KW_AIM_SM", Default=math.floor(aim.smooth*100), Min=1, Max=100, Callback=function(v) aim.smooth=clamp(v/100,0.01,1) end})
   L:Slider({Name="Max Distance", Flag="KW_AIM_MD", Default=aim.maxDistance, Min=200, Max=6000, Callback=function(v) aim.maxDistance=v end})
+  L:Colorpicker({
+        Name = "FOV Color",
+        Flag = "KW_AIM_FOV_COL",
+        Default = Color3.fromRGB(180,220,255), -- default color
+        Callback = function(c)
+            if aim.fovCircle then
+                aim.fovCircle.Color = c
+            end
+        end
+    })
 
   local F = Combat:Section({Name="Aimbot | Filters", Side="Right"})
   F:Toggle({Name="Team Check", Flag="KW_AIM_TC", Default=aim.teamCheck, Callback=function(v) aim.teamCheck=v end})
@@ -1544,9 +1554,6 @@ end)
     local S = MiscTab:Section({Name="Semigod", Side="Left"})
     S:Toggle({Name="Enabled", Flag="KW_SEMIGOD_EN", Default=false, Callback=function(v) if v then enableSemigod() else disableSemigod() end end})
 
-    local SA = SilentTab:Section({Name="Drone Silent Aim", Side="Left"})
-    SA:Toggle({Name="Enabled", Flag="KW_SA_DRONE", Default=false, Callback=function(v) silentAim.droneOnly=v end})
-
     local BL = World:Section({Name="Loadout", Side="Left"})
     BL:Button({Name="Equip Loadout", Callback=function()
         local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
@@ -1726,6 +1733,16 @@ do
     L:Keybind({Name="Toggle Key", Flag="KW_SA_KEY", Callback=function(k) if typeof(k)=="EnumItem" then silentAim.toggleKey=k end end})
     L:Slider({Name="FOV", Flag="KW_SA_FOV", Default=silentAim.fov, Min=40, Max=600, Callback=function(v) silentAim.fov=v end})
     L:Slider({Name="Max Distance", Flag="KW_SA_MD", Default=silentAim.maxDistance, Min=200, Max=6000, Callback=function(v) silentAim.maxDistance=v end})
+    L:Colorpicker({
+        Name = "FOV Color",
+        Flag = "KW_AIM_FOV_COL",
+        Default = Color3.fromRGB(180,220,255), -- default color
+        Callback = function(c)
+            if aim.fovCircle then
+                aim.fovCircle.Color = c
+            end
+        end
+    })
 
     local F = SilentTab:Section({Name="Silent Aim | Filters", Side="Right"})
     F:Toggle({Name="Team Check", Flag="KW_SA_TC", Default=silentAim.teamCheck, Callback=function(v) silentAim.teamCheck=v end})
