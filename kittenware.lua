@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.12                                         |
+| Version: v1.13                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -888,14 +888,38 @@ if hasDrawing then
 end
 
 local holding=false
-UIS.InputBegan:Connect(function(i,gpe)
-  if gpe then return end
-  if i.UserInputType==aim.holdButton then holding=true end
-  if i.KeyCode==aim.toggleKey then
-    aim.enabled = not aim.enabled
-    if aim.fovCircle then aim.fovCircle.Visible = aim.enabled end
-    if not aim.enabled then aim.currentPart=nil end
-  end
+UIS.InputBegan:Connect(function(i, gpe)
+    if gpe then return end
+
+    -- Regular Aim toggle
+    if i.KeyCode == aim.toggleKey then
+        aim.enabled = not aim.enabled
+        if aim.fovCircle then aim.fovCircle.Visible = aim.enabled or silentAim.enabled end
+        if not aim.enabled then aim.currentPart = nil end
+    end
+
+    -- Silent Aim toggle
+    if i.KeyCode == silentAim.toggleKey then
+        silentAim.enabled = not silentAim.enabled
+        if not silentAim.enabled then
+            silentAim.FinalTarget = nil
+        end
+        -- Always update FOV circle visibility
+        if aim.fovCircle then
+            aim.fovCircle.Visible = aim.enabled or silentAim.enabled
+        end
+    end
+
+    -- Hold RMB for Aim
+    if i.UserInputType == aim.holdButton then
+        holding = true
+    end
+end)
+
+UIS.InputEnded:Connect(function(i)
+    if i.UserInputType == aim.holdButton then
+        holding = false
+    end
 end)
 UIS.InputEnded:Connect(function(i) if i.UserInputType==aim.holdButton then holding=false end end)
 
@@ -910,16 +934,21 @@ local function setAimHUD(txt)
 end
 
 local function updFOV()
-  if not aim.fovCircle then return end
-  local m=UIS:GetMouseLocation()
-  aim.fovCircle.Position=Vector2.new(m.X,m.Y)
-  if silentAim.enabled then
-    aim.fovCircle.Radius=silentAim.fov
-  else
-    aim.fovCircle.Radius=aim.fov
-  end
-  aim.fovCircle.Visible = silentAim.enabled or aim.enabled
+    if not aim.fovCircle then return end
+    local m = UIS:GetMouseLocation()
+
+    -- Determine if FOV should be visible
+    local fovEnabled = aim.enabled or silentAim.enabled
+
+    if fovEnabled then
+        aim.fovCircle.Position = Vector2.new(m.X, m.Y)
+        aim.fovCircle.Radius = silentAim.enabled and silentAim.fov or aim.fov
+        aim.fovCircle.Visible = true
+    else
+        aim.fovCircle.Visible = false
+    end
 end
+
 
 local function canSee(part, char)
     if not aim.wallCheck then return true end
@@ -1743,76 +1772,82 @@ local function silentCanSee(TargetCharacter)
 end
 
 RunService.RenderStepped:Connect(function()
-	if not silentAim.enabled then
-		silentAim.FinalTarget = nil
-		return
-	end
+    if not silentAim.enabled then
+        silentAim.FinalTarget = nil
+        if aim.fovCircle then aim.fovCircle.Visible = aim.enabled or silentAim.enabled end
+        return
+    end
 
-	local mousePos = UIS:GetMouseLocation()
+    local mousePos = UIS:GetMouseLocation()
 
-	-- Validate existing target
-	local isFinalTargetValid = false
-	if silentAim.FinalTarget
-	and silentAim.FinalTarget.Character
-	and silentAim.FinalTarget.Character:FindFirstChild("HumanoidRootPart")
-	and silentAim.FinalTarget.Character:FindFirstChild("Humanoid") then
+    -- Validate existing target
+    local isFinalTargetValid = false
+    local current = silentAim.FinalTarget
+    if current and current.Character then
+        local char = current.Character
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        local part = char:FindFirstChild(silentAim.targetPart) or char:FindFirstChild("HumanoidRootPart")
+        if hum and hum.Health > 0 and part then
+            local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+            local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+            if onScreen 
+            and distToMouse <= silentAim.fov 
+            and (not silentAim.wallCheck or silentCanSee(char)) 
+            and not char:FindFirstChild("ForceField") then
+                isFinalTargetValid = true
+            end
+        end
+    end
 
-		local char = silentAim.FinalTarget.Character
-		local hrp = char.HumanoidRootPart
-		local hum = char.Humanoid
+    -- Pick new target if current is invalid
+    if not isFinalTargetValid then
+        silentAim.FinalTarget = nil
 
-		local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
-		local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+        if tick() - silentAim.lastSelect >= silentAim.selectInterval then
+            silentAim.lastSelect = tick()
 
-		if onScreen
-		and distToMouse <= silentAim.fov
-		and hum.Health > 0
-		and not char:FindFirstChild("ForceField")
-		and (not silentAim.wallCheck or silentCanSee(char)) then
-			isFinalTargetValid = true
-		end
-	end
+            local bestTarget = nil
+            local bestDist = math.huge
 
-	-- Pick new target ONLY if current is invalid
-	if not isFinalTargetValid then
-		silentAim.FinalTarget = nil
+            for _, Player in ipairs(Players:GetPlayers()) do
+                if Player ~= LP
+                and Player.Character
+                and not ignorelist[Player.Name]
+                and not (silentAim.teamCheck and sameTeam(Player)) then
 
-		if tick() - silentAim.lastSelect > silentAim.selectInterval then
-			silentAim.lastSelect = tick()
+                    local char = Player.Character
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    local part = char:FindFirstChild(silentAim.targetPart) or char:FindFirstChild("HumanoidRootPart")
 
-			local bestTarget = nil
-			local bestDist = math.huge
+                    if hum and hum.Health > 0 and part and not char:FindFirstChild("ForceField") then
+                        local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+                        if onScreen then
+                            local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                            if dist <= silentAim.fov then
+                                if not silentAim.wallCheck or silentCanSee(char) then
+                                    if dist < bestDist then
+                                        bestDist = dist
+                                        bestTarget = Player
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
 
-			for _, Player in ipairs(Players:GetPlayers()) do
-				if Player ~= LP
-				and Player.Character
-				and Player.Character:FindFirstChild("HumanoidRootPart")
-				and Player.Character:FindFirstChild("Humanoid")
-				and Player.Character.Humanoid.Health > 0
-				and not Player.Character:FindFirstChild("ForceField")
-				and not ignorelist[Player.Name]
-				and not (silentAim.teamCheck and sameTeam(Player)) then
+            silentAim.FinalTarget = bestTarget
+        end
+    end
 
-					local hrp = Player.Character.HumanoidRootPart
-					local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
-
-					if onScreen then
-						local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-
-						if dist <= silentAim.fov and dist < bestDist then
-							if not silentAim.wallCheck or silentCanSee(Player.Character) then
-								bestDist = dist
-								bestTarget = Player
-							end
-						end
-					end
-				end
-			end
-
-			silentAim.FinalTarget = bestTarget
-		end
-	end
+    -- Update FOV circle
+    if aim.fovCircle then
+        aim.fovCircle.Radius = silentAim.enabled and silentAim.fov or aim.fov
+        aim.fovCircle.Visible = aim.enabled or silentAim.enabled
+        aim.fovCircle.Position = UIS:GetMouseLocation()
+    end
 end)
+
 
 ----------------------------------------------------------------
 ----------------------------------------------------------------
