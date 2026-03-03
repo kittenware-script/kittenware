@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.14                                         |
+| Version: v1.15                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -60,7 +60,26 @@ end)
 
 
 loadstring(game:HttpGet('https://raw.githubusercontent.com/KuromiWare-v1/freebypasslmao/refs/heads/main/uhhhidk.lua'))()
-loadstring(game:HttpGet('https://raw.githubusercontent.com/kc-ignore/safety/refs/heads/main/AJKSDHJKDHDJKHSJKDHJDKSHJKSHDJKHD'))()
+do
+    local f = identifyexecutor or getexecutorname or get_executor_name
+    local exec = "unknown"
+
+    if type(f) == "function" then
+        local ok, name = pcall(f)
+        if ok and type(name) == "string" then
+            exec = string.lower(name)
+        end
+    end
+
+    if exec:find("wave") then
+        warn("Bypassing check: due to wave")
+    else
+        -- Any other executor → run it
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/kc-ignore/safety/refs/heads/main/AJKSDHJKDHDJKHSJKDHJDKSHJKSHDJKHD"
+        ))()
+    end
+end
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
@@ -856,9 +875,9 @@ local silentAim = {
     droneOnly = false,
     target = nil,
     teamCheck = false,
-    wallCheck = true,
+    wallCheck = false,
     passiveIgnore = true,
-    targetPart = "Head",
+    targetPart = "Torso",
     fov = 100,
     maxDistance = 1200,
     prediction = 0.1,
@@ -1234,15 +1253,44 @@ setreadonly(mt, true)
 local mouse = LP:GetMouse()
 local old_mouse_index
 old_mouse_index = hookmetamethod(mouse, "__index", function(self, key)
-    if silentAim.enabled and silentAim.droneOnly and (key == "Hit" or key == "Target" or key == "TargetFilter") and aim.currentPart then
+
+    if silentAim.enabled
+        and silentAim.droneOnly
+        and (key == "Hit" or key == "Target" or key == "TargetFilter")
+    then
+
+        -- use silent target if available, otherwise fall back to aimbot target
+        local character
+
+        if silentAim.FinalTarget and silentAim.FinalTarget.Character then
+            character = silentAim.FinalTarget.Character
+        elseif aim.currentPart and aim.currentPart.Parent then
+            character = aim.currentPart.Parent
+        end
+
+        if not character then
+            return old_mouse_index(self, key)
+        end
+
+        local part =
+            character:FindFirstChild(silentAim.targetPart)
+            or character:FindFirstChild("Head")
+
+        if not part then
+            return old_mouse_index(self, key)
+        end
+
         if key == "Hit" then
-            return CFrame.new(aim.currentPart.Position)
+            return CFrame.new(part.Position)
+
         elseif key == "Target" then
-            return aim.currentPart
+            return part
+
         elseif key == "TargetFilter" then
-            return aim.currentPart.Parent
+            return character
         end
     end
+
     return old_mouse_index(self, key)
 end)
 
@@ -1746,9 +1794,9 @@ do
 
     local F = SilentTab:Section({Name="Silent Aim | Filters", Side="Right"})
     F:Toggle({Name="Team Check", Flag="KW_SA_TC", Default=silentAim.teamCheck, Callback=function(v) silentAim.teamCheck=v end})
-    F:Toggle({Name="Wall Check", Flag="KW_SA_WC", Default=silentAim.wallCheck, Callback=function(v) silentAim.wallCheck=v end})
+    -- F:Toggle({Name="Wall Check", Flag="KW_SA_WC", Default=silentAim.wallCheck, Callback=function(v) silentAim.wallCheck=v end})
     F:Toggle({Name="Ignore Passive", Flag="KW_SA_PI", Default=silentAim.passiveIgnore, Callback=function(v) silentAim.passiveIgnore=v end})
-    F:Dropdown({Name="Target Part", Flag="KW_SA_TP", Content={"Head","HumanoidRootPart"}, Default=silentAim.targetPart, Callback=function(v) silentAim.targetPart=v end})
+    F:Dropdown({Name="Target Part", Flag="KW_SA_TP", Content={"Head","Torso"}, Default=silentAim.targetPart, Callback=function(v) silentAim.targetPart=v end})
     F:Slider({Name="Min HP to Lock", Flag="KW_SA_MHP", Default=1, Min=0, Max=100, Callback=function(v) silentAim.minHPToLock=math.max(0, math.floor(v)) end})
     F:Slider({Name="Select Interval (ms)", Flag="KW_SA_SI", Default=math.floor(silentAim.selectInterval*1000), Min=30, Max=200, Callback=function(v) silentAim.selectInterval=clamp(v/1000,0.03,0.2) end})
 
