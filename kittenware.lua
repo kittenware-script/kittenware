@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.15                                         |
+| Version: v1.16                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -873,13 +873,28 @@ local aim = {
 local silentAim = {
     enabled = false,
     droneOnly = false,
+
+	autoShoot = {
+    enabled = false,
+    delay = 0.05,
+    holdToUse = false
+},
     target = nil,
     teamCheck = false,
-    wallCheck = false,
+    wallCheck = true,
     passiveIgnore = true,
     targetPart = "Torso",
     fov = 100,
     maxDistance = 1200,
+
+	rage = {
+    enabled = false,
+    headOnly = true,
+    ignoreFOV = true,
+    ignoreWalls = true,
+    instantSwitch = true
+},
+
     prediction = 0.1,
     bulletSpeed = 300,
     leadStrength = 1.0,
@@ -932,6 +947,44 @@ UIS.InputBegan:Connect(function(i, gpe)
     -- Hold RMB for Aim
     if i.UserInputType == aim.holdButton then
         holding = true
+    end
+end)
+
+task.spawn(function()
+
+    local lastShot = 0
+
+    while task.wait() do
+
+        if not silentAim.enabled then
+            continue
+        end
+
+        if not silentAim.autoShoot.enabled then
+            continue
+        end
+
+        if silentAim.holdToUse and not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+            continue
+        end
+
+        local target = silentAim.FinalTarget
+        if not target or not target.Character then
+            continue
+        end
+
+        local now = tick()
+
+        if now - lastShot < silentAim.autoShoot.delay then
+            continue
+        end
+
+        lastShot = now
+
+        mouse1press()
+        task.wait()
+        mouse1release()
+
     end
 end)
 
@@ -1778,6 +1831,14 @@ do
     local L = SilentTab:Section({Name="Silent Aim | Core", Side="Left"})
     L:Toggle({Name="Enabled", Flag="KW_SA_EN", Default=false, Callback=function(v) silentAim.enabled=v end})
     L:Toggle({Name="Hold RMB", Flag="KW_SA_HOLD", Default=false, Callback=function(v) silentAim.holdToUse=v end})
+	L:Toggle({
+    Name = "Auto Shoot",
+    Flag = "KW_SA_AUTOSHOOT",
+    Default = false,
+    Callback = function(v)
+        silentAim.autoShoot.enabled = v
+    end
+	})
     L:Keybind({Name="Toggle Key", Flag="KW_SA_KEY", Callback=function(k) if typeof(k)=="EnumItem" then silentAim.toggleKey=k end end})
     L:Slider({Name="FOV", Flag="KW_SA_FOV", Default=silentAim.fov, Min=40, Max=600, Callback=function(v) silentAim.fov=v end})
     L:Slider({Name="Max Distance", Flag="KW_SA_MD", Default=silentAim.maxDistance, Min=200, Max=6000, Callback=function(v) silentAim.maxDistance=v end})
@@ -1792,9 +1853,10 @@ do
         end
     })
 
+
     local F = SilentTab:Section({Name="Silent Aim | Filters", Side="Right"})
     F:Toggle({Name="Team Check", Flag="KW_SA_TC", Default=silentAim.teamCheck, Callback=function(v) silentAim.teamCheck=v end})
-    -- F:Toggle({Name="Wall Check", Flag="KW_SA_WC", Default=silentAim.wallCheck, Callback=function(v) silentAim.wallCheck=v end})
+    F:Toggle({Name="Wall Check", Flag="KW_SA_WC", Default=silentAim.wallCheck, Callback=function(v) silentAim.wallCheck=v end})
     F:Toggle({Name="Ignore Passive", Flag="KW_SA_PI", Default=silentAim.passiveIgnore, Callback=function(v) silentAim.passiveIgnore=v end})
     F:Dropdown({Name="Target Part", Flag="KW_SA_TP", Content={"Head","Torso"}, Default=silentAim.targetPart, Callback=function(v) silentAim.targetPart=v end})
     F:Slider({Name="Min HP to Lock", Flag="KW_SA_MHP", Default=1, Min=0, Max=100, Callback=function(v) silentAim.minHPToLock=math.max(0, math.floor(v)) end})
@@ -1851,7 +1913,13 @@ RunService.RenderStepped:Connect(function()
     if current and current.Character then
         local char = current.Character
         local hum = char:FindFirstChildOfClass("Humanoid")
-        local part = char:FindFirstChild(silentAim.targetPart) or char:FindFirstChild("HumanoidRootPart")
+        local targetPart = silentAim.targetPart
+
+if silentAim.rage.enabled and silentAim.rage.headOnly then
+    targetPart = "Head"
+end
+
+local part = char:FindFirstChild(targetPart) or char:FindFirstChild("HumanoidRootPart")
         if hum and hum.Health > 0 and part then
             local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
             local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
@@ -1888,8 +1956,10 @@ RunService.RenderStepped:Connect(function()
                         local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
                         if onScreen then
                             local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                            if dist <= silentAim.fov then
-                                if not silentAim.wallCheck or silentCanSee(char) then
+                            if silentAim.rage.enabled or dist <= silentAim.fov then
+                                if silentAim.rage.enabled and silentAim.rage.ignoreWalls
+or not silentAim.wallCheck
+or silentCanSee(char) then
                                     if dist < bestDist then
                                         bestDist = dist
                                         bestTarget = Player
