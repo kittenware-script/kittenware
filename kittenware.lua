@@ -134,7 +134,7 @@ local function createAdonisBypassPopup()
     Frame.Size = UDim2.new(0, 340, 0, 92)
     Frame.Position = UDim2.new(0.5, -170, -0.2, 0)
     Frame.BackgroundColor3 = Color3.fromRGB(46, 46, 46)
-	Frame.BackgroundTransparency = 0.92
+	Frame.BackgroundTransparency = 0.70
     Frame.BorderSizePixel = 0
     Frame.ClipsDescendants = true
     Frame.Parent = ScreenGui
