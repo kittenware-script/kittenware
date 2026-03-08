@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.17                                         |
+| Version: v1.18                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -2450,178 +2450,232 @@ pcall(function()
 end)
 
 local hud = {
-  showHeaderBar   = false,     
-  showAccentLine  = false,     
-  accentPulse     = true,
-  accentSpeed     = 0.12,     
-  headerAlpha     = 0.18,
-  shadowAlpha     = 0.35,
-  headerHeight    = 34,
-  headerAutoWidth = true,
-  headerWidth     = 480,
-  headerFontSize  = 15,
+    showHeaderBar = true,
 
-  showFPS         = false,
-  showPing        = false,
-  showPlayers     = false,
-  showTime        = false,
-  showPlace       = false,
-  showUsername    = false,
+    showFPS = true,
+    showPing = true,
+    showUID = true,
 
-  showCrosshair   = false,
-  crossGap        = 7,
-  crossLen        = 9,
-  crossThick      = 1.5,
+    showCrosshair = false,
+    crossGap = 8,
+    crossLen = 10,
+    crossThick = 1.5,
 }
 
-local headerBar, headerShadow, headerText, accentLine
-local statText = nil
-if hasDrawing then
-  headerBar    = Drawing.new("Square")
-  headerShadow = Drawing.new("Square")
-  headerText   = Drawing.new("Text")
-  accentLine   = Drawing.new("Line")
-  statText     = Drawing.new("Text")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
 
-  for _,sq in ipairs({headerBar, headerShadow}) do
-    sq.Visible=false; sq.Filled=true; sq.Color=Theme.PanelMid; sq.Thickness=1
-  end
-  headerShadow.Color = Theme.PanelDark
+local LP = Players.LocalPlayer
+local PG = LP:WaitForChild("PlayerGui")
 
-  headerText.Visible=true; headerText.Center=true; headerText.Size=hud.headerFontSize; headerText.Outline=true; headerText.Color=Theme.Secondary
-  statText.Visible=true; statText.Center=true; statText.Size=hud.headerFontSize-1; statText.Outline=true; statText.Color=Color3.fromRGB(200,200,210)
+local wmGui = Instance.new("ScreenGui")
+wmGui.Name = "KW_Watermark"
+wmGui.ResetOnSpawn = false
+wmGui.IgnoreGuiInset = true
+wmGui.Parent = PG
 
-  accentLine.Visible=true; accentLine.Thickness=2
+local wmFrame = Instance.new("Frame")
+wmFrame.Name = "Main"
+wmFrame.Parent = wmGui
+wmFrame.AnchorPoint = Vector2.new(0.5, 0)
+wmFrame.Position = UDim2.new(0.5, 0, 0, 10)
+wmFrame.AutomaticSize = Enum.AutomaticSize.X
+wmFrame.Size = UDim2.new(0, 0, 0, 32)
+wmFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+wmFrame.BorderSizePixel = 0
+
+local wmCorner = Instance.new("UICorner")
+wmCorner.CornerRadius = UDim.new(0, 10)
+wmCorner.Parent = wmFrame
+
+local wmStroke = Instance.new("UIStroke")
+wmStroke.Parent = wmFrame
+wmStroke.Color = Color3.fromRGB(45, 45, 55)
+wmStroke.Thickness = 1
+wmStroke.Transparency = 0.15
+
+local wmPadding = Instance.new("UIPadding")
+wmPadding.Parent = wmFrame
+wmPadding.PaddingLeft = UDim.new(0, 12)
+wmPadding.PaddingRight = UDim.new(0, 12)
+
+local wmLayout = Instance.new("UIListLayout")
+wmLayout.Parent = wmFrame
+wmLayout.FillDirection = Enum.FillDirection.Horizontal
+wmLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+wmLayout.Padding = UDim.new(0, 8)
+wmLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local function clearDynamic()
+    for _, v in ipairs(wmFrame:GetChildren()) do
+        if v:GetAttribute("WMItem") then
+            v:Destroy()
+        end
+    end
 end
 
-local crossLines = {}
-if hasDrawing then
-  for i=1,4 do local l=Drawing.new("Line"); l.Color=Theme.Secondary; l.Thickness=hud.crossThick; l.Visible=false; crossLines[i]=l end
+local function makeLabel(text, color, size, order)
+    local lbl = Instance.new("TextLabel")
+    lbl.Parent = wmFrame
+    lbl.BackgroundTransparency = 1
+    lbl.AutomaticSize = Enum.AutomaticSize.X
+    lbl.Size = UDim2.new(0, 0, 1, 0)
+    lbl.Font = Enum.Font.GothamBold
+    lbl.Text = text
+    lbl.TextSize = size or 14
+    lbl.TextColor3 = color
+    lbl.LayoutOrder = order
+    lbl:SetAttribute("WMItem", true)
+    return lbl
 end
 
-local pingItem = Stats and Stats.Network and Stats.Network.ServerStatsItem and Stats.Network.ServerStatsItem["Data Ping"] or nil
-local fpsCounter,lastFPS,fpsAccum = 0,60,0
+local function makeDot(order)
+    local dot = Instance.new("Frame")
+    dot.Parent = wmFrame
+    dot.Size = UDim2.new(0, 6, 0, 6)
+    dot.BackgroundColor3 = Color3.fromRGB(170, 90, 255)
+    dot.BorderSizePixel = 0
+    dot.LayoutOrder = order
+    dot:SetAttribute("WMItem", true)
 
-local function buildHeaderStrings()
-  local left = ""
-  local rightParts = {}
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(1, 0)
+    c.Parent = dot
 
-  if hud.showFPS then table.insert(rightParts, ("FPS %d"):format(lastFPS)) end
-  if hud.showPing and pingItem then table.insert(rightParts, ("Ping %dms"):format(math.max(0, math.floor(pingItem:GetValue() or 0)))) end
-  if hud.showPlayers then table.insert(rightParts, ("Players %d"):format(#Players:GetPlayers())) end
-  if hud.showTime then table.insert(rightParts, os.date("%H:%M:%S")) end
-  if hud.showPlace then table.insert(rightParts, placeName) end
-  if hud.showUsername then table.insert(rightParts, ("@%s"):format(LP.Name)) end
-
-  local right = table.concat(rightParts, " | ")
-  return left, right
+    return dot
 end
 
-RunService.RenderStepped:Connect(function(dt)
-  if not hasDrawing then return end
+local currentPing = "0"
+local currentFPS = "0"
 
-  if silentAim.enabled or aim.enabled then
-    updFOV()
-  end
+local function getPing()
+    local ok, result = pcall(function()
+        local network = Stats:FindFirstChild("Network")
+        if not network then return "0" end
 
-  fpsAccum += dt; fpsCounter += 1
-  if fpsAccum >= 0.25 then lastFPS = math.floor(fpsCounter / fpsAccum + 0.5); fpsAccum, fpsCounter = 0, 0 end
+        local serverStats = network:FindFirstChild("ServerStatsItem")
+        if not serverStats then return "0" end
 
-  local left, right = buildHeaderStrings()
-  local combined = (right ~= "" and (left.." | "..right)) or left
+        local dataPing = serverStats:FindFirstChild("Data Ping")
+        if not dataPing then return "0" end
 
-  local vw = Camera.ViewportSize.X
-  local vh = Camera.ViewportSize.Y
-  local textSize = hud.headerFontSize
-  headerText.Size = textSize
-  statText.Size   = textSize - 1
+        local str = dataPing:GetValueString()
+        local num = string.match(str, "%d+")
+        return num or "0"
+    end)
 
-  local approxWidth = math.clamp(#combined * textSize * 0.56 + 40, 260, math.min(vw - 24, 720))
-  local w = hud.headerAutoWidth and approxWidth or hud.headerWidth
-  local h = hud.headerHeight
-  local x = math.floor((vw - w) / 2)
-  local y = 8
+    return ok and result or "0"
+end
 
-  if hud.showHeaderBar then
-    headerShadow.Position     = Vector2.new(x, y+2)
-    headerShadow.Size         = Vector2.new(w, h)
-    headerShadow.Transparency = hud.shadowAlpha
-    headerShadow.Visible      = true
+local function rebuildWatermark()
+    clearDynamic()
 
-    headerBar.Position        = Vector2.new(x, y)
-    headerBar.Size            = Vector2.new(w, h)
-    headerBar.Transparency    = hud.headerAlpha
-    headerBar.Visible         = true
-  else
-    headerShadow.Visible = false
-    headerBar.Visible    = false
-  end
+    local order = 1
+    makeLabel("withdraw.cc", Color3.fromRGB(170, 90, 255), 15, order)
+    order += 1
 
-  local accent = Theme.Accent
-  if hud.accentPulse then
-    local hue = (os.clock() * hud.accentSpeed) % 1
-    accent = Color3.fromHSV(hue, 0.5, 1)
-  end
-  if hud.showAccentLine then
-    accentLine.From         = Vector2.new(x+8, y+h-2)
-    accentLine.To           = Vector2.new(x+w-8, y+h-2)
-    accentLine.Color        = accent
-    accentLine.Transparency = 0.9
-    accentLine.Visible      = true
-  else
-    accentLine.Visible = false
-  end
+    local chips = {}
 
-  headerText.Text      = combined
-  headerText.Color     = Theme.Secondary
-  headerText.Position  = Vector2.new(vw/2, y + h/2 + 1)
-  headerText.Visible   = true
+    if hud.showPing then
+        table.insert(chips, {text = currentPing .. " ms", color = Color3.fromRGB(230,230,230)})
+    end
+    if hud.showFPS then
+        table.insert(chips, {text = currentFPS .. " fps", color = Color3.fromRGB(230,230,230)})
+    end
+    if hud.showUID then
+        table.insert(chips, {text = LP.UserId .. " uid", color = Color3.fromRGB(200,200,200)})
+    end
 
-  statText.Text        = " "
-  statText.Color       = accent
-  statText.Position    = Vector2.new(vw/2, y + h + 14)
-  statText.Visible     = true
+    if #chips > 0 then
+        makeLabel("|", Color3.fromRGB(200, 200, 200), 14, order)
+        order += 1
+    end
 
-  local m=UIS:GetMouseLocation()
-  local cgap,clen=hud.crossGap,hud.crossLen
-  local pts={{Vector2.new(m.X - cgap - clen, m.Y), Vector2.new(m.X - cgap, m.Y)},
-             {Vector2.new(m.X + cgap, m.Y),       Vector2.new(m.X + cgap + clen, m.Y)},
-             {Vector2.new(m.X, m.Y - cgap - clen), Vector2.new(m.X, m.Y - cgap)},
-             {Vector2.new(m.X, m.Y + cgap),        Vector2.new(m.X, m.Y + cgap + clen)}}
-  for i=1,4 do
-    local L=crossLines[i]
-    if hud.showCrosshair then
-      L.Thickness = hud.crossThick
-      L.From=pts[i][1]; L.To=pts[i][2]; L.Visible=true
-    else L.Visible=false end
-  end
+    for i, chip in ipairs(chips) do
+        makeLabel(chip.text, chip.color, 14, order)
+        order += 1
+
+        if i < #chips then
+            makeDot(order)
+            order += 1
+        end
+    end
+
+    wmGui.Enabled = hud.showHeaderBar
+end
+
+local lastFpsTick = tick()
+local frameCounter = 0
+
+RunService.RenderStepped:Connect(function()
+    frameCounter += 1
+
+    if tick() - lastFpsTick >= 1 then
+        currentFPS = tostring(frameCounter)
+        frameCounter = 0
+        lastFpsTick = tick()
+        rebuildWatermark()
+    end
 end)
 
+task.spawn(function()
+    while true do
+        currentPing = getPing()
+        rebuildWatermark()
+        task.wait(1)
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    wmGui.Enabled = hud.showHeaderBar
+end)
+
+rebuildWatermark()
+
 do
-  local H = HUDTab:Section({Name="Header | Centered Banner", Side="Left"})
-  H:Toggle({Name="Show Header Bar", Flag="KW_HD_BAR", Default=hud.showHeaderBar, Callback=function(v) hud.showHeaderBar=v end})
-  H:Toggle({Name="Accent Pulse", Flag="KW_HD_AP", Default=hud.accentPulse, Callback=function(v) hud.accentPulse=v end})
-  H:Toggle({Name="Accent Line", Flag="KW_HD_AL", Default=hud.showAccentLine, Callback=function(v) hud.showAccentLine=v end})
-  H:Slider({Name="Header Height", Flag="KW_HD_H", Default=hud.headerHeight, Min=24, Max=50, Callback=function(v) hud.headerHeight=math.floor(v) end})
-  H:Slider({Name="Header Alpha %", Flag="KW_HD_A", Default=math.floor(hud.headerAlpha*100), Min=0, Max=80, Callback=function(v) hud.headerAlpha=clamp(v/100,0,0.8) end})
-  H:Slider({Name="Shadow Alpha %", Flag="KW_HD_SA", Default=math.floor(hud.shadowAlpha*100), Min=0, Max=80, Callback=function(v) hud.shadowAlpha=clamp(v/100,0,0.8) end})
-  H:Toggle({Name="Auto Width", Flag="KW_HD_AW", Default=hud.headerAutoWidth, Callback=function(v) hud.headerAutoWidth=v end})
-  H:Slider({Name="Manual Width", Flag="KW_HD_MW", Default=hud.headerWidth, Min=260, Max=720, Callback=function(v) hud.headerWidth=math.floor(v) end})
-  H:Slider({Name="Font Size", Flag="KW_HD_FS", Default=hud.headerFontSize, Min=12, Max=20, Callback=function(v) hud.headerFontSize=math.floor(v) end})
+    local H = HUDTab:Section({Name="Header | Watermark", Side="Left"})
+    H:Toggle({
+        Name = "Show Watermark",
+        Flag = "KW_WM_SHOW",
+        Default = hud.showHeaderBar,
+        Callback = function(v)
+            hud.showHeaderBar = v
+        end
+    })
 
-  local D = HUDTab:Section({Name="Header | Data Chips", Side="Right"})
-  D:Toggle({Name="Show FPS", Flag="KW_HD_FPS", Default=hud.showFPS, Callback=function(v) hud.showFPS=v end})
-  D:Toggle({Name="Show Ping", Flag="KW_HD_PING", Default=hud.showPing, Callback=function(v) hud.showPing=v end})
-  D:Toggle({Name="Show Players", Flag="KW_HD_PLR", Default=hud.showPlayers, Callback=function(v) hud.showPlayers=v end})
-  D:Toggle({Name="Show Time", Flag="KW_HD_TIME", Default=hud.showTime, Callback=function(v) hud.showTime=v end})
-  D:Toggle({Name="Show Place Name", Flag="KW_HD_PLACE", Default=hud.showPlace, Callback=function(v) hud.showPlace=v end})
-  D:Toggle({Name="Show Username", Flag="KW_HD_USER", Default=hud.showUsername, Callback=function(v) hud.showUsername=v end})
+    H:Toggle({
+        Name = "Show FPS",
+        Flag = "KW_WM_FPS",
+        Default = hud.showFPS,
+        Callback = function(v)
+            hud.showFPS = v
+        end
+    })
 
-  local C = HUDTab:Section({Name="Crosshair", Side="Left"})
-  C:Toggle({Name="Enabled", Flag="KW_CH_EN", Default=hud.showCrosshair, Callback=function(v) hud.showCrosshair=v end})
-  C:Slider({Name="Gap (px)", Flag="KW_CH_GAP", Default=hud.crossGap, Min=3, Max=24, Callback=function(v) hud.crossGap=math.floor(v) end})
-  C:Slider({Name="Length (px)", Flag="KW_CH_LEN", Default=hud.crossLen, Min=4, Max=24, Callback=function(v) hud.crossLen=math.floor(v) end})
-  C:Slider({Name="Thickness", Flag="KW_CH_TH", Default=math.floor(hud.crossThick*10), Min=10, Max=40, Callback=function(v) hud.crossThick=clamp(v/10,0.5,4) end})
+    H:Toggle({
+        Name = "Show Ping",
+        Flag = "KW_WM_PING",
+        Default = hud.showPing,
+        Callback = function(v)
+            hud.showPing = v
+        end
+    })
+
+    H:Toggle({
+        Name = "Show UID",
+        Flag = "KW_WM_UID",
+        Default = hud.showUID,
+        Callback = function(v)
+            hud.showUID = v
+        end
+    })
+
+    local C = HUDTab:Section({Name="Crosshair", Side="Left"})
+    C:Toggle({Name="Enabled", Flag="KW_CH_EN", Default=hud.showCrosshair, Callback=function(v) hud.showCrosshair=v end})
+    C:Slider({Name="Gap (px)", Flag="KW_CH_GAP", Default=hud.crossGap, Min=3, Max=24, Callback=function(v) hud.crossGap=math.floor(v) end})
+    C:Slider({Name="Length (px)", Flag="KW_CH_LEN", Default=hud.crossLen, Min=4, Max=24, Callback=function(v) hud.crossLen=math.floor(v) end})
+    C:Slider({Name="Thickness", Flag="KW_CH_TH", Default=math.floor(hud.crossThick*10), Min=10, Max=40, Callback=function(v) hud.crossThick=clamp(v/10,0.5,4) end})
 end
 
 do
