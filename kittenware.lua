@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.16                                         |
+| Version: v1.17                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -59,7 +59,174 @@ delay(3.5, function()
 end)
 
 
-loadstring(game:HttpGet('https://raw.githubusercontent.com/KuromiWare-v1/freebypasslmao/refs/heads/main/uhhhidk.lua'))()
+--loadstring(game:HttpGet('https://raw.githubusercontent.com/KuromiWare-v1/freebypasslmao/refs/heads/main/uhhhidk.lua'))()
+
+local g = getinfo or debug.getinfo
+local d = false
+local h = {}
+
+local x, y
+
+setthreadidentity(2)
+
+for i, v in getgc(true) do
+    if typeof(v) == "table" then
+        local a = rawget(v, "Detected")
+        local b = rawget(v, "Kill")
+    
+        if typeof(a) == "function" and not x then
+            x = a
+            
+            local o; o = hookfunction(x, function(c, f, n)
+                if c ~= "_" then
+                    if d then
+                        -- warn(`Adonis AntiCheat flagged\nMethod: {c}\nInfo: {f}`)
+                    end
+                end
+                
+                return true
+            end)
+
+            table.insert(h, x)
+        end
+
+        if rawget(v, "Variables") and rawget(v, "Process") and typeof(b) == "function" and not y then
+            y = b
+            local o; o = hookfunction(y, function(f)
+                if d then
+                    -- warn(`Adonis AntiCheat tried to kill (fallback): {f}`)
+                end
+            end)
+
+            table.insert(h, y)
+        end
+    end
+end
+
+local o; o = hookfunction(getrenv().debug.info, newcclosure(function(...)
+    local a, f = ...
+
+    if x and a == x then
+        if d then
+            -- warn("adonis bypassed")
+        end
+
+        return coroutine.yield(coroutine.running())
+    end
+    
+    return o(...)
+end))
+
+setthreadidentity(7)
+
+-- // Custom Notification - "Withdraw [Adonis Bypassed]"
+-- // Works in most Roblox exploit environments (Synapse X, Script-Ware, etc.)
+
+local function createAdonisBypassPopup()
+
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "AdonisBypassNotif"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.Parent = game:GetService("CoreGui")
+
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(0, 340, 0, 92)
+    Frame.Position = UDim2.new(0.5, -170, -0.2, 0)
+    Frame.BackgroundColor3 = Color3.fromRGB(46, 46, 46)
+	Frame.BackgroundTransparency = 0.92
+    Frame.BorderSizePixel = 0
+    Frame.ClipsDescendants = true
+    Frame.Parent = ScreenGui
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 12)
+    UICorner.Parent = Frame
+
+    local UIStroke = Instance.new("UIStroke")
+    UIStroke.Color = Color3.fromRGB(255, 255, 255)
+    UIStroke.Thickness = 1.6
+    UIStroke.Transparency = 0.4
+    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    UIStroke.Parent = Frame
+
+    local UIGradient = Instance.new("UIGradient")
+    UIGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 65)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(18, 18, 18))
+    }
+    UIGradient.Rotation = 90
+    UIGradient.Parent = Frame
+
+    -- Text
+    local TextLabel = Instance.new("TextLabel")
+    TextLabel.Size = UDim2.new(1, -24, 1, -24)
+    TextLabel.Position = UDim2.new(0, 12, 0, 12)
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.Font = Enum.Font.GothamSemibold
+    TextLabel.Text = "Withdraw [Adonis Bypassed]"
+    TextLabel.TextColor3 = Color3.fromRGB(235, 235, 245)
+    TextLabel.TextSize = 19
+    TextLabel.TextXAlignment = Enum.TextXAlignment.Center
+    TextLabel.TextYAlignment = Enum.TextYAlignment.Center
+    TextLabel.Parent = Frame
+
+    -- Underline accent
+    local Accent = Instance.new("Frame")
+    Accent.Size = UDim2.new(0.4, 0, 0, 3)
+    Accent.Position = UDim2.new(0.3, 0, 0.82, 0)
+    Accent.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Accent.BorderSizePixel = 0
+    Accent.Parent = Frame
+
+    local AccentCorner = Instance.new("UICorner")
+    AccentCorner.CornerRadius = UDim.new(1, 0)
+    AccentCorner.Parent = Accent
+
+    -- Slide in + stay + fade out animation
+    local TweenService = game:GetService("TweenService")
+
+    local tweenIn = TweenService:Create(Frame, TweenInfo.new(
+        0.65, Enum.EasingStyle.Back, Enum.EasingDirection.Out
+    ), {
+        Position = UDim2.new(0.5, -170, 0.08, 0),
+        BackgroundTransparency = 0
+    })
+
+    local tweenStay = TweenService:Create(Frame, TweenInfo.new(0.1), {})
+
+    local tweenOut = TweenService:Create(Frame, TweenInfo.new(
+        0.9, Enum.EasingStyle.Quint, Enum.EasingDirection.In
+    ), {
+        Position = UDim2.new(0.5, -170, -0.2, 0),
+        BackgroundTransparency = 1,
+        -- TextTransparency = 1
+    })
+
+    -- Play animation sequence
+    tweenIn:Play()
+    tweenIn.Completed:Connect(function()
+        wait(4.2)           -- how long it stays visible
+        tweenOut:Play()
+        tweenOut.Completed:Connect(function()
+            ScreenGui:Destroy()
+        end)
+    end)
+
+    -- Optional: play a subtle sound (if your exploit supports it)
+    -- pcall(function()
+    --     local snd = Instance.new("Sound")
+    --     snd.SoundId = "rbxassetid://4590657391"   -- quiet click / whoosh sound
+    --     snd.Volume = 0.35
+    --     snd.Parent = Frame
+    --     snd:Play()
+    --     game.Debris:AddItem(snd, 2)
+    -- end)
+end
+
+-- Execute it
+createAdonisBypassPopup()
+
 do
     local f = identifyexecutor or getexecutorname or get_executor_name
     local exec = "unknown"
