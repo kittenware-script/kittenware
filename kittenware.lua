@@ -3531,6 +3531,43 @@ do
   R:Button({Name="Remove Friend", Callback=function() local n=GUI.flags["KW_USER_BOX"]; if n then whitelist[n]=nil end userBox:Set("") end})
   R:Button({Name="Add to Ignore", Callback=function() local n=GUI.flags["KW_USER_BOX"]; if n and n~="" then ignorelist[n]=true end userBox:Set("") end})
   R:Button({Name="Remove Ignore", Callback=function() local n=GUI.flags["KW_USER_BOX"]; if n then ignorelist[n]=nil end userBox:Set("") end})
+
+  local C = About:Section({Name=" ", Side="Right"})
+
+  C:Dropdown({
+	Name = "Configurations",
+	Flag = "Config Dropdown",
+	Content = GUI:GetConfigs()
+})
+
+C:Box({
+	Name = "Configuration Name",
+	Flag = "Config Name",
+	Placeholder = "Config Name"
+})
+
+C:Button({
+	Name = "Load Configuration",
+	Callback = function()
+		GUI:LoadConfig(GUI.flags["Config Dropdown"])
+	end
+})
+
+C:Button({
+	Name = "Delete Configuration",
+	Callback = function()
+		GUI:DeleteConfig(GUI.flags["Config Dropdown"])
+		ConfigList:Refresh(GUI:GetConfigs())
+	end
+})
+
+C:Button({
+	Name = "Save Configuration",
+	Callback = function()
+		GUI:SaveConfig(GUI.flags["Config Dropdown"] or GUI.flags["Config Name"])
+		ConfigList:Refresh(GUI:GetConfigs())
+	end
+})
 end
 
 local S = About:Section({Name="KuromiWare", Side="Right"})
