@@ -1,9 +1,46 @@
 print([[
-KuromiWare On Top
+	                                         .""--..__
+                     _                     []       ``-.._
+                  .'` `'.                  ||__           `-._
+                 /    ,-.\                 ||_ ```---..__     `-.
+                /    /:::\\               /|//}          ``--._  `.
+                |    |:::||              |////}                `-. \
+                |    |:::||             //'///                    `.\
+                |    |:::||            //  ||'                      `|
+                /    |:::|/        _,-//\  ||
+               /`    |:::|`-,__,-'`  |/  \ ||
+             /`  |   |'' ||           \   |||
+           /`    \   |   ||            |  /||
+         |`       |  |   |)            \ | ||
+        |          \ |   /      ,.__    \| ||
+        /           `         /`    `\   | ||
+       |                     /        \  / ||
+       |                     |        | /  ||
+       /         /           |        `(   ||
+      /          .           /          )  ||
+     |            \          |     ________||
+    /             |          /     `-------.|
+   |\            /          |              ||
+   \/`-._       |           /              ||
+    //   `.    /`           |              ||
+   //`.    `. |             \              ||
+  ///\ `-._  )/             |              ||
+ //// )   .(/               |              ||
+ ||||   ,'` )               /              //
+ ||||  /                    /             || 
+ `\\` /`                    |             // 
+     |`                     \            ||  
+    /                        |           //  
+  /`                          \         //   
+/`                            |        ||    
+`-.___,-.      .-.        ___,'        (/    
+         `---'`   `'----'`
+
+
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.20                                         |
+| Version: v1.21                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -1817,8 +1854,142 @@ local function disableIR()
     ir.enabled = false
 end
 
+local isEnabled = false
+local connections = {}
+local mainLoopActive = false
+
+local function GetAllPlayerTools()
+    local tools = {}
+    
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        for _, item in ipairs(backpack:GetChildren()) do
+            if item:IsA("Tool") then
+                table.insert(tools, item)
+            end
+        end
+    end
+    
+    if player.Character then
+        for _, item in ipairs(player.Character:GetChildren()) do
+            if item:IsA("Tool") then
+                table.insert(tools, item)
+            end
+        end
+    end
+    
+    return tools
+end
+
+local function FindWeaponInWorkspace(tool)
+    if not tool then return nil end
+    
+    local playerFolder = workspace:FindFirstChild(player.Name)
+    if not playerFolder then return nil end
+    
+    local weapon = playerFolder:FindFirstChild(tool.Name, true)
+    return weapon
+end
+
+local function IsWeaponReady(weapon)
+    if not weapon then return false end
+    if not weapon:FindFirstChild("GunScript") then return false end
+    if not weapon.GunScript:FindFirstChild("ClientAmmo") then return false end
+    return true
+end
+
+local function freezeAmmo(weapon)
+    if weapon and weapon:FindFirstChild("GunScript") then
+        local gunScript = weapon.GunScript
+        if gunScript:FindFirstChild("ClientAmmo") then
+            local ammo = gunScript.ClientAmmo
+            local originalValue = ammo.Value
+            local connection = ammo.Changed:Connect(function()
+                if ammo.Value ~= originalValue then
+                    ammo.Value = originalValue
+                end
+            end)
+            table.insert(connections, connection)
+            ammo.Value = originalValue
+        end
+    end
+end
+
+local function forceReload(character)
+    if not character then return end
+
+    for _, tool in ipairs(character:GetDescendants()) do
+        if tool:IsA("Tool") then
+            local weapon = FindWeaponInWorkspace(tool)
+            if not weapon then continue end
+
+            local reloadEvent = weapon:FindFirstChild("ReloadEvent")
+            if not reloadEvent then continue end
+
+            local function fireReload(args)
+                reloadEvent:FireServer(unpack(args, 1, table.maxn(args)))
+            end
+
+            fireReload({[11] = "startReload"})
+            fireReload({[14] = 0, [11] = "magMath"})
+            fireReload({[14] = 3, [11] = "insertMag"})
+            fireReload({[14] = 3, [11] = "stopReload"})
+        end
+    end
+end
+
+local function cleanup()
+    for _, connection in ipairs(connections) do
+        connection:Disconnect()
+    end
+    connections = {}
+end
+
+local function processWeapons(character)
+    if not character then return end
+
+    for _, tool in ipairs(character:GetDescendants()) do
+        if tool:IsA("Tool") then
+            local weapon = FindWeaponInWorkspace(tool)
+            if not weapon then continue end
+            
+            if IsWeaponReady(weapon) then
+                freezeAmmo(weapon)
+            end
+        end
+    end
+    
+    forceReload(character)
+end
+
+local function mainLoop()
+    while isEnabled do
+        local character = player.Character or player.CharacterAdded:Wait()
+        processWeapons(character)
+        task.wait(0.1)
+    end
+end
+
 do
-    local L = MiscTab:Section({Name="Fast Reload", Side="Left"})
+    local L = MiscTab:Section({Name="Weapon mods", Side="Left"})
+
+	L:Toggle({
+    Name = "Infinite Ammo",
+    Flag = "KW_INF_AMMO",
+    Default = false,
+    callback = function(state)
+        isEnabled = state
+        if state then
+            cleanup()
+            if player.Character then
+                forceReload(player.Character)
+            end
+            coroutine.wrap(mainLoop)()
+        else
+            cleanup()
+        end
+    end
+})
 
     L:Toggle({
         Name = "Enabled",
@@ -2062,45 +2233,6 @@ CS:Slider({
     Max=5,
     Callback=function(v)
         cframeSpeed.speed = v
-    end
-})
-
-local V = MiscTab:Section({Name="Void Position (Beta)", Side="Left"})
-
-V:Toggle({
-    Name="Enabled",
-    Flag="KW_VOID_EN",
-    Default=false,
-    Callback=function(v)
-        voidPos.enabled = v
-
-        if not v then
-            local char = LP.Character
-            local hum = char and char:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum.PlatformStand = false
-            end
-        end
-    end
-})
-
-V:Toggle({
-    Name="Hold Shift",
-    Flag="KW_VOID_HOLD",
-    Default=false,
-    Callback=function(v)
-        voidPos.holdToUse = v
-    end
-})
-
-V:Slider({
-    Name="Height",
-    Flag="KW_VOID_HGT",
-    Default=voidPos.height,
-    Min=10,
-    Max=500,
-    Callback=function(v)
-        voidPos.height = v
     end
 })
 end
