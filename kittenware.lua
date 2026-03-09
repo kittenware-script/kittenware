@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.19                                         |
+| Version: v1.20                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -2473,6 +2473,157 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+--// Bullet Trails
+do
+    local Players = game:GetService("Players")
+    local UIS = game:GetService("UserInputService")
+    local TweenService = game:GetService("TweenService")
+    local Debris = game:GetService("Debris")
+    local RunService = game:GetService("RunService")
+
+    local LP = Players.LocalPlayer
+    local Camera = workspace.CurrentCamera
+
+    bulletTrails = {
+        enabled = false,
+
+        rainbow = false,
+        rainbowSpeed = 2,
+
+        color = Color3.fromRGB(170,90,255),
+        material = Enum.Material.Neon,
+
+        width = 0.06,
+        transparency = 0.15,
+
+        lifetime = 0.25,
+        distance = 1400,
+        fireRate = 0.06
+    }
+
+    local function getRainbow()
+        local t = tick() * bulletTrails.rainbowSpeed
+        return Color3.fromHSV((t % 5)/5,1,1)
+    end
+
+    local function getBarrel()
+
+        local char = LP.Character
+        if not char then return nil end
+
+        local tool = char:FindFirstChildOfClass("Tool")
+        if not tool then return nil end
+
+        local barrel = tool:FindFirstChild("Barrel", true)
+
+        if barrel and barrel:IsA("BasePart") then
+            return barrel
+        end
+
+        return nil
+    end
+
+    local function createTrail(startPos,endPos)
+
+        local distance = (endPos-startPos).Magnitude
+
+        local tracer = Instance.new("Part")
+        tracer.Name = "KW_BulletTrail"
+        tracer.Anchored = true
+        tracer.CanCollide = false
+        tracer.CanTouch = false
+        tracer.CanQuery = false
+        tracer.CastShadow = false
+
+        tracer.Material = bulletTrails.material
+        tracer.Color = bulletTrails.rainbow and getRainbow() or bulletTrails.color
+
+        tracer.Transparency = bulletTrails.transparency
+
+        tracer.Size = Vector3.new(
+            bulletTrails.width,
+            bulletTrails.width,
+            distance
+        )
+
+        tracer.CFrame =
+            CFrame.new(startPos,endPos)
+            * CFrame.new(0,0,-distance/2)
+
+        tracer.Parent = workspace
+
+        local tween = TweenService:Create(
+            tracer,
+            TweenInfo.new(bulletTrails.lifetime,Enum.EasingStyle.Linear),
+            {
+                Transparency = 1,
+                Size = Vector3.new(0.01,0.01,distance)
+            }
+        )
+
+        tween:Play()
+
+        Debris:AddItem(tracer,bulletTrails.lifetime+0.1)
+    end
+
+    local function shoot()
+
+        local barrel = getBarrel()
+        if not barrel then return end
+
+        local origin = barrel.Position
+        local direction = barrel.CFrame.LookVector * bulletTrails.distance
+
+        local params = RaycastParams.new()
+        params.FilterDescendantsInstances = {LP.Character}
+        params.FilterType = Enum.RaycastFilterType.Blacklist
+
+        local result = workspace:Raycast(origin,direction,params)
+
+        local hitPos =
+            result and result.Position
+            or (origin + direction)
+
+        createTrail(origin,hitPos)
+
+    end
+
+    local holding = false
+    local lastShot = 0
+
+    UIS.InputBegan:Connect(function(input,gpe)
+        if gpe then return end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            holding = true
+        end
+    end)
+
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            holding = false
+        end
+    end)
+
+    RunService.RenderStepped:Connect(function()
+
+        if not bulletTrails.enabled then return end
+        if not holding then return end
+
+        local barrel = getBarrel()
+        if not barrel then return end
+
+        if tick() - lastShot < bulletTrails.fireRate then
+            return
+        end
+
+        lastShot = tick()
+
+        shoot()
+
+    end)
+
+end
+
 do
     --// Services
     local Players = game:GetService("Players")
@@ -2685,6 +2836,103 @@ G:Dropdown({
         gunChams.material = Enum.Material[v]
     end
 })
+
+local B = World:Section({Name="Bullet Trails", Side="Right"})
+
+    B:Toggle({
+        Name="Enabled",
+        Flag="KW_BT_EN",
+        Default=false,
+        Callback=function(v)
+            bulletTrails.enabled = v
+        end
+    })
+
+    B:Toggle({
+        Name="Rainbow",
+        Flag="KW_BT_RB",
+        Default=false,
+        Callback=function(v)
+            bulletTrails.rainbow = v
+        end
+    })
+
+    B:Slider({
+        Name="Rainbow Speed",
+        Flag="KW_BT_RS",
+        Default=20,
+        Min=5,
+        Max=80,
+        Callback=function(v)
+            bulletTrails.rainbowSpeed = v / 10
+        end
+    })
+
+    B:Slider({
+        Name="Width",
+        Flag="KW_BT_WIDTH",
+        Default=6,
+        Min=1,
+        Max=20,
+        Callback=function(v)
+            bulletTrails.width = v / 100
+        end
+    })
+
+    B:Slider({
+        Name="Lifetime (ms)",
+        Flag="KW_BT_LT",
+        Default=250,
+        Min=50,
+        Max=800,
+        Callback=function(v)
+            bulletTrails.lifetime = v / 1000
+        end
+    })
+
+    B:Slider({
+        Name="Fire Rate (ms)",
+        Flag="KW_BT_FR",
+        Default=60,
+        Min=10,
+        Max=200,
+        Callback=function(v)
+            bulletTrails.fireRate = v / 1000
+        end
+    })
+
+    B:Slider({
+        Name="Transparency %",
+        Flag="KW_BT_TR",
+        Default=15,
+        Min=0,
+        Max=100,
+        Callback=function(v)
+            bulletTrails.transparency = v / 100
+        end
+    })
+
+    B:Dropdown({
+        Name="Material",
+        Flag="KW_BT_MAT",
+        Content={"Neon","ForceField"},
+        Default="Neon",
+        Callback=function(v)
+            bulletTrails.material =
+                v == "ForceField"
+                and Enum.Material.ForceField
+                or Enum.Material.Neon
+        end
+    })
+
+    B:Colorpicker({
+        Name="Color",
+        Flag="KW_BT_COL",
+        Default=Color3.fromRGB(170,90,255),
+        Callback=function(c)
+            bulletTrails.color = c
+        end
+    })
 end
 
 
