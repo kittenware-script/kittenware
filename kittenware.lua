@@ -2100,10 +2100,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-
-    local S = MiscTab:Section({Name="Semigod", Side="Left"})
-    S:Toggle({Name="Enabled", Flag="KW_SEMIGOD_EN", Default=false, Callback=function(v) if v then enableSemigod() else disableSemigod() end end})
-
     local BL = World:Section({Name="Loadout", Side="Left"})
     BL:Button({Name="Equip Loadout", Callback=function()
         local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
@@ -2115,87 +2111,6 @@ end)
         end
     end})
 
-    local KA = MiscTab:Section({Name="Kill All", Side="Left"})
-KA:Button({
-    Name = "Execute",
-    Callback = function()
-        task.spawn(function()
-
-            -- spawn gun
-            local commandFunction = LP.PlayerGui.ChatConsoleGui.CommandFunction
-            commandFunction:InvokeServer("!spawn l9")
-
-            local char = LP.Character or LP.CharacterAdded:Wait()
-            local hum = char:WaitForChild("Humanoid")
-
-            local Gun = LP.Backpack:WaitForChild("L96A1", 5)
-            if not Gun then
-                warn("Gun not found")
-                return
-            end
-
-            -- equip properly
-            hum:EquipTool(Gun)
-            task.wait(0.2)
-
-            local FireEvent = Gun:FindFirstChild("FireEvent", true)
-            if not FireEvent then
-                warn("FireEvent missing")
-                return
-            end
-
-            local Handle = Gun:FindFirstChild("Handle") or Gun:FindFirstChildWhichIsA("BasePart")
-            if not Handle then
-                warn("Gun handle missing")
-                return
-            end
-
-            -- grab fire delay
-            local waitTime = 0.05
-            pcall(function()
-                local settings = require(Gun.Settings)
-                waitTime = settings.waittime or waitTime
-            end)
-
-            -- fire at every player
-            for _, plr in ipairs(Players:GetPlayers()) do
-                if plr ~= LP and plr.Character then
-                    local hum2 = plr.Character:FindFirstChildOfClass("Humanoid")
-                    local head = plr.Character:FindFirstChild("Head")
-
-                    if hum2 and hum2.Health > 0 and head then
-                        pcall(function()
-                            FireEvent:FireServer(
-                                {
-                                    {
-                                        {
-                                            head,
-                                            head.Position,
-                                            Vector3.zero,
-                                            Enum.Material.Plastic,
-                                            Handle.Position,
-                                            Gun.Flash
-                                        }
-                                    }
-                                },
-                                true,
-                                nil,
-                                Vector3.zero,
-                                nil,
-                                1,
-                                waitTime,
-                                3.6
-                            )
-                        end)
-
-                        task.wait(waitTime)
-                    end
-                end
-            end
-        end)
-    end
-})
-
 
     local AY = MiscTab:Section({Name="Anti Yaw", Side="Right"})
     AY:Toggle({Name="Enabled", Flag="KW_ANTIYAW_EN", Default=false, Callback=function(v) antiYaw.enabled=v antiYaw.lockCF=nil end})
@@ -2205,7 +2120,7 @@ KA:Button({
     AY:Slider({Name="Min Yaw Offset", Flag="KW_ANTIYAW_MIN", Default=antiYaw.minYaw, Min=-180, Max=0, Callback=function(v) antiYaw.minYaw=v end})
     AY:Slider({Name="Max Yaw Offset", Flag="KW_ANTIYAW_MAX", Default=antiYaw.maxYaw, Min=0, Max=180, Callback=function(v) antiYaw.maxYaw=v end})
 
-	local CS = MiscTab:Section({Name="CFrame Speed", Side="Right"})
+	local CS = MiscTab:Section({Name="CFrame Speed", Side="Left"})
 
 CS:Toggle({
     Name="Enabled",
@@ -2919,7 +2834,7 @@ end)
     end
 })
 
-local G = World:Section({Name="Gun Chams", Side="Left"})
+local G = World:Section({Name="Gun Chams", Side="Right"})
 
 G:Toggle({
     Name="Enabled",
@@ -2969,7 +2884,7 @@ G:Dropdown({
     end
 })
 
-local B = World:Section({Name="Bullet Trails", Side="Right"})
+local B = World:Section({Name="Bullet Trails", Side="Left"})
 
     B:Toggle({
         Name="Enabled",
@@ -3507,7 +3422,7 @@ do
         end
     })
 
-	local N = HUDTab:Section({Name="Notifcations", Side="Right"})
+	local N = HUDTab:Section({Name="Notifcations", Side="Left"})
 	N:Toggle({
     Name = "Death Notifications",
     Flag = "KW_DEATH_NOTIFS",
@@ -3517,7 +3432,7 @@ do
     end
 })
 
-    local C = HUDTab:Section({Name="Crosshair", Side="Left"})
+    local C = HUDTab:Section({Name="Crosshair", Side="Right"})
     C:Toggle({Name="Enabled", Flag="KW_CH_EN", Default=hud.showCrosshair, Callback=function(v) hud.showCrosshair=v end})
     C:Slider({Name="Gap (px)", Flag="KW_CH_GAP", Default=hud.crossGap, Min=3, Max=24, Callback=function(v) hud.crossGap=math.floor(v) end})
     C:Slider({Name="Length (px)", Flag="KW_CH_LEN", Default=hud.crossLen, Min=4, Max=24, Callback=function(v) hud.crossLen=math.floor(v) end})
@@ -3570,7 +3485,7 @@ C:Button({
 })
 end
 
-local S = About:Section({Name="KuromiWare", Side="Right"})
+local S = About:Section({Name="KuromiWare", Side="Left"})
 S:Keybind({Name="Toggle UI", Flag="KW_UI_TOG", Default=Enum.KeyCode.RightShift, Callback=function(_, newKey) if not newKey then GUI:Close() end end})
 S:Button({Name="Unload", Callback=function()
   disableESP(); if descAddConn then descAddConn:Disconnect() end; if descRemConn then descRemConn:Disconnect() end
