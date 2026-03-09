@@ -2514,7 +2514,7 @@ do
         local tool = char:FindFirstChildOfClass("Tool")
         if not tool then return nil end
 
-        local barrel = tool:FindFirstChild("Barrel", true)
+        local barrel = tool:FindFirstChild("BarrelHandle", true)
 
         if barrel and barrel:IsA("BasePart") then
             return barrel
