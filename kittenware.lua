@@ -3,7 +3,7 @@ KuromiWare On Top
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.18                                         |
+| Version: v1.19                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -123,108 +123,219 @@ setthreadidentity(7)
 -- // Works in most Roblox exploit environments (Synapse X, Script-Ware, etc.)
 
 local function createAdonisBypassPopup()
+    local TweenService = game:GetService("TweenService")
+    local CoreGui = game:GetService("CoreGui")
+    local Debris = game:GetService("Debris")
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "AdonisBypassNotif"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.IgnoreGuiInset = true
-    ScreenGui.Parent = game:GetService("CoreGui")
+    ScreenGui.Parent = CoreGui
 
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 340, 0, 92)
-    Frame.Position = UDim2.new(0.5, -170, -0.2, 0)
-    Frame.BackgroundColor3 = Color3.fromRGB(46, 46, 46)
-	Frame.BackgroundTransparency = 0.70
+    Frame.Name = "Main"
+    Frame.Parent = ScreenGui
+    Frame.AnchorPoint = Vector2.new(0.5, 0)
+    Frame.Position = UDim2.new(0.5, 0, -0.18, 0)
+    Frame.Size = UDim2.new(0, 390, 0, 56)
+    Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+    Frame.BackgroundTransparency = 0.08
     Frame.BorderSizePixel = 0
     Frame.ClipsDescendants = true
-    Frame.Parent = ScreenGui
 
     local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 12)
+    UICorner.CornerRadius = UDim.new(0, 10)
     UICorner.Parent = Frame
 
     local UIStroke = Instance.new("UIStroke")
-    UIStroke.Color = Color3.fromRGB(255, 255, 255)
-    UIStroke.Thickness = 1.6
-    UIStroke.Transparency = 0.4
-    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     UIStroke.Parent = Frame
+    UIStroke.Color = Color3.fromRGB(45, 45, 55)
+    UIStroke.Thickness = 1
+    UIStroke.Transparency = 0.15
+    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    local UIGradient = Instance.new("UIGradient")
-    UIGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 65)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(18, 18, 18))
-    }
-    UIGradient.Rotation = 90
-    UIGradient.Parent = Frame
+    local UIPadding = Instance.new("UIPadding")
+    UIPadding.Parent = Frame
+    UIPadding.PaddingLeft = UDim.new(0, 14)
+    UIPadding.PaddingRight = UDim.new(0, 14)
 
-    -- Text
-    local TextLabel = Instance.new("TextLabel")
-    TextLabel.Size = UDim2.new(1, -24, 1, -24)
-    TextLabel.Position = UDim2.new(0, 12, 0, 12)
-    TextLabel.BackgroundTransparency = 1
-    TextLabel.Font = Enum.Font.GothamSemibold
-    TextLabel.Text = "Withdraw [Adonis Bypassed]"
-    TextLabel.TextColor3 = Color3.fromRGB(235, 235, 245)
-    TextLabel.TextSize = 19
-    TextLabel.TextXAlignment = Enum.TextXAlignment.Center
-    TextLabel.TextYAlignment = Enum.TextYAlignment.Center
-    TextLabel.Parent = Frame
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = Frame
+    UIListLayout.FillDirection = Enum.FillDirection.Horizontal
+    UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    UIListLayout.Padding = UDim.new(0, 8)
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-    -- Underline accent
-    local Accent = Instance.new("Frame")
-    Accent.Size = UDim2.new(0.4, 0, 0, 3)
-    Accent.Position = UDim2.new(0.3, 0, 0.82, 0)
-    Accent.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Accent.BorderSizePixel = 0
-    Accent.Parent = Frame
+    local function makeLabel(text, color, size, order)
+        local lbl = Instance.new("TextLabel")
+        lbl.Parent = Frame
+        lbl.BackgroundTransparency = 1
+        lbl.AutomaticSize = Enum.AutomaticSize.X
+        lbl.Size = UDim2.new(0, 0, 1, 0)
+        lbl.Font = Enum.Font.GothamBold
+        lbl.Text = text
+        lbl.TextSize = size
+        lbl.TextColor3 = color
+        lbl.TextTransparency = 1
+        lbl.LayoutOrder = order
+        return lbl
+    end
 
-    local AccentCorner = Instance.new("UICorner")
-    AccentCorner.CornerRadius = UDim.new(1, 0)
-    AccentCorner.Parent = Accent
+    local function makeDot(order)
+        local dot = Instance.new("Frame")
+        dot.Parent = Frame
+        dot.Size = UDim2.new(0, 6, 0, 6)
+        dot.BackgroundColor3 = Color3.fromRGB(170, 90, 255)
+        dot.BackgroundTransparency = 1
+        dot.BorderSizePixel = 0
+        dot.LayoutOrder = order
 
-    -- Slide in + stay + fade out animation
-    local TweenService = game:GetService("TweenService")
+        local c = Instance.new("UICorner")
+        c.CornerRadius = UDim.new(1, 0)
+        c.Parent = dot
 
-    local tweenIn = TweenService:Create(Frame, TweenInfo.new(
-        0.65, Enum.EasingStyle.Back, Enum.EasingDirection.Out
-    ), {
-        Position = UDim2.new(0.5, -170, 0.08, 0),
-        BackgroundTransparency = 0
-    })
+        return dot
+    end
 
-    local tweenStay = TweenService:Create(Frame, TweenInfo.new(0.1), {})
+    local title = makeLabel("withdraw.cc", Color3.fromRGB(170, 90, 255), 15, 1)
+    local divider = makeLabel("|", Color3.fromRGB(200, 200, 200), 14, 2)
+    local status = makeLabel("Adonis Bypassed", Color3.fromRGB(235, 235, 235), 14, 3)
+    local dot = makeDot(4)
+    local state = makeLabel("Enjoy!", Color3.fromRGB(200, 200, 200), 14, 5)
 
-    local tweenOut = TweenService:Create(Frame, TweenInfo.new(
-        0.9, Enum.EasingStyle.Quint, Enum.EasingDirection.In
-    ), {
-        Position = UDim2.new(0.5, -170, -0.2, 0),
-        BackgroundTransparency = 1,
-        -- TextTransparency = 1
-    })
+    -- whoosh sound
+    pcall(function()
+        local snd = Instance.new("Sound")
+        snd.SoundId = "rbxassetid://4590657391"
+        snd.Volume = 0.45
+        snd.PlayOnRemove = false
+        snd.Parent = Frame
+        snd:Play()
+        Debris:AddItem(snd, 3)
+    end)
 
-    -- Play animation sequence
-    tweenIn:Play()
-    tweenIn.Completed:Connect(function()
-        wait(4.2)           -- how long it stays visible
-        tweenOut:Play()
-        tweenOut.Completed:Connect(function()
+    -- fade in helper
+    local tweenInFrame = TweenService:Create(
+        Frame,
+        TweenInfo.new(0.65, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        {
+            Position = UDim2.new(0.5, 0, 0.08, 0),
+            BackgroundTransparency = 0.08
+        }
+    )
+
+    local tweenInStroke = TweenService:Create(
+        UIStroke,
+        TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {Transparency = 0.15}
+    )
+
+    local tweenInTitle = TweenService:Create(
+        title,
+        TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {TextTransparency = 0}
+    )
+
+    local tweenInDivider = TweenService:Create(
+        divider,
+        TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {TextTransparency = 0}
+    )
+
+    local tweenInStatus = TweenService:Create(
+        status,
+        TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {TextTransparency = 0}
+    )
+
+    local tweenInState = TweenService:Create(
+        state,
+        TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {TextTransparency = 0}
+    )
+
+    local tweenInDot = TweenService:Create(
+        dot,
+        TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {BackgroundTransparency = 0}
+    )
+
+    -- start hidden pieces cleanly
+    Frame.BackgroundTransparency = 1
+    UIStroke.Transparency = 1
+
+    tweenInFrame:Play()
+    tweenInStroke:Play()
+    tweenInTitle:Play()
+    tweenInDivider:Play()
+    tweenInStatus:Play()
+    tweenInState:Play()
+    tweenInDot:Play()
+
+    tweenInFrame.Completed:Connect(function()
+        task.wait(4.2)
+
+        local tweenOutFrame = TweenService:Create(
+            Frame,
+            TweenInfo.new(0.75, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
+            {
+                Position = UDim2.new(0.5, 0, -0.18, 0),
+                BackgroundTransparency = 1
+            }
+        )
+
+        local tweenOutStroke = TweenService:Create(
+            UIStroke,
+            TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+            {Transparency = 1}
+        )
+
+        local tweenOutTitle = TweenService:Create(
+            title,
+            TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+            {TextTransparency = 1}
+        )
+
+        local tweenOutDivider = TweenService:Create(
+            divider,
+            TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+            {TextTransparency = 1}
+        )
+
+        local tweenOutStatus = TweenService:Create(
+            status,
+            TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+            {TextTransparency = 1}
+        )
+
+        local tweenOutState = TweenService:Create(
+            state,
+            TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+            {TextTransparency = 1}
+        )
+
+        local tweenOutDot = TweenService:Create(
+            dot,
+            TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+            {BackgroundTransparency = 1}
+        )
+
+        tweenOutFrame:Play()
+        tweenOutStroke:Play()
+        tweenOutTitle:Play()
+        tweenOutDivider:Play()
+        tweenOutStatus:Play()
+        tweenOutState:Play()
+        tweenOutDot:Play()
+
+        tweenOutFrame.Completed:Connect(function()
             ScreenGui:Destroy()
         end)
     end)
-
-    -- Optional: play a subtle sound (if your exploit supports it)
-    -- pcall(function()
-    --     local snd = Instance.new("Sound")
-    --     snd.SoundId = "rbxassetid://4590657391"   -- quiet click / whoosh sound
-    --     snd.Volume = 0.35
-    --     snd.Parent = Frame
-    --     snd:Play()
-    --     game.Debris:AddItem(snd, 2)
-    -- end)
 end
 
--- Execute it
 createAdonisBypassPopup()
 
 do
@@ -2275,6 +2386,92 @@ function disableFOV()
     disconnectAll()
 end
 
+--// Gun Chams
+local gunChams = {
+    enabled = false,
+    rainbow = false,
+    rainbowSpeed = 0.35,
+    color = Color3.fromRGB(255,80,80),
+    material = Enum.Material.ForceField
+}
+
+local function getChamColor()
+    if gunChams.rainbow then
+        local h = (tick() * gunChams.rainbowSpeed) % 1
+        return Color3.fromHSV(h, 1, 1)
+    end
+    return gunChams.color
+end
+
+local function chamPart(p)
+    if not p or not p:IsA("BasePart") then return end
+    p.Material = gunChams.material
+    p.Color = getChamColor()
+end
+
+local function chamModel(model)
+    if not model then return end
+    for _,v in ipairs(model:GetDescendants()) do
+        if v:IsA("BasePart") then
+            chamPart(v)
+        end
+    end
+end
+
+local function findBestViewModel()
+    local cam = workspace.CurrentCamera
+    if not cam then return nil end
+
+    local bestModel = nil
+    local bestScore = -math.huge
+
+    for _,obj in ipairs(cam:GetDescendants()) do
+        if obj:IsA("Model") then
+            local score = 0
+            local name = obj.Name:lower()
+
+            if name:find("view") then score += 8 end
+            if name:find("weapon") then score += 8 end
+            if name:find("gun") then score += 8 end
+            if name:find("vm") then score += 6 end
+            if name:find("arms") then score -= 3 end
+
+            local partCount = 0
+            for _,d in ipairs(obj:GetDescendants()) do
+                if d:IsA("BasePart") then
+                    partCount += 1
+                end
+            end
+
+            score += math.clamp(partCount, 0, 20)
+
+            if score > bestScore then
+                bestScore = score
+                bestModel = obj
+            end
+        end
+    end
+
+    return bestModel
+end
+
+RunService.RenderStepped:Connect(function()
+    if not gunChams.enabled then return end
+
+    local vm = findBestViewModel()
+    if vm then
+        chamModel(vm)
+    end
+
+    local char = LP.Character
+    if char then
+        for _,tool in ipairs(char:GetChildren()) do
+            if tool:IsA("Tool") then
+                chamModel(tool)
+            end
+        end
+    end
+end)
 
 do
     --// Services
@@ -2438,6 +2635,56 @@ end)
         end
     end
 })
+
+local G = World:Section({Name="Gun Chams", Side="Left"})
+
+G:Toggle({
+    Name="Enabled",
+    Flag="KW_GUN_CHAMS",
+    Default=false,
+    Callback=function(v)
+        gunChams.enabled = v
+    end
+})
+
+G:Toggle({
+    Name="Rainbow",
+    Flag="KW_GUN_CHAMS_RAINBOW",
+    Default=false,
+    Callback=function(v)
+        gunChams.rainbow = v
+    end
+})
+
+G:Slider({
+    Name="Rainbow Speed",
+    Flag="KW_GUN_CHAMS_RAINBOW_SPEED",
+    Default=35,
+    Min=1,
+    Max=100,
+    Callback=function(v)
+        gunChams.rainbowSpeed = v / 100
+    end
+})
+
+G:Colorpicker({
+    Name="Static Color",
+    Flag="KW_GUN_CHAMS_COL",
+    Default=Color3.fromRGB(255,80,80),
+    Callback=function(c)
+        gunChams.color = c
+    end
+})
+
+G:Dropdown({
+    Name="Material",
+    Flag="KW_GUN_CHAMS_MAT",
+    Content={"ForceField","Neon"},
+    Default="ForceField",
+    Callback=function(v)
+        gunChams.material = Enum.Material[v]
+    end
+})
 end
 
 
@@ -2455,6 +2702,8 @@ local hud = {
     showFPS = true,
     showPing = true,
     showUID = true,
+
+	deathNotifs = false,
 
     showCrosshair = false,
     crossGap = 8,
@@ -2633,6 +2882,213 @@ end)
 
 rebuildWatermark()
 
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local Debris = game:GetService("Debris")
+
+local HEALTH_THRESHOLD = 5
+local flaggedHumanoids = {}
+
+local function createDeathPopup(playerName)
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "DeathNotif_" .. tostring(playerName)
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.Parent = CoreGui
+
+    local Frame = Instance.new("Frame")
+    Frame.Name = "Main"
+    Frame.Parent = ScreenGui
+    Frame.AnchorPoint = Vector2.new(0.5, 0)
+    Frame.Position = UDim2.new(0.5, 0, -0.18, 0)
+    Frame.Size = UDim2.new(0, 370, 0, 56)
+    Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+    Frame.BackgroundTransparency = 1
+    Frame.BorderSizePixel = 0
+    Frame.ClipsDescendants = true
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = Frame
+
+    local UIStroke = Instance.new("UIStroke")
+    UIStroke.Parent = Frame
+    UIStroke.Color = Color3.fromRGB(45, 45, 55)
+    UIStroke.Thickness = 1
+    UIStroke.Transparency = 1
+    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+    local UIPadding = Instance.new("UIPadding")
+    UIPadding.Parent = Frame
+    UIPadding.PaddingLeft = UDim.new(0, 14)
+    UIPadding.PaddingRight = UDim.new(0, 14)
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = Frame
+    UIListLayout.FillDirection = Enum.FillDirection.Horizontal
+    UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    UIListLayout.Padding = UDim.new(0, 8)
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local function makeLabel(text, color, size, order)
+        local lbl = Instance.new("TextLabel")
+        lbl.Parent = Frame
+        lbl.BackgroundTransparency = 1
+        lbl.AutomaticSize = Enum.AutomaticSize.X
+        lbl.Size = UDim2.new(0, 0, 1, 0)
+        lbl.Font = Enum.Font.GothamBold
+        lbl.Text = text
+        lbl.TextSize = size
+        lbl.TextColor3 = color
+        lbl.TextTransparency = 1
+        lbl.LayoutOrder = order
+        return lbl
+    end
+
+    local function makeDot(order)
+        local dot = Instance.new("Frame")
+        dot.Parent = Frame
+        dot.Size = UDim2.new(0, 6, 0, 6)
+        dot.BackgroundColor3 = Color3.fromRGB(170, 90, 255)
+        dot.BackgroundTransparency = 1
+        dot.BorderSizePixel = 0
+        dot.LayoutOrder = order
+
+        local c = Instance.new("UICorner")
+        c.CornerRadius = UDim.new(1, 0)
+        c.Parent = dot
+
+        return dot
+    end
+
+    local title = makeLabel("withdraw.cc", Color3.fromRGB(170, 90, 255), 15, 1)
+    local divider = makeLabel("|", Color3.fromRGB(200, 200, 200), 14, 2)
+    local status = makeLabel(playerName, Color3.fromRGB(235, 235, 235), 14, 3)
+    local dot = makeDot(4)
+    local state = makeLabel("died", Color3.fromRGB(200, 200, 200), 14, 5)
+
+    pcall(function()
+        local snd = Instance.new("Sound")
+        snd.SoundId = "rbxassetid://4590657391"
+        snd.Volume = 0.45
+        snd.Parent = Frame
+        snd:Play()
+        Debris:AddItem(snd, 3)
+    end)
+
+    local tweenInFrame = TweenService:Create(
+        Frame,
+        TweenInfo.new(0.65, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        {
+            Position = UDim2.new(0.5, 0, 0.08, 0),
+            BackgroundTransparency = 0.08
+        }
+    )
+
+    local tweenInStroke = TweenService:Create(
+        UIStroke,
+        TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {Transparency = 0.15}
+    )
+
+    TweenService:Create(title, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+    TweenService:Create(divider, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+    TweenService:Create(status, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+    TweenService:Create(state, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+    TweenService:Create(dot, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+
+    tweenInFrame:Play()
+    tweenInStroke:Play()
+
+    tweenInFrame.Completed:Connect(function()
+        task.wait(3.5)
+
+        local tweenOutFrame = TweenService:Create(
+            Frame,
+            TweenInfo.new(0.75, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
+            {
+                Position = UDim2.new(0.5, 0, -0.18, 0),
+                BackgroundTransparency = 1
+            }
+        )
+
+        TweenService:Create(UIStroke, TweenInfo.new(0.25), {Transparency = 1}):Play()
+        TweenService:Create(title, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
+        TweenService:Create(divider, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
+        TweenService:Create(status, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
+        TweenService:Create(state, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
+        TweenService:Create(dot, TweenInfo.new(0.25), {BackgroundTransparency = 1}):Play()
+
+        tweenOutFrame:Play()
+        tweenOutFrame.Completed:Connect(function()
+            ScreenGui:Destroy()
+        end)
+    end)
+end
+
+local function hookHumanoid(plr, humanoid)
+    if not humanoid or flaggedHumanoids[humanoid] ~= nil then
+        return
+    end
+
+    flaggedHumanoids[humanoid] = false
+
+    local function onHealthChanged(health)
+        if humanoid.Parent == nil then
+            return
+        end
+
+        if health < HEALTH_THRESHOLD and flaggedHumanoids[humanoid] == false then
+    flaggedHumanoids[humanoid] = true
+    if hud.deathNotifs then
+        createDeathPopup(plr.Name)
+    end
+end
+    end
+
+    humanoid.HealthChanged:Connect(onHealthChanged)
+
+    humanoid.Destroying:Connect(function()
+        flaggedHumanoids[humanoid] = nil
+    end)
+
+    if humanoid.Health < HEALTH_THRESHOLD and flaggedHumanoids[humanoid] == false then
+    flaggedHumanoids[humanoid] = true
+    if hud.deathNotifs then
+        createDeathPopup(plr.Name)
+    end
+end
+end
+
+local function hookCharacter(plr, character)
+    if not character then
+        return
+    end
+
+    local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 10)
+    if humanoid then
+        hookHumanoid(plr, humanoid)
+    end
+end
+
+local function hookPlayer(plr)
+    if plr.Character then
+        hookCharacter(plr, plr.Character)
+    end
+
+    plr.CharacterAdded:Connect(function(character)
+        hookCharacter(plr, character)
+    end)
+end
+
+for _, plr in ipairs(Players:GetPlayers()) do
+    hookPlayer(plr)
+end
+
+Players.PlayerAdded:Connect(hookPlayer)
+
 do
     local H = HUDTab:Section({Name="Header | Watermark", Side="Left"})
     H:Toggle({
@@ -2670,6 +3126,16 @@ do
             hud.showUID = v
         end
     })
+
+	local N = HUDTab:Section({Name="Notifcations", Side="Right"})
+	N:Toggle({
+    Name = "Death Notifications",
+    Flag = "KW_DEATH_NOTIFS",
+    Default = hud.deathNotifs,
+    Callback = function(v)
+        hud.deathNotifs = v
+    end
+})
 
     local C = HUDTab:Section({Name="Crosshair", Side="Left"})
     C:Toggle({Name="Enabled", Flag="KW_CH_EN", Default=hud.showCrosshair, Callback=function(v) hud.showCrosshair=v end})
