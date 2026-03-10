@@ -1256,12 +1256,58 @@ UIS.InputBegan:Connect(function(i, gpe)
     end
 end)
 
-task.spawn(function()
+local function validSilentHealth(hum)
+    if not hum then return false end
+    if hum.Health <= 0 then return false end
+    if hum.Health <= (silentAim.minHPToLock or 0) then return false end
+    return true
+end
 
+local function getSilentTargetPart(character)
+    if not character then return nil end
+
+    local targetPart = silentAim.targetPart
+    if silentAim.rage.enabled and silentAim.rage.headOnly then
+        targetPart = "Head"
+    end
+
+    return character:FindFirstChild(targetPart)
+        or character:FindFirstChild("HumanoidRootPart")
+        or character:FindFirstChild("Head")
+end
+
+local function validSilentTarget(player)
+    if not player or not player.Character then
+        return false
+    end
+
+    local char = player.Character
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local part = getSilentTargetPart(char)
+
+    if not hum or not part then
+        return false
+    end
+
+    if not validSilentHealth(hum) then
+        return false
+    end
+
+    if char:FindFirstChild("ForceField") then
+        return false
+    end
+
+    if silentAim.passiveIgnore and isPassive(char) then
+        return false
+    end
+
+    return true
+end
+
+task.spawn(function()
     local lastShot = 0
 
     while task.wait() do
-
         if not silentAim.enabled then
             continue
         end
@@ -1275,12 +1321,11 @@ task.spawn(function()
         end
 
         local target = silentAim.FinalTarget
-        if not target or not target.Character then
+        if not validSilentTarget(target) then
             continue
         end
 
         local now = tick()
-
         if now - lastShot < silentAim.autoShoot.delay then
             continue
         end
@@ -1290,7 +1335,6 @@ task.spawn(function()
         mouse1press()
         task.wait()
         mouse1release()
-
     end
 end)
 
@@ -2236,7 +2280,7 @@ if silentAim.rage.enabled and silentAim.rage.headOnly then
 end
 
 local part = char:FindFirstChild(targetPart) or char:FindFirstChild("HumanoidRootPart")
-        if hum and hum.Health > 0 and part then
+        if hum and validSilentHealth(hum) and part then
             local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
             local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
             if onScreen 
@@ -2268,7 +2312,7 @@ local part = char:FindFirstChild(targetPart) or char:FindFirstChild("HumanoidRoo
                     local hum = char:FindFirstChildOfClass("Humanoid")
                     local part = char:FindFirstChild(silentAim.targetPart) or char:FindFirstChild("HumanoidRootPart")
 
-                    if hum and hum.Health > 0 and part and not char:FindFirstChild("ForceField") then
+                    if hum and validSilentHealth(hum) and part and not char:FindFirstChild("ForceField") then
                         local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
                         if onScreen then
                             local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
