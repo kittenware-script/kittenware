@@ -1983,7 +1983,7 @@ do
 })
 
     L:Toggle({
-        Name = "Enabled",
+        Name = "Fast Reload",
         Flag = "KW_IR_EN",
         Default = false,
         Callback = function(v)
@@ -2525,6 +2525,8 @@ do
     bulletTrails = {
         enabled = false,
 
+		followSilentAim = true,
+
         rainbow = false,
         rainbowSpeed = 2,
 
@@ -2604,27 +2606,63 @@ do
         Debris:AddItem(tracer,bulletTrails.lifetime+0.1)
     end
 
+	local function getSilentAimTracerPosition()
+    if not silentAim then return nil end
+    if not silentAim.enabled then return nil end
+
+    local targetPlayer = silentAim.FinalTarget
+    if not targetPlayer or not targetPlayer.Character then
+        return nil
+    end
+
+    local targetPartName = silentAim.targetPart or "Head"
+    local character = targetPlayer.Character
+    local part =
+        character:FindFirstChild(targetPartName)
+        or character:FindFirstChild("Head")
+        or character:FindFirstChild("HumanoidRootPart")
+
+    if not part then
+        return nil
+    end
+
+    -- optional prediction
+    if silentAim.prediction then
+        local vel = part.AssemblyLinearVelocity or Vector3.zero
+        local dist = (part.Position - Camera.CFrame.Position).Magnitude
+        local bulletSpeed = math.max(20, silentAim.bulletSpeed or 300)
+        local leadStrength = silentAim.leadStrength or 1
+        local t = dist / bulletSpeed
+        return part.Position + vel * t * leadStrength
+    end
+
+    return part.Position
+end
+
     local function shoot()
+    local barrel = getBarrel()
+    if not barrel then return end
 
-        local barrel = getBarrel()
-        if not barrel then return end
+    local origin = barrel.Position
+    local hitPos = nil
 
-        local origin = barrel.Position
+    -- if silent aim is active and has a target, send tracer to target
+    hitPos = getSilentAimTracerPosition()
+
+    -- fallback to normal barrel ray
+    if not hitPos then
         local direction = barrel.CFrame.LookVector * bulletTrails.distance
 
         local params = RaycastParams.new()
         params.FilterDescendantsInstances = {LP.Character}
         params.FilterType = Enum.RaycastFilterType.Blacklist
 
-        local result = workspace:Raycast(origin,direction,params)
-
-        local hitPos =
-            result and result.Position
-            or (origin + direction)
-
-        createTrail(origin,hitPos)
-
+        local result = workspace:Raycast(origin, direction, params)
+        hitPos = result and result.Position or (origin + direction)
     end
+
+    createTrail(origin, hitPos)
+end
 
     local holding = false
     local lastShot = 0
