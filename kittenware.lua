@@ -30,7 +30,7 @@ print([[
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.22                                         |
+| Version: v1.23                                         |
 |                                                        |
 | Bypass loading expect lag                              |
 |                                                        |
@@ -488,6 +488,15 @@ local esp = {
   cornerLen        = 8,
   fillAlpha        = 0.15,
 
+  rainbowESP       = false,
+  rainbowVisibleOnly = false,
+  rainbowSpeed     = 1,
+  rainbowSat       = 1,
+  rainbowVal       = 1,
+
+  rainbowDrone     = false,
+  rainbowItemESP   = false,
+
   showTracers      = true,
   tracerOrigin     = "Bottom",
 
@@ -705,6 +714,39 @@ local function equippedName(ch)
   return nil
 end
 
+local function getRainbowColor(speed, sat, val, offset)
+  local t = tick() * (speed or esp.rainbowSpeed or 1.5)
+  local h = (t + (offset or 0)) % 1
+  return Color3.fromHSV(h, sat or esp.rainbowSat or 1, val or esp.rainbowVal or 1)
+end
+
+local function getESPBaseColor(plr, ch, visible)
+  local passive = esp.passiveESP and isPassive(ch)
+
+  if passive then
+    if esp.rainbowESP and not esp.rainbowVisibleOnly then
+      return getRainbowColor()
+    end
+    return esp.passiveColor
+  end
+
+  if esp.useTeamColors and plr.TeamColor then
+    if esp.rainbowESP and not esp.rainbowVisibleOnly then
+      return getRainbowColor()
+    end
+    return plr.TeamColor.Color
+  end
+
+  if esp.rainbowESP then
+    if esp.rainbowVisibleOnly then
+      return visible and getRainbowColor() or esp.occColor
+    end
+    return getRainbowColor()
+  end
+
+  return visible and esp.visColor or esp.occColor
+end
+
 local function updatePlayer(plr)
   if plr==LP or ignorelist[plr.Name] then local b=buckets[plr]; if b then hideBucket(b) end return end
   if sameTeam(plr) then local b=buckets[plr]; if b then hideBucket(b) end return end
@@ -719,10 +761,8 @@ local function updatePlayer(plr)
   local vis = LOS(hrp, ch) or (p.torso and LOS(p.torso, ch))
   if esp.onlyVisible and not vis then local b=buckets[plr]; if b then hideBucket(b) end return end
 
-  local base = vis and esp.visColor or esp.occColor
-  if esp.useTeamColors and plr.TeamColor then base = plr.TeamColor.Color end
-  if esp.passiveESP and isPassive(ch) then base = esp.passiveColor end
-  local col=base
+    local passive = esp.passiveESP and isPassive(ch)
+  local col = getESPBaseColor(plr, ch, vis)
   local th,a = dynThickness(dist)
 
   local b=getBucket(plr)
@@ -828,8 +868,8 @@ end
   if esp.itemESP and onScr then
     local tname = equippedName(ch)
     if tname or esp.itemWhenNoTool then
-      b.itemText.Text  = tname or ""
-      b.itemText.Color = esp.itemESPColor
+            b.itemText.Text  = tname or ""
+      b.itemText.Color = esp.rainbowItemESP and getRainbowColor(esp.rainbowSpeed, esp.rainbowSat, esp.rainbowVal, 0.15) or esp.itemESPColor
       b.itemText.Size  = esp.itemSize
       b.itemText.Position = Vector2.new((minX+maxX)/2, nameY + esp.itemOffsetY)
       b.itemText.Visible = (tname ~= nil) or esp.itemWhenNoTool
@@ -858,15 +898,16 @@ local function updateDrone(model)
 
   local tl,tr,bl,br = Vector2.new(minX,minY), Vector2.new(maxX,minY), Vector2.new(minX,maxY), Vector2.new(maxX,maxY)
   local th, al = 2, 0.9
-  drawBoxLines(b, tl,tr,bl,br, esp.droneColor, th, al)
+    local droneCol = esp.rainbowDrone and getRainbowColor(esp.rainbowSpeed, esp.rainbowSat, esp.rainbowVal, 0.3) or esp.droneColor
+  drawBoxLines(b, tl,tr,bl,br, droneCol, th, al)
 
   if esp.droneFilled then
-    b.fill.Filled=true; b.fill.Color=esp.droneColor; b.fill.Transparency=clamp(esp.droneFillAlpha,0.05,0.8)
+        b.fill.Filled=true; b.fill.Color=droneCol; b.fill.Transparency=clamp(esp.droneFillAlpha,0.05,0.8)
     b.fill.Position=tl; b.fill.Size=Vector2.new(maxX-minX, maxY-minY); b.fill.Visible=true
   else b.fill.Visible=false end
 
   b.label.Text = (model.Name and model.Name ~= "" and model.Name) or "DRONE"
-  b.label.Color = esp.droneColor
+    b.label.Color = droneCol
   b.label.Size = 14
   b.label.Position = Vector2.new((minX+maxX)/2, math.max(0, minY - 14))
   b.label.Visible = true
@@ -881,7 +922,7 @@ local function updateDrone(model)
     local v,_ = Camera:WorldToViewportPoint(center)
     b.tracer.From = tracerAnchor()
     b.tracer.To = Vector2.new(v.X, v.Y)
-    b.tracer.Color = esp.droneColor
+    b.tracer.Color = droneCol
     b.tracer.Thickness = 2
     b.tracer.Transparency = 0.9
     b.tracer.Visible = true
@@ -1099,6 +1140,9 @@ do
   P:Colorpicker({Name="Passive Color", Flag="KW_PAS_COL", Default=esp.passiveColor, Callback=function(c) esp.passiveColor=c end})
   P:Colorpicker({Name="Visible Color", Flag="KW_C_V", Default=esp.visColor, Callback=function(c) esp.visColor=c end})
   P:Colorpicker({Name="Occluded Color", Flag="KW_C_O", Default=esp.occColor, Callback=function(c) esp.occColor=c end})
+  P:Toggle({Name="Rainbow ESP", Flag="KW_ESP_RAINBOW", Default=esp.rainbowESP, Callback=function(v) esp.rainbowESP=v end})
+  P:Slider({Name="Rainbow Speed", Flag="KW_ESP_RAINBOW_SPD", Default=math.floor(esp.rainbowSpeed*10), Min=1, Max=5, Callback=function(v) esp.rainbowSpeed=v/10 end})
+
 
   local D = ESPTab:Section({Name="Drones", Side="Left"})
   D:Toggle({Name="Enable Drone ESP", Flag="KW_DR_EN", Default=esp.droneEnabled, Callback=function(v) esp.droneEnabled=v end})
@@ -3250,213 +3294,6 @@ end)
 
 rebuildWatermark()
 
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-local Debris = game:GetService("Debris")
-
-local HEALTH_THRESHOLD = 5
-local flaggedHumanoids = {}
-
-local function createDeathPopup(playerName)
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "DeathNotif_" .. tostring(playerName)
-    ScreenGui.ResetOnSpawn = false
-    ScreenGui.IgnoreGuiInset = true
-    ScreenGui.Parent = CoreGui
-
-    local Frame = Instance.new("Frame")
-    Frame.Name = "Main"
-    Frame.Parent = ScreenGui
-    Frame.AnchorPoint = Vector2.new(0.5, 0)
-    Frame.Position = UDim2.new(0.5, 0, -0.18, 0)
-    Frame.Size = UDim2.new(0, 370, 0, 56)
-    Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
-    Frame.BackgroundTransparency = 1
-    Frame.BorderSizePixel = 0
-    Frame.ClipsDescendants = true
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 10)
-    UICorner.Parent = Frame
-
-    local UIStroke = Instance.new("UIStroke")
-    UIStroke.Parent = Frame
-    UIStroke.Color = Color3.fromRGB(45, 45, 55)
-    UIStroke.Thickness = 1
-    UIStroke.Transparency = 1
-    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-    local UIPadding = Instance.new("UIPadding")
-    UIPadding.Parent = Frame
-    UIPadding.PaddingLeft = UDim.new(0, 14)
-    UIPadding.PaddingRight = UDim.new(0, 14)
-
-    local UIListLayout = Instance.new("UIListLayout")
-    UIListLayout.Parent = Frame
-    UIListLayout.FillDirection = Enum.FillDirection.Horizontal
-    UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-    UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    UIListLayout.Padding = UDim.new(0, 8)
-    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-    local function makeLabel(text, color, size, order)
-        local lbl = Instance.new("TextLabel")
-        lbl.Parent = Frame
-        lbl.BackgroundTransparency = 1
-        lbl.AutomaticSize = Enum.AutomaticSize.X
-        lbl.Size = UDim2.new(0, 0, 1, 0)
-        lbl.Font = Enum.Font.GothamBold
-        lbl.Text = text
-        lbl.TextSize = size
-        lbl.TextColor3 = color
-        lbl.TextTransparency = 1
-        lbl.LayoutOrder = order
-        return lbl
-    end
-
-    local function makeDot(order)
-        local dot = Instance.new("Frame")
-        dot.Parent = Frame
-        dot.Size = UDim2.new(0, 6, 0, 6)
-        dot.BackgroundColor3 = Color3.fromRGB(170, 90, 255)
-        dot.BackgroundTransparency = 1
-        dot.BorderSizePixel = 0
-        dot.LayoutOrder = order
-
-        local c = Instance.new("UICorner")
-        c.CornerRadius = UDim.new(1, 0)
-        c.Parent = dot
-
-        return dot
-    end
-
-    local title = makeLabel("withdraw.cc", Color3.fromRGB(170, 90, 255), 15, 1)
-    local divider = makeLabel("|", Color3.fromRGB(200, 200, 200), 14, 2)
-    local status = makeLabel(playerName, Color3.fromRGB(235, 235, 235), 14, 3)
-    local dot = makeDot(4)
-    local state = makeLabel("died", Color3.fromRGB(200, 200, 200), 14, 5)
-
-    pcall(function()
-        local snd = Instance.new("Sound")
-        snd.SoundId = "rbxassetid://4590657391"
-        snd.Volume = 0.45
-        snd.Parent = Frame
-        snd:Play()
-        Debris:AddItem(snd, 3)
-    end)
-
-    local tweenInFrame = TweenService:Create(
-        Frame,
-        TweenInfo.new(0.65, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-        {
-            Position = UDim2.new(0.5, 0, 0.08, 0),
-            BackgroundTransparency = 0.08
-        }
-    )
-
-    local tweenInStroke = TweenService:Create(
-        UIStroke,
-        TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-        {Transparency = 0.15}
-    )
-
-    TweenService:Create(title, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    TweenService:Create(divider, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    TweenService:Create(status, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    TweenService:Create(state, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    TweenService:Create(dot, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
-
-    tweenInFrame:Play()
-    tweenInStroke:Play()
-
-    tweenInFrame.Completed:Connect(function()
-        task.wait(3.5)
-
-        local tweenOutFrame = TweenService:Create(
-            Frame,
-            TweenInfo.new(0.75, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
-            {
-                Position = UDim2.new(0.5, 0, -0.18, 0),
-                BackgroundTransparency = 1
-            }
-        )
-
-        TweenService:Create(UIStroke, TweenInfo.new(0.25), {Transparency = 1}):Play()
-        TweenService:Create(title, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
-        TweenService:Create(divider, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
-        TweenService:Create(status, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
-        TweenService:Create(state, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
-        TweenService:Create(dot, TweenInfo.new(0.25), {BackgroundTransparency = 1}):Play()
-
-        tweenOutFrame:Play()
-        tweenOutFrame.Completed:Connect(function()
-            ScreenGui:Destroy()
-        end)
-    end)
-end
-
-local function hookHumanoid(plr, humanoid)
-    if not humanoid or flaggedHumanoids[humanoid] ~= nil then
-        return
-    end
-
-    flaggedHumanoids[humanoid] = false
-
-    local function onHealthChanged(health)
-        if humanoid.Parent == nil then
-            return
-        end
-
-        if health < HEALTH_THRESHOLD and flaggedHumanoids[humanoid] == false then
-    flaggedHumanoids[humanoid] = true
-    if hud.deathNotifs then
-        createDeathPopup(plr.Name)
-    end
-end
-    end
-
-    humanoid.HealthChanged:Connect(onHealthChanged)
-
-    humanoid.Destroying:Connect(function()
-        flaggedHumanoids[humanoid] = nil
-    end)
-
-    if humanoid.Health < HEALTH_THRESHOLD and flaggedHumanoids[humanoid] == false then
-    flaggedHumanoids[humanoid] = true
-    if hud.deathNotifs then
-        createDeathPopup(plr.Name)
-    end
-end
-end
-
-local function hookCharacter(plr, character)
-    if not character then
-        return
-    end
-
-    local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 10)
-    if humanoid then
-        hookHumanoid(plr, humanoid)
-    end
-end
-
-local function hookPlayer(plr)
-    if plr.Character then
-        hookCharacter(plr, plr.Character)
-    end
-
-    plr.CharacterAdded:Connect(function(character)
-        hookCharacter(plr, character)
-    end)
-end
-
-for _, plr in ipairs(Players:GetPlayers()) do
-    hookPlayer(plr)
-end
-
-Players.PlayerAdded:Connect(hookPlayer)
-
 do
     local H = HUDTab:Section({Name="Header | Watermark", Side="Left"})
     H:Toggle({
@@ -3494,16 +3331,6 @@ do
             hud.showUID = v
         end
     })
-
-	local N = HUDTab:Section({Name="Notifcations", Side="Left"})
-	N:Toggle({
-    Name = "Death Notifications",
-    Flag = "KW_DEATH_NOTIFS",
-    Default = hud.deathNotifs,
-    Callback = function(v)
-        hud.deathNotifs = v
-    end
-})
 
     local C = HUDTab:Section({Name="Crosshair", Side="Right"})
     C:Toggle({Name="Enabled", Flag="KW_CH_EN", Default=hud.showCrosshair, Callback=function(v) hud.showCrosshair=v end})
