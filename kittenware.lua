@@ -30,9 +30,9 @@ print([[
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.23                                         |
+| Version: v1.24                                         |
 |                                                        |
-| Bypass loading expect lag                              |
+|                                                        |
 |                                                        |
 | Undected: Maybe:3                                      |
 | Loaded? Yes! Thanks for using withdraw                 |
@@ -586,23 +586,35 @@ end
 
 
 local function parts(char)
-  return {
-    hum = char:FindFirstChildOfClass("Humanoid"),
-    hrp = char:FindFirstChild("HumanoidRootPart"),
-    head= char:FindFirstChild("Head"),
-    torso= char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso"),
-    lower= char:FindFirstChild("LowerTorso"),
-    luArm= char:FindFirstChild("LeftUpperArm") or char:FindFirstChild("Left Arm"),
-    llArm= char:FindFirstChild("LeftLowerArm"),
-    lHand= char:FindFirstChild("LeftHand"),
-    ruArm= char:FindFirstChild("RightUpperArm") or char:FindFirstChild("Right Arm"),
-    rlArm= char:FindFirstChild("RightLowerArm"),
-    rHand= char:FindFirstChild("RightHand"),
-    luLeg= char:FindFirstChild("LeftUpperLeg") or char:FindFirstChild("Left Leg"),
-    llLeg= char:FindFirstChild("LeftLowerLeg"),
-    ruLeg= char:FindFirstChild("RightUpperLeg") or char:FindFirstChild("Right Leg"),
-    rlLeg= char:FindFirstChild("RightLowerLeg"),
-  }
+    local p = {
+        hum = char:FindFirstChildOfClass("Humanoid"),
+        hrp = char:FindFirstChild("HumanoidRootPart"),
+        head= char:FindFirstChild("Head"),
+    }
+
+    if p.hum and p.hum.RigType == Enum.HumanoidRigType.R15 then
+        p.upperTorso = char:FindFirstChild("UpperTorso")
+        p.lowerTorso = char:FindFirstChild("LowerTorso")
+        p.leftUpperArm = char:FindFirstChild("LeftUpperArm")
+        p.leftLowerArm = char:FindFirstChild("LeftLowerArm")
+        p.leftHand = char:FindFirstChild("LeftHand")
+        p.rightUpperArm = char:FindFirstChild("RightUpperArm")
+        p.rightLowerArm = char:FindFirstChild("RightLowerArm")
+        p.rightHand = char:FindFirstChild("RightHand")
+        p.leftUpperLeg = char:FindFirstChild("LeftUpperLeg")
+        p.leftLowerLeg = char:FindFirstChild("LeftLowerLeg")
+        p.leftFoot = char:FindFirstChild("LeftFoot")
+        p.rightUpperLeg = char:FindFirstChild("RightUpperLeg")
+        p.rightLowerLeg = char:FindFirstChild("RightLowerLeg")
+        p.rightFoot = char:FindFirstChild("RightFoot")
+    else -- R6
+        p.torso = char:FindFirstChild("Torso")
+        p.leftArm = char:FindFirstChild("Left Arm")
+        p.rightArm = char:FindFirstChild("Right Arm")
+        p.leftLeg = char:FindFirstChild("Left Leg")
+        p.rightLeg = char:FindFirstChild("Right Leg")
+    end
+    return p
 end
 
 local function vp(v3) local v,o=Camera:WorldToViewportPoint(v3); return Vector2.new(v.X,v.Y), o end
@@ -615,6 +627,7 @@ local buckets, signalMap = {}, {}
 local function getBucket(plr)
   if buckets[plr] then return buckets[plr] end
   local b = {
+    -- Existing lines (for original skeleton or fallback)
     torso=mkLine(), lower=mkLine(), head=mkLine(),
     luArm=mkLine(), llArm=mkLine(), lHand=mkLine(),
     ruArm=mkLine(), rlArm=mkLine(), rHand=mkLine(),
@@ -629,6 +642,34 @@ local function getBucket(plr)
     itemText=mkText(),
     hpBack=mkSquare(),
     hpBar=mkSquare(),
+
+    -- New lines for R15 skeleton
+    Head_UpperTorso = mkLine(),
+    UpperTorso_LowerTorso = mkLine(),
+    UpperTorso_LeftUpperArm = mkLine(),
+    LeftUpperArm_LeftLowerArm = mkLine(),
+    LeftLowerArm_LeftHand = mkLine(),
+    UpperTorso_RightUpperArm = mkLine(),
+    RightUpperArm_RightLowerArm = mkLine(),
+    RightLowerArm_RightHand = mkLine(),
+    LowerTorso_LeftUpperLeg = mkLine(),
+    LeftUpperLeg_LeftLowerLeg = mkLine(),
+    LeftLowerLeg_LeftFoot = mkLine(),
+    LowerTorso_RightUpperLeg = mkLine(),
+    RightUpperLeg_RightLowerLeg = mkLine(),
+    RightLowerLeg_RightFoot = mkLine(),
+
+    -- New lines for R6 skeleton
+    Head_Spine = mkLine(),
+    Spine = mkLine(),
+    LeftArm_Torso = mkLine(), -- For connecting Left Arm to Torso
+    LeftArm_Body = mkLine(),  -- For the Left Arm itself
+    RightArm_Torso = mkLine(),
+    RightArm_Body = mkLine(),
+    LeftLeg_Torso = mkLine(),
+    LeftLeg_Body = mkLine(),
+    RightLeg_Torso = mkLine(),
+    RightLeg_Body = mkLine(),
   }
   buckets[plr]=b; return b
 end
@@ -720,6 +761,43 @@ local function getRainbowColor(speed, sat, val, offset)
   return Color3.fromHSV(h, sat or esp.rainbowSat or 1, val or esp.rainbowVal or 1)
 end
 
+
+local function hideAllSkeletonLines(b)
+    -- Hide the old skeleton lines
+    b.torso.Visible=false; b.lower.Visible=false; b.head.Visible=false;
+    b.luArm.Visible=false; b.llArm.Visible=false; b.lHand.Visible=false;
+    b.ruArm.Visible=false; b.rlArm.Visible=false; b.rHand.Visible=false;
+    b.luLeg.Visible=false; b.llLeg.Visible=false; b.ruLeg.Visible=false; b.rlLeg.Visible=false;
+
+    -- Hide R15 lines
+    b.Head_UpperTorso.Visible = false
+    b.UpperTorso_LowerTorso.Visible = false
+    b.UpperTorso_LeftUpperArm.Visible = false
+    b.LeftUpperArm_LeftLowerArm.Visible = false
+    b.LeftLowerArm_LeftHand.Visible = false
+    b.UpperTorso_RightUpperArm.Visible = false
+    b.RightUpperArm_RightLowerArm.Visible = false
+    b.RightLowerArm_RightHand.Visible = false
+    b.LowerTorso_LeftUpperLeg.Visible = false
+    b.LeftUpperLeg_LeftLowerLeg.Visible = false
+    b.LeftLowerLeg_LeftFoot.Visible = false
+    b.LowerTorso_RightUpperLeg.Visible = false
+    b.RightUpperLeg_RightLowerLeg.Visible = false
+    b.RightLowerLeg_RightFoot.Visible = false
+
+    -- Hide R6 lines
+    b.Head_Spine.Visible = false
+    b.Spine.Visible = false
+    b.LeftArm_Torso.Visible = false
+    b.LeftArm_Body.Visible = false
+    b.RightArm_Torso.Visible = false
+    b.RightArm_Body.Visible = false
+    b.LeftLeg_Torso.Visible = false
+    b.LeftLeg_Body.Visible = false
+    b.RightLeg_Torso.Visible = false
+    b.RightLeg_Body.Visible = false
+end
+
 local function getESPBaseColor(plr, ch, visible)
   local passive = esp.passiveESP and isPassive(ch)
 
@@ -767,28 +845,87 @@ local function updatePlayer(plr)
 
   local b=getBucket(plr)
 
+  hideAllSkeletonLines(b) -- Start by hiding all skeleton lines for this bucket
+
   if esp.showSkeleton then
-    if p.torso then
-      setLine(b.torso, p.torso.Position, hrp.Position, col, th, a)
-      setLine(b.head,  (p.head and p.head.Position) or p.torso.Position, p.torso.Position, col, th, a)
-      setLine(b.lower, (p.lower and p.lower.Position) or p.torso.Position, p.torso.Position, col, th, a)
-    else b.torso.Visible=false b.head.Visible=false b.lower.Visible=false end
-    setLine(b.luArm, (p.luArm and p.luArm.Position), (p.torso and p.torso.Position) or hrp.Position, col, th, a)
-    if p.llArm then setLine(b.llArm, p.llArm.Position, (p.luArm and p.luArm.Position) or ((p.torso or hrp).Position), col, th, a) else b.llArm.Visible=false end
-    if p.lHand then setLine(b.lHand, p.lHand.Position, (p.llArm and p.llArm.Position) or (p.luArm and p.luArm.Position), col, th, a) else b.lHand.Visible=false end
-    setLine(b.ruArm, (p.ruArm and p.ruArm.Position), (p.torso and p.torso.Position) or hrp.Position, col, th, a)
-    if p.rlArm then setLine(b.rlArm, p.rlArm.Position, (p.ruArm and p.ruArm.Position) or ((p.torso or hrp).Position), col, th, a) else b.rlArm.Visible=false end
-    if p.rHand then setLine(b.rHand, p.rHand.Position, (p.rlArm and p.rlArm.Position) or (p.ruArm and p.ruArm.Position), col, th, a) else b.rHand.Visible=false end
-    local pelvis = p.lower or p.torso or hrp
-    setLine(b.luLeg, (p.luLeg and p.luLeg.Position), pelvis.Position, col, th, a)
-    if p.llLeg then setLine(b.llLeg, p.llLeg.Position, (p.luLeg and p.luLeg.Position), col, th, a) else b.llLeg.Visible=false end
-    setLine(b.ruLeg, (p.ruLeg and p.ruLeg.Position), pelvis.Position, col, th, a)
-    if p.rlLeg then setLine(b.rlLeg, p.rlLeg.Position, (p.ruLeg and p.ruLeg.Position), col, th, a) else b.rlLeg.Visible=false end
-  else
-    b.torso.Visible=false b.head.Visible=false b.lower.Visible=false
-    b.luArm.Visible=false b.llArm.Visible=false b.lHand.Visible=false
-    b.ruArm.Visible=false b.rlArm.Visible=false b.rHand.Visible=false
-    b.luLeg.Visible=false b.llLeg.Visible=false b.ruLeg.Visible=false b.rlLeg.Visible=false
+    local R15 = (hum.RigType == Enum.HumanoidRigType.R15)
+    if R15 then
+        -- R15 Skeleton Drawing
+        if p.head and p.upperTorso then setLine(b.Head_UpperTorso, p.head.Position, p.upperTorso.Position, col, th, a) end
+        if p.upperTorso and p.lowerTorso then setLine(b.UpperTorso_LowerTorso, p.upperTorso.Position, p.lowerTorso.Position, col, th, a) end
+
+        -- Left Arm
+        if p.upperTorso and p.leftUpperArm then setLine(b.UpperTorso_LeftUpperArm, p.upperTorso.Position, p.leftUpperArm.Position, col, th, a) end
+        if p.leftUpperArm and p.leftLowerArm then setLine(b.LeftUpperArm_LeftLowerArm, p.leftUpperArm.Position, p.leftLowerArm.Position, col, th, a) end
+        if p.leftLowerArm and p.leftHand then setLine(b.LeftLowerArm_LeftHand, p.leftLowerArm.Position, p.leftHand.Position, col, th, a) end
+
+        -- Right Arm
+        if p.upperTorso and p.rightUpperArm then setLine(b.UpperTorso_RightUpperArm, p.upperTorso.Position, p.rightUpperArm.Position, col, th, a) end
+        if p.rightUpperArm and p.rightLowerArm then setLine(b.RightUpperArm_RightLowerArm, p.rightUpperArm.Position, p.rightLowerArm.Position, col, th, a) end
+        if p.rightLowerArm and p.rightHand then setLine(b.RightLowerArm_RightHand, p.rightLowerArm.Position, p.rightHand.Position, col, th, a) end
+
+        -- Left Leg
+        if p.lowerTorso and p.leftUpperLeg then setLine(b.LowerTorso_LeftUpperLeg, p.lowerTorso.Position, p.leftUpperLeg.Position, col, th, a) end
+        if p.leftUpperLeg and p.leftLowerLeg then setLine(b.LeftUpperLeg_LeftLowerLeg, p.leftUpperLeg.Position, p.leftLowerLeg.Position, col, th, a) end
+        if p.leftLowerLeg and p.leftFoot then setLine(b.LeftLowerLeg_LeftFoot, p.leftLowerLeg.Position, p.leftFoot.Position, col, th, a) end
+
+        -- Right Leg
+        if p.lowerTorso and p.rightUpperLeg then setLine(b.LowerTorso_RightUpperLeg, p.lowerTorso.Position, p.rightUpperLeg.Position, col, th, a) end
+        if p.rightUpperLeg and p.rightLowerLeg then setLine(b.RightUpperLeg_RightLowerLeg, p.rightUpperLeg.Position, p.rightLowerLeg.Position, col, th, a) end
+        if p.rightLowerLeg and p.rightFoot then setLine(b.RightLowerLeg_RightFoot, p.rightLowerLeg.Position, p.rightFoot.Position, col, th, a) end
+
+    else -- R6 Skeleton Drawing
+        local torso = p.torso
+        if torso then
+            local T_Height = torso.Size.Y/2 - 0.2 -- Adjusted for part connection points
+            local upperTorsoPos = (torso.CFrame * CFrame.new(0, T_Height, 0)).p
+            local lowerTorsoPos = (torso.CFrame * CFrame.new(0, -T_Height, 0)).p
+
+            if p.head then setLine(b.Head_Spine, p.head.Position, upperTorsoPos, col, th, a) end
+            setLine(b.Spine, upperTorsoPos, lowerTorsoPos, col, th, a)
+
+            -- Left Arm
+            local leftArm = p.leftArm
+            if leftArm then
+                local LA_Height = leftArm.Size.Y/2 - 0.2
+                local leftUpperArmPos = (leftArm.CFrame * CFrame.new(0, LA_Height, 0)).p
+                local leftLowerArmPos = (leftArm.CFrame * CFrame.new(0, -LA_Height, 0)).p
+                setLine(b.LeftArm_Torso, upperTorsoPos, leftUpperArmPos, col, th, a)
+                setLine(b.LeftArm_Body, leftUpperArmPos, leftLowerArmPos, col, th, a)
+            end
+
+            -- Right Arm
+            local rightArm = p.rightArm
+            if rightArm then
+                local RA_Height = rightArm.Size.Y/2 - 0.2
+                local rightUpperArmPos = (rightArm.CFrame * CFrame.new(0, RA_Height, 0)).p
+                local rightLowerArmPos = (rightArm.CFrame * CFrame.new(0, -RA_Height, 0)).p
+                setLine(b.RightArm_Torso, upperTorsoPos, rightUpperArmPos, col, th, a)
+                setLine(b.RightArm_Body, rightUpperArmPos, rightLowerArmPos, col, th, a)
+            end
+
+            -- Left Leg
+            local leftLeg = p.leftLeg
+            if leftLeg then
+                local LL_Height = leftLeg.Size.Y/2 - 0.2
+                local leftUpperLegPos = (leftLeg.CFrame * CFrame.new(0, LL_Height, 0)).p
+                local leftLowerLegPos = (leftLeg.CFrame * CFrame.new(0, -LL_Height, 0)).p
+                setLine(b.LeftLeg_Torso, lowerTorsoPos, leftUpperLegPos, col, th, a)
+                setLine(b.LeftLeg_Body, leftUpperLegPos, leftLowerLegPos, col, th, a)
+            end
+
+            -- Right Leg
+            local rightLeg = p.rightLeg
+            if rightLeg then
+                local RL_Height = rightLeg.Size.Y/2 - 0.2
+                local rightUpperLegPos = (rightLeg.CFrame * CFrame.new(0, RL_Height, 0)).p
+                local rightLowerLegPos = (rightLeg.CFrame * CFrame.new(0, -RL_Height, 0)).p
+                setLine(b.RightLeg_Torso, lowerTorsoPos, rightUpperLegPos, col, th, a)
+                setLine(b.RightLeg_Body, rightUpperLegPos, rightLowerLegPos, col, th, a)
+            end
+        end
+  end
+
   end
 
   local minX,minY,maxX,maxY,onScr = computeBBox(ch)
@@ -3402,4 +3539,4 @@ enableIR()
 
 getgenv().KittenWareLoaded = true
 getgenv().KittenWareLoading = nil
-GUI:Close()
+GUI:Close()	
