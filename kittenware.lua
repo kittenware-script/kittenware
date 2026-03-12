@@ -3486,7 +3486,7 @@ do
 
   local C = About:Section({Name=" ", Side="Right"})
 
-  C:Dropdown({
+  local ConfigList = C:Dropdown({
 	Name = "Configurations",
 	Flag = "Config Dropdown",
 	Content = GUI:GetConfigs()
@@ -3520,6 +3520,14 @@ C:Button({
 		ConfigList:Refresh(GUI:GetConfigs())
 	end
 })
+
+C:Button({
+      Name = "Refresh Config List",
+      Callback = function()
+          ConfigList:Refresh(GUI:GetConfigs())
+          GUI:Notify("CONFIG", "Config list refreshed", 2)
+      end
+  })
 end
 
 local S = About:Section({Name="KuromiWare", Side="Left"})
