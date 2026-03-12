@@ -2316,6 +2316,51 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+	local autoArmor = {
+    enabled = false,
+    selected = "riot"
+}
+
+local armorList = {
+"bear","britan","com","emr","fbi","gladiator","gru","hcs","new",
+"patriot","prussia","redcoat","rgf","riot","robes","robes2",
+"sas","slav","swat","tenor","un","vdv","heavy","rusk"
+}
+
+local function runArmor()
+    if not autoArmor.enabled then return end
+
+    local commandFunction = LP:WaitForChild("PlayerGui")
+        :WaitForChild("ChatConsoleGui")
+        :WaitForChild("CommandFunction")
+
+    commandFunction:InvokeServer("!sa "..autoArmor.selected)
+end
+
+local function onRespawn(character)
+    if not autoArmor.enabled then return end
+
+    -- wait for character to fully load
+    character:WaitForChild("Humanoid")
+    task.wait(0.8)
+
+    runArmor()
+end
+
+LP.CharacterAdded:Connect(onRespawn)
+
+LP.CharacterAdded:Connect(function()
+    task.wait(1)
+    checkArmor()
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(5)
+        checkArmor()
+    end
+end)
+
     local BL = World:Section({Name="Loadout", Side="Left"})
     BL:Button({Name="Equip Loadout", Callback=function()
         local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
@@ -2326,6 +2371,30 @@ end)
             if humanoid then humanoid.Health = 0 end
         end
     end})
+	local AA = World:Section({Name="Auto Armor", Side="Right"})
+
+AA:Toggle({
+    Name="Enabled",
+    Flag="KW_AUTO_ARMOR",
+    Default=false,
+    Callback=function(v)
+        autoArmor.enabled = v
+        if v then
+			-- GUI:Notify("ARMOR", "Respawn for armor to equip", 3)
+            runArmor()
+        end
+    end
+})
+
+AA:Dropdown({
+    Name="Armor Type",
+    Flag="KW_ARMOR_TYPE",
+    Content=armorList,
+    Default="riot",
+    Callback=function(v)
+        autoArmor.selected = v
+    end
+})
 
 
     local AY = MiscTab:Section({Name="Anti Yaw", Side="Right"})
