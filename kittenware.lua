@@ -30,7 +30,7 @@ print([[
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.27                                         |
+| Version: v1.28                                         |
 |                                                        |
 |                                                        |
 |                                                        |
@@ -2009,6 +2009,178 @@ do
             ir.speed = v
         end
     })
+
+	local N = MiscTab:Section({Name="Noclip", Side="Left"})
+
+	local noclipEnabled = false
+    local noclipConn
+
+    local function startNoclip()
+        noclipConn = game:GetService("RunService").Stepped:Connect(function()
+            if player.Character then
+                for _,v in pairs(player.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
+                    end
+                end
+            end
+        end)
+    end
+
+    local function stopNoclip()
+        if noclipConn then
+            noclipConn:Disconnect()
+            noclipConn = nil
+        end
+    end
+
+    N:Toggle({
+        Name = "Enable",
+        Flag = "KW_NOCLIP",
+        Default = false,
+        Callback = function(v)
+            noclipEnabled = v
+            if v then
+                startNoclip()
+            else
+                stopNoclip()
+            end
+        end
+    })
+
+
+    -------------------------------------------------
+    -- Highlight Interactables
+    -------------------------------------------------
+
+    local HESP = {
+        interactESP = false,
+        interactColor = Color3.fromRGB(255,255,255),
+        interactOutline = Color3.fromRGB(255,255,255),
+        interactFillAlpha = 0.9,
+        interactOutlineAlpha = 0.5,
+        interactMaxDist = 500
+    }
+
+    local interactHighlights = {}
+
+    local function clearInteractHighlights()
+        for _,h in pairs(interactHighlights) do
+            if h then h:Destroy() end
+        end
+        interactHighlights = {}
+    end
+
+
+    local function scanInteractables()
+
+        clearInteractHighlights()
+
+        local root = workspace:FindFirstChild("Private Building Areas")
+        if not root then return end
+
+        for _,area in pairs(root:GetChildren()) do
+            local build = area:FindFirstChild("Build")
+
+            if build then
+                for _,obj in pairs(build:GetDescendants()) do
+                    if obj.Name == "Interactable" then
+
+                        local highlight = Instance.new("Highlight")
+                        highlight.FillColor = HESP.interactColor
+                        highlight.OutlineColor = HESP.interactOutline
+                        highlight.FillTransparency = HESP.interactFillAlpha
+                        highlight.OutlineTransparency = HESP.interactOutlineAlpha
+                        highlight.Parent = obj
+
+                        table.insert(interactHighlights, highlight)
+
+                    end
+                end
+            end
+        end
+    end
+
+
+    local function updateInteractHighlights()
+
+        for _,h in pairs(interactHighlights) do
+            if h then
+                h.FillColor = HESP.interactColor
+                h.OutlineColor = HESP.interactOutline
+                h.FillTransparency = HESP.interactFillAlpha
+                h.OutlineTransparency = HESP.interactOutlineAlpha
+            end
+        end
+
+    end
+
+    N:Toggle({
+        Name = "Higlight Noclipable Parts",
+        Flag = "KW_INTERACT_ESP",
+        Default = HESP.interactESP,
+        Callback = function(v)
+            HESP.interactESP = v
+            if v then
+                scanInteractables()
+            else
+                clearInteractHighlights()
+            end
+        end
+    })
+
+    N:Colorpicker({
+        Name = "Fill Color",
+        Flag = "KW_INTERACT_COLOR",
+        Default = HESP.interactColor,
+        Callback = function(c)
+            HESP.interactColor = c
+            updateInteractHighlights()
+        end
+    })
+
+    N:Colorpicker({
+        Name = "Outline Color",
+        Flag = "KW_INTERACT_OUTLINE",
+        Default = HESP.interactOutline,
+        Callback = function(c)
+            HESP.interactOutline = c
+            updateInteractHighlights()
+        end
+    })
+
+    N:Slider({
+        Name = "Fill Transparency %",
+        Flag = "KW_INTERACT_FILL_ALPHA",
+        Default = math.floor(HESP.interactFillAlpha*100),
+        Min = 0,
+        Max = 100,
+        Callback = function(v)
+            HESP.interactFillAlpha = v/100
+            updateInteractHighlights()
+        end
+    })
+
+    N:Slider({
+        Name = "Outline Transparency %",
+        Flag = "KW_INTERACT_OUT_ALPHA",
+        Default = math.floor(HESP.interactOutlineAlpha*100),
+        Min = 0,
+        Max = 100,
+        Callback = function(v)
+            HESP.interactOutlineAlpha = v/100
+            updateInteractHighlights()
+        end
+    })
+
+    N:Button({
+        Name = "Rescan Parts",
+        Callback = function()
+            if HESP.interactESP then
+                scanInteractables()
+            end
+        end
+    })
 end
 
 
@@ -2173,7 +2345,7 @@ AA:Dropdown({
     AY:Slider({Name="Min Yaw Offset", Flag="KW_ANTIYAW_MIN", Default=antiYaw.minYaw, Min=-180, Max=0, Callback=function(v) antiYaw.minYaw=v end})
     AY:Slider({Name="Max Yaw Offset", Flag="KW_ANTIYAW_MAX", Default=antiYaw.maxYaw, Min=0, Max=180, Callback=function(v) antiYaw.maxYaw=v end})
 
-	local CS = MiscTab:Section({Name="CFrame Speed", Side="Left"})
+	local CS = MiscTab:Section({Name="CFrame Speed", Side="Right"})
 
 CS:Toggle({
     Name="Enabled",
