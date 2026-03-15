@@ -3321,51 +3321,6 @@ local Stats = game:GetService("Stats")
 local LP = Players.LocalPlayer
 local PG = LP:WaitForChild("PlayerGui")
 
-local deathTracker = {}
-
-local function watchCharacter(player, character)
-	if player == LP then return end
-
-	local humanoid = character:WaitForChild("Humanoid", 10)
-	if not humanoid then return end
-
-	deathTracker[player] = false
-
-	humanoid.HealthChanged:Connect(function(hp)
-		if not hud.deathNotifs then return end
-
-		if hp <= 5 and not deathTracker[player] then
-			deathTracker[player] = true
-			GUI:Notify(player.Name, "died", 3)
-		end
-	end)
-
-	humanoid.Died:Connect(function()
-		deathTracker[player] = true
-	end)
-end
-
-local function setupPlayer(player)
-	if player == LP then return end
-
-	if player.Character then
-		task.spawn(function()
-			watchCharacter(player, player.Character)
-		end)
-	end
-
-	player.CharacterAdded:Connect(function(char)
-		task.spawn(function()
-			watchCharacter(player, char)
-		end)
-	end)
-end
-
-for _, player in ipairs(Players:GetPlayers()) do
-	setupPlayer(player)
-end
-
-Players.PlayerAdded:Connect(setupPlayer)
 
 local wmGui = Instance.new("ScreenGui")
 wmGui.Name = "KW_Watermark"
@@ -3568,16 +3523,6 @@ do
             hud.showUID = v
         end
     })
-
-	local N = HUDTab:Section({Name="Notifications", Side="Left"})
-	N:Toggle({
-	Name = "Death Notifications",
-	Flag = "KW_DEATH_NOTIFS",
-	Default = hud.deathNotifs,
-	Callback = function(v)
-		hud.deathNotifs = v
-	end
-})
 
     local C = HUDTab:Section({Name="Crosshair", Side="Right"})
     C:Toggle({Name="Enabled", Flag="KW_CH_EN", Default=hud.showCrosshair, Callback=function(v) hud.showCrosshair=v end})
