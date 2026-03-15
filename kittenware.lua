@@ -30,7 +30,7 @@ print([[
 ==========================================================
 |                      withdraw.cc                       |
 |--------------------------------------------------------|
-| Version: v1.25                                         |
+| Version: v1.27                                         |
 |                                                        |
 |                                                        |
 |                                                        |
@@ -2316,7 +2316,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-	local autoArmor = {
+local autoArmor = {
     enabled = false,
     selected = "riot"
 }
@@ -2324,7 +2324,7 @@ end)
 local armorList = {
 "bear","britan","com","emr","fbi","gladiator","gru","hcs","new",
 "patriot","prussia","redcoat","rgf","riot","robes","robes2",
-"sas","slav","swat","tenor","un","vdv","heavy","rusk"
+"sas","slav","swat","tenor","un","vdv"
 }
 
 local function runArmor()
@@ -2349,18 +2349,6 @@ end
 
 LP.CharacterAdded:Connect(onRespawn)
 
-LP.CharacterAdded:Connect(function()
-    task.wait(1)
-    checkArmor()
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(5)
-        checkArmor()
-    end
-end)
-
     local BL = World:Section({Name="Loadout", Side="Left"})
     BL:Button({Name="Equip Loadout", Callback=function()
         local commandFunction = LP:WaitForChild("PlayerGui"):WaitForChild("ChatConsoleGui"):WaitForChild("CommandFunction")
@@ -2371,6 +2359,7 @@ end)
             if humanoid then humanoid.Health = 0 end
         end
     end})
+
 	local AA = World:Section({Name="Auto Armor", Side="Right"})
 
 AA:Toggle({
@@ -2379,10 +2368,6 @@ AA:Toggle({
     Default=false,
     Callback=function(v)
         autoArmor.enabled = v
-        if v then
-			-- GUI:Notify("ARMOR", "Respawn for armor to equip", 3)
-            runArmor()
-        end
     end
 })
 
